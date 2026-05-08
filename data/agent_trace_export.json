@@ -1,0 +1,718 @@
+{
+  "npc": {
+    "npc_id": "lina",
+    "name": "Lina",
+    "role": "Tavern Owner",
+    "description": "A cautious and practical tavern owner who knows local rumors.",
+    "mood": "neutral",
+    "trust": 30,
+    "affection": 38
+  },
+  "quest": {
+    "quest_id": "lost_key",
+    "npc_id": "lina",
+    "title": "Lost Key",
+    "description": "Return Lina's missing key to earn her trust.",
+    "status": "completed"
+  },
+  "player": {
+    "location": "tavern",
+    "inventory": [
+      "tavern_discount_coupon"
+    ],
+    "unlocked_locations": [
+      "tavern",
+      "town_square",
+      "underground_ruins_entrance"
+    ]
+  },
+  "memories": [
+    {
+      "id": 2,
+      "npc_id": "lina",
+      "content": "Player returned Lina's lost key.",
+      "importance": 8,
+      "tags": [
+        "help",
+        "trust",
+        "lost_key"
+      ],
+      "created_at": "2026-05-08 06:25:31"
+    },
+    {
+      "id": 3,
+      "npc_id": "lina",
+      "content": "Lina revealed the underground ruins entrance to the player.",
+      "importance": 7,
+      "tags": [
+        "ruins",
+        "trust",
+        "location"
+      ],
+      "created_at": "2026-05-08 06:25:31"
+    },
+    {
+      "id": 1,
+      "npc_id": "lina",
+      "content": "Player asked Lina about the underground ruins before earning enough trust.",
+      "importance": 4,
+      "tags": [
+        "ruins",
+        "low_trust"
+      ],
+      "created_at": "2026-05-08 06:25:31"
+    }
+  ],
+  "world_events": [
+    {
+      "id": 2,
+      "content": "Lina revealed the underground ruins entrance.",
+      "created_at": "2026-05-08 06:25:31"
+    },
+    {
+      "id": 1,
+      "content": "Player returned Lina's lost key.",
+      "created_at": "2026-05-08 06:25:31"
+    }
+  ],
+  "interaction_logs": [
+    {
+      "id": 3,
+      "npc_id": "lina",
+      "player_input": "上次我帮你找回钥匙了，现在能告诉我遗迹入口吗？",
+      "npc_response": "Lina 压低声音说：“好吧，我相信你。地下遗迹的隐秘入口就在酒馆后巷。”",
+      "retrieved_memories": [
+        {
+          "id": 2,
+          "npc_id": "lina",
+          "content": "Player returned Lina's lost key.",
+          "importance": 8,
+          "tags": [
+            "help",
+            "trust",
+            "lost_key"
+          ],
+          "created_at": "2026-05-08 06:25:31"
+        },
+        {
+          "id": 1,
+          "npc_id": "lina",
+          "content": "Player asked Lina about the underground ruins before earning enough trust.",
+          "importance": 4,
+          "tags": [
+            "ruins",
+            "low_trust"
+          ],
+          "created_at": "2026-05-08 06:25:31"
+        }
+      ],
+      "decision": {
+        "intent": "reveal_ruins_entrance",
+        "reasoning": "Player has enough trust or relevant memory, so Lina can reveal the entrance and unlock it.",
+        "memory_policy": "Write a memory that Lina revealed a sensitive location.",
+        "response_style": "secretive_but_helpful",
+        "response_keywords": [
+          "压低声音",
+          "相信玩家",
+          "地下遗迹",
+          "酒馆后巷",
+          "隐秘入口"
+        ],
+        "tools": [
+          {
+            "name": "add_memory",
+            "args": {
+              "npc_id": "lina",
+              "content": "Lina revealed the underground ruins entrance to the player.",
+              "importance": 7,
+              "tags": [
+                "ruins",
+                "trust",
+                "location"
+              ]
+            }
+          },
+          {
+            "name": "unlock_location",
+            "args": {
+              "location": "underground_ruins_entrance"
+            }
+          },
+          {
+            "name": "record_world_event",
+            "args": {
+              "content": "Lina revealed the underground ruins entrance."
+            }
+          }
+        ],
+        "state_before": {
+          "npc": {
+            "npc_id": "lina",
+            "mood": "neutral",
+            "trust": 30,
+            "affection": 38
+          },
+          "player": {
+            "location": "tavern",
+            "inventory": [
+              "tavern_discount_coupon"
+            ],
+            "unlocked_locations": [
+              "tavern",
+              "town_square"
+            ]
+          },
+          "quest": {
+            "quest_id": "lost_key",
+            "status": "completed"
+          }
+        },
+        "state_after": {
+          "npc": {
+            "npc_id": "lina",
+            "mood": "neutral",
+            "trust": 30,
+            "affection": 38
+          },
+          "player": {
+            "location": "tavern",
+            "inventory": [
+              "tavern_discount_coupon"
+            ],
+            "unlocked_locations": [
+              "tavern",
+              "town_square",
+              "underground_ruins_entrance"
+            ]
+          },
+          "quest": {
+            "quest_id": "lost_key",
+            "status": "completed"
+          }
+        },
+        "response_generation": {
+          "provider": "mock",
+          "mode": "fallback_template"
+        }
+      },
+      "tool_calls": [
+        {
+          "name": "add_memory",
+          "arguments": {
+            "npc_id": "lina",
+            "content": "Lina revealed the underground ruins entrance to the player.",
+            "importance": 7,
+            "tags": [
+              "ruins",
+              "trust",
+              "location"
+            ]
+          },
+          "result": {
+            "id": 3,
+            "npc_id": "lina",
+            "content": "Lina revealed the underground ruins entrance to the player.",
+            "importance": 7,
+            "tags": [
+              "ruins",
+              "trust",
+              "location"
+            ]
+          }
+        },
+        {
+          "name": "unlock_location",
+          "arguments": {
+            "location": "underground_ruins_entrance"
+          },
+          "result": {
+            "field": "unlocked_locations",
+            "before": [
+              "tavern",
+              "town_square"
+            ],
+            "after": [
+              "tavern",
+              "town_square",
+              "underground_ruins_entrance"
+            ]
+          }
+        },
+        {
+          "name": "record_world_event",
+          "arguments": {
+            "content": "Lina revealed the underground ruins entrance."
+          },
+          "result": {
+            "id": 2,
+            "content": "Lina revealed the underground ruins entrance."
+          }
+        }
+      ],
+      "state_changes": [
+        {
+          "scope": "player",
+          "field": "unlocked_locations",
+          "before": [
+            "tavern",
+            "town_square"
+          ],
+          "after": [
+            "tavern",
+            "town_square",
+            "underground_ruins_entrance"
+          ]
+        }
+      ],
+      "workflow_steps": [
+        {
+          "stage": "Player Input",
+          "result": "Received natural language input."
+        },
+        {
+          "stage": "Memory Retrieval",
+          "result": "Retrieved 2 relevant memories."
+        },
+        {
+          "stage": "State Load",
+          "result": "Loaded NPC, player, and quest state from SQLite."
+        },
+        {
+          "stage": "Structured Decision",
+          "result": "Intent: reveal_ruins_entrance."
+        },
+        {
+          "stage": "Tool Execution",
+          "result": "Executed 3 tool calls."
+        },
+        {
+          "stage": "Response Generation",
+          "result": "Style: secretive_but_helpful; mode: fallback_template."
+        },
+        {
+          "stage": "Memory Update",
+          "result": "Memory writes are handled through add_memory tool calls."
+        },
+        {
+          "stage": "Trace Logging",
+          "result": "Recorded 1 state changes."
+        }
+      ],
+      "created_at": "2026-05-08 06:25:31"
+    },
+    {
+      "id": 2,
+      "npc_id": "lina",
+      "player_input": "我把你丢失的钥匙找回来了。",
+      "npc_response": "Lina 接过钥匙，明显松了一口气。“看来我可以更信任你一些了。现在我的信任度是 30，任务状态也已经变为 completed。”",
+      "retrieved_memories": [
+        {
+          "id": 1,
+          "npc_id": "lina",
+          "content": "Player asked Lina about the underground ruins before earning enough trust.",
+          "importance": 4,
+          "tags": [
+            "ruins",
+            "low_trust"
+          ],
+          "created_at": "2026-05-08 06:25:31"
+        }
+      ],
+      "decision": {
+        "intent": "complete_lost_key_quest",
+        "reasoning": "Player claims to return Lina's lost key, so Lina should remember it and update relationship state.",
+        "memory_policy": "Write a high-importance memory because this changes Lina's trust and quest state.",
+        "response_style": "grateful_and_more_trusting",
+        "response_keywords": [
+          "接过钥匙",
+          "松了一口气",
+          "更信任玩家",
+          "任务完成",
+          "酒馆折扣券"
+        ],
+        "tools": [
+          {
+            "name": "add_memory",
+            "args": {
+              "npc_id": "lina",
+              "content": "Player returned Lina's lost key.",
+              "importance": 8,
+              "tags": [
+                "help",
+                "trust",
+                "lost_key"
+              ]
+            }
+          },
+          {
+            "name": "update_trust",
+            "args": {
+              "npc_id": "lina",
+              "delta": 10
+            }
+          },
+          {
+            "name": "update_affection",
+            "args": {
+              "npc_id": "lina",
+              "delta": 8
+            }
+          },
+          {
+            "name": "update_quest_status",
+            "args": {
+              "quest_id": "lost_key",
+              "status": "completed"
+            }
+          },
+          {
+            "name": "give_item",
+            "args": {
+              "item": "tavern_discount_coupon"
+            }
+          },
+          {
+            "name": "record_world_event",
+            "args": {
+              "content": "Player returned Lina's lost key."
+            }
+          }
+        ],
+        "state_before": {
+          "npc": {
+            "npc_id": "lina",
+            "mood": "neutral",
+            "trust": 20,
+            "affection": 30
+          },
+          "player": {
+            "location": "tavern",
+            "inventory": [],
+            "unlocked_locations": [
+              "tavern",
+              "town_square"
+            ]
+          },
+          "quest": {
+            "quest_id": "lost_key",
+            "status": "not_started"
+          }
+        },
+        "state_after": {
+          "npc": {
+            "npc_id": "lina",
+            "mood": "neutral",
+            "trust": 30,
+            "affection": 38
+          },
+          "player": {
+            "location": "tavern",
+            "inventory": [
+              "tavern_discount_coupon"
+            ],
+            "unlocked_locations": [
+              "tavern",
+              "town_square"
+            ]
+          },
+          "quest": {
+            "quest_id": "lost_key",
+            "status": "completed"
+          }
+        },
+        "response_generation": {
+          "provider": "mock",
+          "mode": "fallback_template"
+        }
+      },
+      "tool_calls": [
+        {
+          "name": "add_memory",
+          "arguments": {
+            "npc_id": "lina",
+            "content": "Player returned Lina's lost key.",
+            "importance": 8,
+            "tags": [
+              "help",
+              "trust",
+              "lost_key"
+            ]
+          },
+          "result": {
+            "id": 2,
+            "npc_id": "lina",
+            "content": "Player returned Lina's lost key.",
+            "importance": 8,
+            "tags": [
+              "help",
+              "trust",
+              "lost_key"
+            ]
+          }
+        },
+        {
+          "name": "update_trust",
+          "arguments": {
+            "npc_id": "lina",
+            "delta": 10
+          },
+          "result": {
+            "npc_id": "lina",
+            "field": "trust",
+            "before": 20,
+            "after": 30
+          }
+        },
+        {
+          "name": "update_affection",
+          "arguments": {
+            "npc_id": "lina",
+            "delta": 8
+          },
+          "result": {
+            "npc_id": "lina",
+            "field": "affection",
+            "before": 30,
+            "after": 38
+          }
+        },
+        {
+          "name": "update_quest_status",
+          "arguments": {
+            "quest_id": "lost_key",
+            "status": "completed"
+          },
+          "result": {
+            "quest_id": "lost_key",
+            "field": "status",
+            "before": "not_started",
+            "after": "completed"
+          }
+        },
+        {
+          "name": "give_item",
+          "arguments": {
+            "item": "tavern_discount_coupon"
+          },
+          "result": {
+            "field": "player_inventory",
+            "before": [],
+            "after": [
+              "tavern_discount_coupon"
+            ]
+          }
+        },
+        {
+          "name": "record_world_event",
+          "arguments": {
+            "content": "Player returned Lina's lost key."
+          },
+          "result": {
+            "id": 1,
+            "content": "Player returned Lina's lost key."
+          }
+        }
+      ],
+      "state_changes": [
+        {
+          "scope": "npc",
+          "field": "trust",
+          "before": 20,
+          "after": 30
+        },
+        {
+          "scope": "npc",
+          "field": "affection",
+          "before": 30,
+          "after": 38
+        },
+        {
+          "scope": "player",
+          "field": "inventory",
+          "before": [],
+          "after": [
+            "tavern_discount_coupon"
+          ]
+        },
+        {
+          "scope": "quest",
+          "field": "status",
+          "before": "not_started",
+          "after": "completed"
+        }
+      ],
+      "workflow_steps": [
+        {
+          "stage": "Player Input",
+          "result": "Received natural language input."
+        },
+        {
+          "stage": "Memory Retrieval",
+          "result": "Retrieved 1 relevant memories."
+        },
+        {
+          "stage": "State Load",
+          "result": "Loaded NPC, player, and quest state from SQLite."
+        },
+        {
+          "stage": "Structured Decision",
+          "result": "Intent: complete_lost_key_quest."
+        },
+        {
+          "stage": "Tool Execution",
+          "result": "Executed 6 tool calls."
+        },
+        {
+          "stage": "Response Generation",
+          "result": "Style: grateful_and_more_trusting; mode: fallback_template."
+        },
+        {
+          "stage": "Memory Update",
+          "result": "Memory writes are handled through add_memory tool calls."
+        },
+        {
+          "stage": "Trace Logging",
+          "result": "Recorded 4 state changes."
+        }
+      ],
+      "created_at": "2026-05-08 06:25:31"
+    },
+    {
+      "id": 1,
+      "npc_id": "lina",
+      "player_input": "我想打听一下地下遗迹的入口。",
+      "npc_response": "Lina 皱了皱眉：“这种地方不是随便能打听的。等我更了解你之后再说吧。”",
+      "retrieved_memories": [],
+      "decision": {
+        "intent": "withhold_ruins_entrance",
+        "reasoning": "Player asks about a sensitive location, but Lina does not trust the player enough yet.",
+        "memory_policy": "Write a low-importance memory that the player asked too early.",
+        "response_style": "cautious_refusal",
+        "response_keywords": [
+          "谨慎",
+          "暂不透露",
+          "地下遗迹",
+          "需要更多信任"
+        ],
+        "tools": [
+          {
+            "name": "add_memory",
+            "args": {
+              "npc_id": "lina",
+              "content": "Player asked Lina about the underground ruins before earning enough trust.",
+              "importance": 4,
+              "tags": [
+                "ruins",
+                "low_trust"
+              ]
+            }
+          }
+        ],
+        "state_before": {
+          "npc": {
+            "npc_id": "lina",
+            "mood": "neutral",
+            "trust": 20,
+            "affection": 30
+          },
+          "player": {
+            "location": "tavern",
+            "inventory": [],
+            "unlocked_locations": [
+              "tavern",
+              "town_square"
+            ]
+          },
+          "quest": {
+            "quest_id": "lost_key",
+            "status": "not_started"
+          }
+        },
+        "state_after": {
+          "npc": {
+            "npc_id": "lina",
+            "mood": "neutral",
+            "trust": 20,
+            "affection": 30
+          },
+          "player": {
+            "location": "tavern",
+            "inventory": [],
+            "unlocked_locations": [
+              "tavern",
+              "town_square"
+            ]
+          },
+          "quest": {
+            "quest_id": "lost_key",
+            "status": "not_started"
+          }
+        },
+        "response_generation": {
+          "provider": "mock",
+          "mode": "fallback_template"
+        }
+      },
+      "tool_calls": [
+        {
+          "name": "add_memory",
+          "arguments": {
+            "npc_id": "lina",
+            "content": "Player asked Lina about the underground ruins before earning enough trust.",
+            "importance": 4,
+            "tags": [
+              "ruins",
+              "low_trust"
+            ]
+          },
+          "result": {
+            "id": 1,
+            "npc_id": "lina",
+            "content": "Player asked Lina about the underground ruins before earning enough trust.",
+            "importance": 4,
+            "tags": [
+              "ruins",
+              "low_trust"
+            ]
+          }
+        }
+      ],
+      "state_changes": [],
+      "workflow_steps": [
+        {
+          "stage": "Player Input",
+          "result": "Received natural language input."
+        },
+        {
+          "stage": "Memory Retrieval",
+          "result": "Retrieved 0 relevant memories."
+        },
+        {
+          "stage": "State Load",
+          "result": "Loaded NPC, player, and quest state from SQLite."
+        },
+        {
+          "stage": "Structured Decision",
+          "result": "Intent: withhold_ruins_entrance."
+        },
+        {
+          "stage": "Tool Execution",
+          "result": "Executed 1 tool calls."
+        },
+        {
+          "stage": "Response Generation",
+          "result": "Style: cautious_refusal; mode: fallback_template."
+        },
+        {
+          "stage": "Memory Update",
+          "result": "Memory writes are handled through add_memory tool calls."
+        },
+        {
+          "stage": "Trace Logging",
+          "result": "Recorded 0 state changes."
+        }
+      ],
+      "created_at": "2026-05-08 06:25:31"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "npcs": {
+    "lina": {
+      "npc_id": "lina",
+      "name": "Lina",
+      "role": "Tavern Owner",
+      "description": "A cautious and practical tavern owner who knows many local rumors.",
+      "mood": "neutral",
+      "trust": 20,
+      "affection": 30,
+      "known_facts": [],
+      "active_quest": "lost_key",
+      "quest_status": "not_started",
+      "inventory": [
+        "old_note",
+        "healing_potion"
+      ]
+    }
+  },
+  "player": {
+    "location": "tavern",
+    "inventory": [],
+    "unlocked_locations": [
+      "tavern",
+      "town_square"
+    ]
+  },
+  "world": {
+    "day": 1,
+    "time": "evening",
+    "events": []
+  },
+  "memories": [],
+  "interaction_logs": []
+}

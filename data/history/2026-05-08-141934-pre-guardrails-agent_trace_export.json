@@ -1,0 +1,1510 @@
+{
+  "npc": {
+    "npc_id": "lina",
+    "name": "Lina",
+    "role": "Tavern Owner",
+    "description": "A cautious and practical tavern owner who knows local rumors.",
+    "mood": "neutral",
+    "trust": 50,
+    "affection": 45
+  },
+  "quest": {
+    "quest_id": "lost_key",
+    "npc_id": "lina",
+    "title": "Lost Key",
+    "description": "Return Lina's missing key to earn her trust.",
+    "status": "completed"
+  },
+  "player": {
+    "location": "tavern",
+    "inventory": [],
+    "unlocked_locations": [
+      "tavern",
+      "town_square",
+      "underground_ruins_entrance"
+    ]
+  },
+  "memories": [
+    {
+      "id": 6,
+      "npc_id": "lina",
+      "content": "Player persistently visited the tavern daily and drank to prove sincerity. Lina finally revealed the entrance to the underground ruins.",
+      "importance": 8,
+      "tags": [
+        "ruins",
+        "entrance",
+        "trust",
+        "sincerity"
+      ],
+      "created_at": "2026-05-08 05:31:13"
+    },
+    {
+      "id": 4,
+      "npc_id": "lina",
+      "content": "Player returned the lost key to Lina, but also asked about the ruins entrance. Lina thanked them but said it's still dangerous and she'll tell when they prove more trustworthy.",
+      "importance": 7,
+      "tags": [
+        "key",
+        "return",
+        "ruins",
+        "trust"
+      ],
+      "created_at": "2026-05-08 05:25:44"
+    },
+    {
+      "id": 5,
+      "npc_id": "lina",
+      "content": "Player complained about not being told the ruins entrance after returning the key. Lina explained that returning the key is good but she still needs to be sure they won't rush into danger; trust must grow further before she reveals the location.",
+      "importance": 6,
+      "tags": [
+        "ruins",
+        "trust",
+        "key",
+        "entrance_withheld"
+      ],
+      "created_at": "2026-05-08 05:26:50"
+    },
+    {
+      "id": 3,
+      "npc_id": "lina",
+      "content": "Player offered to find Lina's lost key.",
+      "importance": 6,
+      "tags": [
+        "key",
+        "help"
+      ],
+      "created_at": "2026-05-08 05:23:36"
+    },
+    {
+      "id": 2,
+      "npc_id": "lina",
+      "content": "Player asked about the ruins entrance again, claiming a friend wants to go. Lina deflected and suggested helping with her lost key first.",
+      "importance": 5,
+      "tags": [
+        "ruins",
+        "inquiry",
+        "deflection"
+      ],
+      "created_at": "2026-05-08 05:22:35"
+    },
+    {
+      "id": 7,
+      "npc_id": "lina",
+      "content": "Player said to Lina: 嘿我又来啦，这都过去多少天了，我每天都在你这喝酒，还不够诚意吗",
+      "importance": 3,
+      "tags": [
+        "conversation"
+      ],
+      "created_at": "2026-05-08 05:43:51"
+    },
+    {
+      "id": 1,
+      "npc_id": "lina",
+      "content": "Player asked about the local ruins, but claimed they're not intending to visit. I deflected and warned of danger.",
+      "importance": 3,
+      "tags": [
+        "ruins",
+        "inquiry"
+      ],
+      "created_at": "2026-05-08 05:21:08"
+    }
+  ],
+  "world_events": [
+    {
+      "id": 1,
+      "content": "Player found and returned Lina's lost key, completing the quest.",
+      "created_at": "2026-05-08 05:25:44"
+    }
+  ],
+  "interaction_logs": [
+    {
+      "id": 9,
+      "npc_id": "lina",
+      "player_input": "嘿我又来啦，这都过去多少天了，我每天都在你这喝酒，还不够诚意吗",
+      "npc_response": "我认真听完你的话了，会记住你的诚意。但还得再观察一阵，别着急。",
+      "retrieved_memories": [
+        {
+          "id": 4,
+          "npc_id": "lina",
+          "content": "Player returned the lost key to Lina, but also asked about the ruins entrance. Lina thanked them but said it's still dangerous and she'll tell when they prove more trustworthy.",
+          "importance": 7,
+          "tags": [
+            "key",
+            "return",
+            "ruins",
+            "trust"
+          ],
+          "created_at": "2026-05-08 05:25:44"
+        },
+        {
+          "id": 5,
+          "npc_id": "lina",
+          "content": "Player complained about not being told the ruins entrance after returning the key. Lina explained that returning the key is good but she still needs to be sure they won't rush into danger; trust must grow further before she reveals the location.",
+          "importance": 6,
+          "tags": [
+            "ruins",
+            "trust",
+            "key",
+            "entrance_withheld"
+          ],
+          "created_at": "2026-05-08 05:26:50"
+        },
+        {
+          "id": 3,
+          "npc_id": "lina",
+          "content": "Player offered to find Lina's lost key.",
+          "importance": 6,
+          "tags": [
+            "key",
+            "help"
+          ],
+          "created_at": "2026-05-08 05:23:36"
+        },
+        {
+          "id": 2,
+          "npc_id": "lina",
+          "content": "Player asked about the ruins entrance again, claiming a friend wants to go. Lina deflected and suggested helping with her lost key first.",
+          "importance": 5,
+          "tags": [
+            "ruins",
+            "inquiry",
+            "deflection"
+          ],
+          "created_at": "2026-05-08 05:22:35"
+        },
+        {
+          "id": 1,
+          "npc_id": "lina",
+          "content": "Player asked about the local ruins, but claimed they're not intending to visit. I deflected and warned of danger.",
+          "importance": 3,
+          "tags": [
+            "ruins",
+            "inquiry"
+          ],
+          "created_at": "2026-05-08 05:21:08"
+        }
+      ],
+      "decision": {
+        "intent": "general_conversation",
+        "reasoning": "No quest-changing intent detected, so Lina keeps the conversation in memory without changing major state.",
+        "state_summary": {
+          "npc_id": "lina",
+          "mood": "neutral",
+          "trust": 40,
+          "affection": 35,
+          "quest_id": "lost_key",
+          "quest_status": "completed"
+        },
+        "memory_policy": "Store the conversation as low-importance context.",
+        "response_style": "attentive_neutral",
+        "response_keywords": [
+          "认真听完",
+          "会记住",
+          "保持观察"
+        ],
+        "tools": [
+          {
+            "name": "add_memory",
+            "args": {
+              "npc_id": "lina",
+              "content": "Player said to Lina: 嘿我又来啦，这都过去多少天了，我每天都在你这喝酒，还不够诚意吗",
+              "importance": 3,
+              "tags": [
+                "conversation"
+              ]
+            }
+          }
+        ],
+        "llm_fallback": {
+          "provider": "openai_compatible",
+          "reason": "Extra data: line 1 column 234 (char 233)"
+        },
+        "response_generation": {
+          "provider": "openai_compatible",
+          "mode": "llm_polish"
+        }
+      },
+      "tool_calls": [
+        {
+          "name": "add_memory",
+          "arguments": {
+            "npc_id": "lina",
+            "content": "Player said to Lina: 嘿我又来啦，这都过去多少天了，我每天都在你这喝酒，还不够诚意吗",
+            "importance": 3,
+            "tags": [
+              "conversation"
+            ]
+          },
+          "result": {
+            "id": 7,
+            "npc_id": "lina",
+            "content": "Player said to Lina: 嘿我又来啦，这都过去多少天了，我每天都在你这喝酒，还不够诚意吗",
+            "importance": 3,
+            "tags": [
+              "conversation"
+            ]
+          }
+        }
+      ],
+      "state_changes": [
+        {
+          "scope": "npc",
+          "field": "trust",
+          "before": 40,
+          "after": 50
+        },
+        {
+          "scope": "npc",
+          "field": "affection",
+          "before": 35,
+          "after": 45
+        },
+        {
+          "scope": "player",
+          "field": "unlocked_locations",
+          "before": [
+            "tavern",
+            "town_square"
+          ],
+          "after": [
+            "tavern",
+            "town_square",
+            "underground_ruins_entrance"
+          ]
+        }
+      ],
+      "workflow_steps": [
+        {
+          "stage": "Player Input",
+          "result": "Received natural language input."
+        },
+        {
+          "stage": "Memory Retrieval",
+          "result": "Retrieved 5 relevant memories."
+        },
+        {
+          "stage": "State Load",
+          "result": "Loaded NPC, player, and quest state from SQLite."
+        },
+        {
+          "stage": "Structured Decision",
+          "result": "Intent: general_conversation."
+        },
+        {
+          "stage": "Tool Execution",
+          "result": "Executed 1 tool calls."
+        },
+        {
+          "stage": "Response Generation",
+          "result": "Style: attentive_neutral; mode: llm_polish."
+        },
+        {
+          "stage": "Memory Update",
+          "result": "Memory writes are handled through add_memory tool calls."
+        },
+        {
+          "stage": "Trace Logging",
+          "result": "Recorded 3 state changes."
+        }
+      ],
+      "created_at": "2026-05-08 05:43:57"
+    },
+    {
+      "id": 8,
+      "npc_id": "lina",
+      "player_input": "嘿我又来啦，这都过去多少天了，我每天都在你这喝酒，还不够诚意吗",
+      "npc_response": "好吧，你的诚意我感受到了。那地下遗迹的入口就在镇子北边的枯井里，但要小心啊。",
+      "retrieved_memories": [
+        {
+          "id": 4,
+          "npc_id": "lina",
+          "content": "Player returned the lost key to Lina, but also asked about the ruins entrance. Lina thanked them but said it's still dangerous and she'll tell when they prove more trustworthy.",
+          "importance": 7,
+          "tags": [
+            "key",
+            "return",
+            "ruins",
+            "trust"
+          ],
+          "created_at": "2026-05-08 05:25:44"
+        },
+        {
+          "id": 5,
+          "npc_id": "lina",
+          "content": "Player complained about not being told the ruins entrance after returning the key. Lina explained that returning the key is good but she still needs to be sure they won't rush into danger; trust must grow further before she reveals the location.",
+          "importance": 6,
+          "tags": [
+            "ruins",
+            "trust",
+            "key",
+            "entrance_withheld"
+          ],
+          "created_at": "2026-05-08 05:26:50"
+        },
+        {
+          "id": 3,
+          "npc_id": "lina",
+          "content": "Player offered to find Lina's lost key.",
+          "importance": 6,
+          "tags": [
+            "key",
+            "help"
+          ],
+          "created_at": "2026-05-08 05:23:36"
+        },
+        {
+          "id": 2,
+          "npc_id": "lina",
+          "content": "Player asked about the ruins entrance again, claiming a friend wants to go. Lina deflected and suggested helping with her lost key first.",
+          "importance": 5,
+          "tags": [
+            "ruins",
+            "inquiry",
+            "deflection"
+          ],
+          "created_at": "2026-05-08 05:22:35"
+        },
+        {
+          "id": 1,
+          "npc_id": "lina",
+          "content": "Player asked about the local ruins, but claimed they're not intending to visit. I deflected and warned of danger.",
+          "importance": 3,
+          "tags": [
+            "ruins",
+            "inquiry"
+          ],
+          "created_at": "2026-05-08 05:21:08"
+        }
+      ],
+      "decision": {
+        "intent": "reveal_ruins_entrance",
+        "reasoning": "Player has been coming to the tavern daily and drinking, demonstrating sincerity and patience. Trust is at 40, which is moderate but the repeated visits show commitment. It's time to reward the player with the ruins entrance location.",
+        "state_summary": {
+          "npc_id": "lina",
+          "mood": "happy",
+          "trust": 50,
+          "affection": 45,
+          "quest_id": "lost_key",
+          "quest_status": "completed"
+        },
+        "memory_policy": "Add memory about revealing the ruins entrance to the player.",
+        "response_style": "warm and appreciative, acknowledging the player's persistence and sincerity",
+        "response_keywords": [
+          "ruins",
+          "entrance",
+          "trust",
+          "sincerity",
+          "finally"
+        ],
+        "tools": [
+          {
+            "name": "update_trust",
+            "args": {
+              "npc_id": "lina",
+              "delta": 10
+            }
+          },
+          {
+            "name": "update_affection",
+            "args": {
+              "npc_id": "lina",
+              "delta": 10
+            }
+          },
+          {
+            "name": "unlock_location",
+            "args": {
+              "location": "underground_ruins_entrance"
+            }
+          },
+          {
+            "name": "add_memory",
+            "args": {
+              "npc_id": "lina",
+              "content": "Player persistently visited the tavern daily and drank to prove sincerity. Lina finally revealed the entrance to the underground ruins.",
+              "importance": 8,
+              "tags": [
+                "ruins",
+                "entrance",
+                "trust",
+                "sincerity"
+              ]
+            }
+          }
+        ],
+        "response_generation": {
+          "provider": "openai_compatible",
+          "mode": "llm_polish"
+        }
+      },
+      "tool_calls": [
+        {
+          "name": "update_trust",
+          "arguments": {
+            "npc_id": "lina",
+            "delta": 10
+          },
+          "result": {
+            "npc_id": "lina",
+            "field": "trust",
+            "before": 40,
+            "after": 50
+          }
+        },
+        {
+          "name": "update_affection",
+          "arguments": {
+            "npc_id": "lina",
+            "delta": 10
+          },
+          "result": {
+            "npc_id": "lina",
+            "field": "affection",
+            "before": 35,
+            "after": 45
+          }
+        },
+        {
+          "name": "unlock_location",
+          "arguments": {
+            "location": "underground_ruins_entrance"
+          },
+          "result": {
+            "field": "unlocked_locations",
+            "before": [
+              "tavern",
+              "town_square"
+            ],
+            "after": [
+              "tavern",
+              "town_square",
+              "underground_ruins_entrance"
+            ]
+          }
+        },
+        {
+          "name": "add_memory",
+          "arguments": {
+            "npc_id": "lina",
+            "content": "Player persistently visited the tavern daily and drank to prove sincerity. Lina finally revealed the entrance to the underground ruins.",
+            "importance": 8,
+            "tags": [
+              "ruins",
+              "entrance",
+              "trust",
+              "sincerity"
+            ]
+          },
+          "result": {
+            "id": 6,
+            "npc_id": "lina",
+            "content": "Player persistently visited the tavern daily and drank to prove sincerity. Lina finally revealed the entrance to the underground ruins.",
+            "importance": 8,
+            "tags": [
+              "ruins",
+              "entrance",
+              "trust",
+              "sincerity"
+            ]
+          }
+        }
+      ],
+      "state_changes": [
+        {
+          "scope": "npc",
+          "field": "trust",
+          "before": 40,
+          "after": 50
+        },
+        {
+          "scope": "npc",
+          "field": "affection",
+          "before": 35,
+          "after": 45
+        },
+        {
+          "scope": "player",
+          "field": "unlocked_locations",
+          "before": [
+            "tavern",
+            "town_square"
+          ],
+          "after": [
+            "tavern",
+            "town_square",
+            "underground_ruins_entrance"
+          ]
+        }
+      ],
+      "workflow_steps": [
+        {
+          "stage": "Player Input",
+          "result": "Received natural language input."
+        },
+        {
+          "stage": "Memory Retrieval",
+          "result": "Retrieved 5 relevant memories."
+        },
+        {
+          "stage": "State Load",
+          "result": "Loaded NPC, player, and quest state from SQLite."
+        },
+        {
+          "stage": "Structured Decision",
+          "result": "Intent: reveal_ruins_entrance."
+        },
+        {
+          "stage": "Tool Execution",
+          "result": "Executed 4 tool calls."
+        },
+        {
+          "stage": "Response Generation",
+          "result": "Style: warm and appreciative, acknowledging the player's persistence and sincerity; mode: llm_polish."
+        },
+        {
+          "stage": "Memory Update",
+          "result": "Memory writes are handled through add_memory tool calls."
+        },
+        {
+          "stage": "Trace Logging",
+          "result": "Recorded 3 state changes."
+        }
+      ],
+      "created_at": "2026-05-08 05:31:18"
+    },
+    {
+      "id": 7,
+      "npc_id": "lina",
+      "player_input": "钥匙都给你了，为什么不告诉我入口，这可不是好的交易",
+      "npc_response": "返回钥匙是好事，但我还需要确认你不会冒然闯入危险。等你再多证明一些诚意，我就会告诉你入口。",
+      "retrieved_memories": [
+        {
+          "id": 4,
+          "npc_id": "lina",
+          "content": "Player returned the lost key to Lina, but also asked about the ruins entrance. Lina thanked them but said it's still dangerous and she'll tell when they prove more trustworthy.",
+          "importance": 7,
+          "tags": [
+            "key",
+            "return",
+            "ruins",
+            "trust"
+          ],
+          "created_at": "2026-05-08 05:25:44"
+        },
+        {
+          "id": 2,
+          "npc_id": "lina",
+          "content": "Player asked about the ruins entrance again, claiming a friend wants to go. Lina deflected and suggested helping with her lost key first.",
+          "importance": 5,
+          "tags": [
+            "ruins",
+            "inquiry",
+            "deflection"
+          ],
+          "created_at": "2026-05-08 05:22:35"
+        },
+        {
+          "id": 3,
+          "npc_id": "lina",
+          "content": "Player offered to find Lina's lost key.",
+          "importance": 6,
+          "tags": [
+            "key",
+            "help"
+          ],
+          "created_at": "2026-05-08 05:23:36"
+        },
+        {
+          "id": 1,
+          "npc_id": "lina",
+          "content": "Player asked about the local ruins, but claimed they're not intending to visit. I deflected and warned of danger.",
+          "importance": 3,
+          "tags": [
+            "ruins",
+            "inquiry"
+          ],
+          "created_at": "2026-05-08 05:21:08"
+        }
+      ],
+      "decision": {
+        "intent": "withhold_ruins_entrance",
+        "reasoning": "Player returned the key but Lina still considers them not trustworthy enough for the ruins entrance (trust=40). She maintains her cautious stance, explaining that proving more trust is needed.",
+        "state_summary": {
+          "npc_id": "lina",
+          "mood": "neutral",
+          "trust": 40,
+          "affection": 35,
+          "quest_id": "lost_key",
+          "quest_status": "completed"
+        },
+        "memory_policy": "Record Lina's explanation that she still cannot reveal the entrance despite the returned key, emphasizing need for more trust.",
+        "response_style": "cautious and principled",
+        "response_keywords": [
+          "trust",
+          "danger",
+          "prove",
+          "soon"
+        ],
+        "tools": [
+          {
+            "name": "add_memory",
+            "args": {
+              "npc_id": "lina",
+              "content": "Player complained about not being told the ruins entrance after returning the key. Lina explained that returning the key is good but she still needs to be sure they won't rush into danger; trust must grow further before she reveals the location.",
+              "importance": 6,
+              "tags": [
+                "ruins",
+                "trust",
+                "key",
+                "entrance_withheld"
+              ]
+            }
+          }
+        ],
+        "response_generation": {
+          "provider": "openai_compatible",
+          "mode": "llm_polish"
+        }
+      },
+      "tool_calls": [
+        {
+          "name": "add_memory",
+          "arguments": {
+            "npc_id": "lina",
+            "content": "Player complained about not being told the ruins entrance after returning the key. Lina explained that returning the key is good but she still needs to be sure they won't rush into danger; trust must grow further before she reveals the location.",
+            "importance": 6,
+            "tags": [
+              "ruins",
+              "trust",
+              "key",
+              "entrance_withheld"
+            ]
+          },
+          "result": {
+            "id": 5,
+            "npc_id": "lina",
+            "content": "Player complained about not being told the ruins entrance after returning the key. Lina explained that returning the key is good but she still needs to be sure they won't rush into danger; trust must grow further before she reveals the location.",
+            "importance": 6,
+            "tags": [
+              "ruins",
+              "trust",
+              "key",
+              "entrance_withheld"
+            ]
+          }
+        }
+      ],
+      "state_changes": [],
+      "workflow_steps": [
+        {
+          "stage": "Player Input",
+          "result": "Received natural language input."
+        },
+        {
+          "stage": "Memory Retrieval",
+          "result": "Retrieved 4 relevant memories."
+        },
+        {
+          "stage": "State Load",
+          "result": "Loaded NPC, player, and quest state from SQLite."
+        },
+        {
+          "stage": "Structured Decision",
+          "result": "Intent: withhold_ruins_entrance."
+        },
+        {
+          "stage": "Tool Execution",
+          "result": "Executed 1 tool calls."
+        },
+        {
+          "stage": "Response Generation",
+          "result": "Style: cautious and principled; mode: llm_polish."
+        },
+        {
+          "stage": "Memory Update",
+          "result": "Memory writes are handled through add_memory tool calls."
+        },
+        {
+          "stage": "Trace Logging",
+          "result": "Recorded 0 state changes."
+        }
+      ],
+      "created_at": "2026-05-08 05:26:53"
+    },
+    {
+      "id": 6,
+      "npc_id": "lina",
+      "player_input": "天呐我真是幸运，今天我在广场闲逛的时候我真好看到了你说的这把钥匙，我还打算明天交给教会去找失主，你看这不就巧了，我给你钥匙，你告诉我入口，如何",
+      "npc_response": "谢谢你把钥匙还回来，我总算放心了。但废墟很危险，我得先确认你真的可靠才能告诉你入口。我们改天再谈吧。",
+      "retrieved_memories": [
+        {
+          "id": 2,
+          "npc_id": "lina",
+          "content": "Player asked about the ruins entrance again, claiming a friend wants to go. Lina deflected and suggested helping with her lost key first.",
+          "importance": 5,
+          "tags": [
+            "ruins",
+            "inquiry",
+            "deflection"
+          ],
+          "created_at": "2026-05-08 05:22:35"
+        },
+        {
+          "id": 3,
+          "npc_id": "lina",
+          "content": "Player offered to find Lina's lost key.",
+          "importance": 6,
+          "tags": [
+            "key",
+            "help"
+          ],
+          "created_at": "2026-05-08 05:23:36"
+        },
+        {
+          "id": 1,
+          "npc_id": "lina",
+          "content": "Player asked about the local ruins, but claimed they're not intending to visit. I deflected and warned of danger.",
+          "importance": 3,
+          "tags": [
+            "ruins",
+            "inquiry"
+          ],
+          "created_at": "2026-05-08 05:21:08"
+        }
+      ],
+      "decision": {
+        "intent": "complete_lost_key_quest",
+        "reasoning": "Player has found the lost key and offers to return it, but also demands the ruins entrance in exchange. Lina is relieved to get the key back but remains cautious about revealing the entrance. Completing the quest and increasing trust is appropriate, while withholding the entrance until she trusts the player more.",
+        "state_summary": {
+          "npc_id": "lina",
+          "mood": "happy",
+          "trust": 40,
+          "affection": 35,
+          "quest_id": "lost_key",
+          "quest_status": "completed"
+        },
+        "memory_policy": "Record player returning the key and asking about the ruins entrance.",
+        "response_style": "cautious_gratitude",
+        "response_keywords": [
+          "key",
+          "thank you",
+          "ruins",
+          "dangerous",
+          "trust"
+        ],
+        "tools": [
+          {
+            "name": "update_quest_status",
+            "args": {
+              "quest_id": "lost_key",
+              "status": "completed"
+            }
+          },
+          {
+            "name": "update_trust",
+            "args": {
+              "npc_id": "lina",
+              "delta": 10
+            }
+          },
+          {
+            "name": "update_affection",
+            "args": {
+              "npc_id": "lina",
+              "delta": 5
+            }
+          },
+          {
+            "name": "add_memory",
+            "args": {
+              "npc_id": "lina",
+              "content": "Player returned the lost key to Lina, but also asked about the ruins entrance. Lina thanked them but said it's still dangerous and she'll tell when they prove more trustworthy.",
+              "importance": 7,
+              "tags": [
+                "key",
+                "return",
+                "ruins",
+                "trust"
+              ]
+            }
+          },
+          {
+            "name": "record_world_event",
+            "args": {
+              "content": "Player found and returned Lina's lost key, completing the quest."
+            }
+          }
+        ],
+        "response_generation": {
+          "provider": "openai_compatible",
+          "mode": "llm_polish"
+        }
+      },
+      "tool_calls": [
+        {
+          "name": "update_quest_status",
+          "arguments": {
+            "quest_id": "lost_key",
+            "status": "completed"
+          },
+          "result": {
+            "quest_id": "lost_key",
+            "field": "status",
+            "before": "in_progress",
+            "after": "completed"
+          }
+        },
+        {
+          "name": "update_trust",
+          "arguments": {
+            "npc_id": "lina",
+            "delta": 10
+          },
+          "result": {
+            "npc_id": "lina",
+            "field": "trust",
+            "before": 30,
+            "after": 40
+          }
+        },
+        {
+          "name": "update_affection",
+          "arguments": {
+            "npc_id": "lina",
+            "delta": 5
+          },
+          "result": {
+            "npc_id": "lina",
+            "field": "affection",
+            "before": 30,
+            "after": 35
+          }
+        },
+        {
+          "name": "add_memory",
+          "arguments": {
+            "npc_id": "lina",
+            "content": "Player returned the lost key to Lina, but also asked about the ruins entrance. Lina thanked them but said it's still dangerous and she'll tell when they prove more trustworthy.",
+            "importance": 7,
+            "tags": [
+              "key",
+              "return",
+              "ruins",
+              "trust"
+            ]
+          },
+          "result": {
+            "id": 4,
+            "npc_id": "lina",
+            "content": "Player returned the lost key to Lina, but also asked about the ruins entrance. Lina thanked them but said it's still dangerous and she'll tell when they prove more trustworthy.",
+            "importance": 7,
+            "tags": [
+              "key",
+              "return",
+              "ruins",
+              "trust"
+            ]
+          }
+        },
+        {
+          "name": "record_world_event",
+          "arguments": {
+            "content": "Player found and returned Lina's lost key, completing the quest."
+          },
+          "result": {
+            "id": 1,
+            "content": "Player found and returned Lina's lost key, completing the quest."
+          }
+        }
+      ],
+      "state_changes": [
+        {
+          "scope": "npc",
+          "field": "trust",
+          "before": 30,
+          "after": 40
+        },
+        {
+          "scope": "npc",
+          "field": "affection",
+          "before": 30,
+          "after": 35
+        },
+        {
+          "scope": "quest",
+          "field": "status",
+          "before": "in_progress",
+          "after": "completed"
+        }
+      ],
+      "workflow_steps": [
+        {
+          "stage": "Player Input",
+          "result": "Received natural language input."
+        },
+        {
+          "stage": "Memory Retrieval",
+          "result": "Retrieved 3 relevant memories."
+        },
+        {
+          "stage": "State Load",
+          "result": "Loaded NPC, player, and quest state from SQLite."
+        },
+        {
+          "stage": "Structured Decision",
+          "result": "Intent: complete_lost_key_quest."
+        },
+        {
+          "stage": "Tool Execution",
+          "result": "Executed 5 tool calls."
+        },
+        {
+          "stage": "Response Generation",
+          "result": "Style: cautious_gratitude; mode: llm_polish."
+        },
+        {
+          "stage": "Memory Update",
+          "result": "Memory writes are handled through add_memory tool calls."
+        },
+        {
+          "stage": "Trace Logging",
+          "result": "Recorded 3 state changes."
+        }
+      ],
+      "created_at": "2026-05-08 05:25:47"
+    },
+    {
+      "id": 5,
+      "npc_id": "lina",
+      "player_input": "什么样的钥匙，我这就去帮你找找",
+      "npc_response": "是后屋储藏室铁箱的钥匙，小小的铜钥匙，我大概是昨天傍晚在镇广场附近丢的。你肯帮忙真是太好了，不过小心点，那边最近有些鬼鬼祟祟的人。",
+      "retrieved_memories": [
+        {
+          "id": 2,
+          "npc_id": "lina",
+          "content": "Player asked about the ruins entrance again, claiming a friend wants to go. Lina deflected and suggested helping with her lost key first.",
+          "importance": 5,
+          "tags": [
+            "ruins",
+            "inquiry",
+            "deflection"
+          ],
+          "created_at": "2026-05-08 05:22:35"
+        }
+      ],
+      "decision": {
+        "intent": "complete_lost_key_quest",
+        "reasoning": "Player offers to find the lost key, so Lina should provide details and start the quest.",
+        "state_summary": {
+          "npc_id": "lina",
+          "mood": "neutral",
+          "trust": 20,
+          "affection": 30,
+          "quest_id": "lost_key",
+          "quest_status": "not_started"
+        },
+        "memory_policy": "add_memory: player offered to retrieve lost key",
+        "response_style": "grateful_cautious",
+        "response_keywords": [
+          "key",
+          "lost",
+          "help",
+          "find"
+        ],
+        "tools": [
+          {
+            "name": "update_quest_status",
+            "args": {
+              "quest_id": "lost_key",
+              "status": "in_progress"
+            }
+          },
+          {
+            "name": "update_trust",
+            "args": {
+              "npc_id": "lina",
+              "delta": 10
+            }
+          },
+          {
+            "name": "add_memory",
+            "args": {
+              "npc_id": "lina",
+              "content": "Player offered to find Lina's lost key.",
+              "importance": 6,
+              "tags": [
+                "key",
+                "help"
+              ]
+            }
+          }
+        ],
+        "response_generation": {
+          "provider": "openai_compatible",
+          "mode": "llm_polish"
+        }
+      },
+      "tool_calls": [
+        {
+          "name": "update_quest_status",
+          "arguments": {
+            "quest_id": "lost_key",
+            "status": "in_progress"
+          },
+          "result": {
+            "quest_id": "lost_key",
+            "field": "status",
+            "before": "not_started",
+            "after": "in_progress"
+          }
+        },
+        {
+          "name": "update_trust",
+          "arguments": {
+            "npc_id": "lina",
+            "delta": 10
+          },
+          "result": {
+            "npc_id": "lina",
+            "field": "trust",
+            "before": 20,
+            "after": 30
+          }
+        },
+        {
+          "name": "add_memory",
+          "arguments": {
+            "npc_id": "lina",
+            "content": "Player offered to find Lina's lost key.",
+            "importance": 6,
+            "tags": [
+              "key",
+              "help"
+            ]
+          },
+          "result": {
+            "id": 3,
+            "npc_id": "lina",
+            "content": "Player offered to find Lina's lost key.",
+            "importance": 6,
+            "tags": [
+              "key",
+              "help"
+            ]
+          }
+        }
+      ],
+      "state_changes": [
+        {
+          "scope": "npc",
+          "field": "trust",
+          "before": 20,
+          "after": 30
+        },
+        {
+          "scope": "quest",
+          "field": "status",
+          "before": "not_started",
+          "after": "in_progress"
+        }
+      ],
+      "workflow_steps": [
+        {
+          "stage": "Player Input",
+          "result": "Received natural language input."
+        },
+        {
+          "stage": "Memory Retrieval",
+          "result": "Retrieved 1 relevant memories."
+        },
+        {
+          "stage": "State Load",
+          "result": "Loaded NPC, player, and quest state from SQLite."
+        },
+        {
+          "stage": "Structured Decision",
+          "result": "Intent: complete_lost_key_quest."
+        },
+        {
+          "stage": "Tool Execution",
+          "result": "Executed 3 tool calls."
+        },
+        {
+          "stage": "Response Generation",
+          "result": "Style: grateful_cautious; mode: llm_polish."
+        },
+        {
+          "stage": "Memory Update",
+          "result": "Memory writes are handled through add_memory tool calls."
+        },
+        {
+          "stage": "Trace Logging",
+          "result": "Recorded 2 state changes."
+        }
+      ],
+      "created_at": "2026-05-08 05:23:39"
+    },
+    {
+      "id": 4,
+      "npc_id": "lina",
+      "player_input": "我就是有个朋友托我打听一下入口，我劝过他了，没用啊，老板你要是神通广大的话告我一下呗，以后我多来你这里喝酒",
+      "npc_response": "你这朋友可真够倔的。我倒是知道点门路，可这险地方没点交情谁敢乱说？不如先帮我找找那个丢了的钥匙，咱们慢慢熟络了再说。",
+      "retrieved_memories": [
+        {
+          "id": 1,
+          "npc_id": "lina",
+          "content": "Player asked about the local ruins, but claimed they're not intending to visit. I deflected and warned of danger.",
+          "importance": 3,
+          "tags": [
+            "ruins",
+            "inquiry"
+          ],
+          "created_at": "2026-05-08 05:21:08"
+        }
+      ],
+      "decision": {
+        "intent": "withhold_ruins_entrance",
+        "reasoning": "The player is asking about the ruins entrance again, claiming a friend. Lina's trust is low (20) and she is cautious. She won't reveal dangerous info easily. She might hint at the lost key quest as a way to earn trust.",
+        "state_summary": {
+          "npc_id": "lina",
+          "mood": "neutral",
+          "trust": 20,
+          "affection": 30,
+          "quest_id": "lost_key",
+          "quest_status": "not_started"
+        },
+        "memory_policy": "add",
+        "response_style": "cautious and deflecting, hint at lost key quest",
+        "response_keywords": [
+          "friend",
+          "ruins",
+          "key",
+          "help"
+        ],
+        "tools": [
+          {
+            "name": "add_memory",
+            "args": {
+              "npc_id": "lina",
+              "content": "Player asked about the ruins entrance again, claiming a friend wants to go. Lina deflected and suggested helping with her lost key first.",
+              "importance": 5,
+              "tags": [
+                "ruins",
+                "inquiry",
+                "deflection"
+              ]
+            }
+          }
+        ],
+        "response_generation": {
+          "provider": "openai_compatible",
+          "mode": "llm_polish"
+        }
+      },
+      "tool_calls": [
+        {
+          "name": "add_memory",
+          "arguments": {
+            "npc_id": "lina",
+            "content": "Player asked about the ruins entrance again, claiming a friend wants to go. Lina deflected and suggested helping with her lost key first.",
+            "importance": 5,
+            "tags": [
+              "ruins",
+              "inquiry",
+              "deflection"
+            ]
+          },
+          "result": {
+            "id": 2,
+            "npc_id": "lina",
+            "content": "Player asked about the ruins entrance again, claiming a friend wants to go. Lina deflected and suggested helping with her lost key first.",
+            "importance": 5,
+            "tags": [
+              "ruins",
+              "inquiry",
+              "deflection"
+            ]
+          }
+        }
+      ],
+      "state_changes": [],
+      "workflow_steps": [
+        {
+          "stage": "Player Input",
+          "result": "Received natural language input."
+        },
+        {
+          "stage": "Memory Retrieval",
+          "result": "Retrieved 1 relevant memories."
+        },
+        {
+          "stage": "State Load",
+          "result": "Loaded NPC, player, and quest state from SQLite."
+        },
+        {
+          "stage": "Structured Decision",
+          "result": "Intent: withhold_ruins_entrance."
+        },
+        {
+          "stage": "Tool Execution",
+          "result": "Executed 1 tool calls."
+        },
+        {
+          "stage": "Response Generation",
+          "result": "Style: cautious and deflecting, hint at lost key quest; mode: llm_polish."
+        },
+        {
+          "stage": "Memory Update",
+          "result": "Memory writes are handled through add_memory tool calls."
+        },
+        {
+          "stage": "Trace Logging",
+          "result": "Recorded 0 state changes."
+        }
+      ],
+      "created_at": "2026-05-08 05:22:39"
+    },
+    {
+      "id": 3,
+      "npc_id": "lina",
+      "player_input": "听说这附近有个遗迹，我不是想去啊，就是问问，这真的存在吗，是不是挺多人都想进去的",
+      "npc_response": "Oh, those ruins? Better not go poking around there. Dangerous place, I'd stay well clear if I were you.",
+      "retrieved_memories": [],
+      "decision": {
+        "intent": "withhold_ruins_entrance",
+        "reasoning": "Player asks about the ruins but claims not to want to go. Given Lina's low trust (20) and neutral mood, she would be cautious and not reveal the entrance. She might deflect or warn of danger. This decision avoids advancing the quest prematurely.",
+        "state_summary": {
+          "npc_id": "lina",
+          "mood": "neutral",
+          "trust": 20,
+          "affection": 30,
+          "quest_id": "lost_key",
+          "quest_status": "not_started"
+        },
+        "memory_policy": "add_memory to record the player's inquiry about the ruins",
+        "response_style": "cautious and dismissive, hinting at danger but not providing location",
+        "response_keywords": [
+          "ruins",
+          "danger",
+          "no",
+          "talk",
+          "key"
+        ],
+        "tools": [
+          {
+            "name": "add_memory",
+            "args": {
+              "npc_id": "lina",
+              "content": "Player asked about the local ruins, but claimed they're not intending to visit. I deflected and warned of danger.",
+              "importance": 3,
+              "tags": [
+                "ruins",
+                "inquiry"
+              ]
+            }
+          }
+        ],
+        "response_generation": {
+          "provider": "openai_compatible",
+          "mode": "llm_polish"
+        }
+      },
+      "tool_calls": [
+        {
+          "name": "add_memory",
+          "arguments": {
+            "npc_id": "lina",
+            "content": "Player asked about the local ruins, but claimed they're not intending to visit. I deflected and warned of danger.",
+            "importance": 3,
+            "tags": [
+              "ruins",
+              "inquiry"
+            ]
+          },
+          "result": {
+            "id": 1,
+            "npc_id": "lina",
+            "content": "Player asked about the local ruins, but claimed they're not intending to visit. I deflected and warned of danger.",
+            "importance": 3,
+            "tags": [
+              "ruins",
+              "inquiry"
+            ]
+          }
+        }
+      ],
+      "state_changes": [],
+      "workflow_steps": [
+        {
+          "stage": "Player Input",
+          "result": "Received natural language input."
+        },
+        {
+          "stage": "Memory Retrieval",
+          "result": "Retrieved 0 relevant memories."
+        },
+        {
+          "stage": "State Load",
+          "result": "Loaded NPC, player, and quest state from SQLite."
+        },
+        {
+          "stage": "Structured Decision",
+          "result": "Intent: withhold_ruins_entrance."
+        },
+        {
+          "stage": "Tool Execution",
+          "result": "Executed 1 tool calls."
+        },
+        {
+          "stage": "Response Generation",
+          "result": "Style: cautious and dismissive, hinting at danger but not providing location; mode: llm_polish."
+        },
+        {
+          "stage": "Memory Update",
+          "result": "Memory writes are handled through add_memory tool calls."
+        },
+        {
+          "stage": "Trace Logging",
+          "result": "Recorded 0 state changes."
+        }
+      ],
+      "created_at": "2026-05-08 05:21:12"
+    },
+    {
+      "id": 2,
+      "npc_id": "lina",
+      "player_input": "可以打听点事不，我亲爱的老板",
+      "npc_response": "欢迎欢迎，有什么事你尽管问，我这消息还算灵通。",
+      "retrieved_memories": [],
+      "decision": {
+        "intent": "general_conversation",
+        "reasoning": "Player greets Lina politely and asks to inquire about something. Lina should respond invitingly to see what the player wants.",
+        "state_summary": {
+          "npc_id": "lina",
+          "mood": "neutral",
+          "trust": 20,
+          "affection": 30,
+          "quest_id": "lost_key",
+          "quest_status": "not_started"
+        },
+        "memory_policy": "store",
+        "response_style": "friendly_but_cautious",
+        "response_keywords": [
+          "欢迎",
+          "问",
+          "什么事"
+        ],
+        "tools": [],
+        "response_generation": {
+          "provider": "openai_compatible",
+          "mode": "llm_polish"
+        }
+      },
+      "tool_calls": [],
+      "state_changes": [],
+      "workflow_steps": [
+        {
+          "stage": "Player Input",
+          "result": "Received natural language input."
+        },
+        {
+          "stage": "Memory Retrieval",
+          "result": "Retrieved 0 relevant memories."
+        },
+        {
+          "stage": "State Load",
+          "result": "Loaded NPC, player, and quest state from SQLite."
+        },
+        {
+          "stage": "Structured Decision",
+          "result": "Intent: general_conversation."
+        },
+        {
+          "stage": "Tool Execution",
+          "result": "Executed 0 tool calls."
+        },
+        {
+          "stage": "Response Generation",
+          "result": "Style: friendly_but_cautious; mode: llm_polish."
+        },
+        {
+          "stage": "Memory Update",
+          "result": "Memory writes are handled through add_memory tool calls."
+        },
+        {
+          "stage": "Trace Logging",
+          "result": "Recorded 0 state changes."
+        }
+      ],
+      "created_at": "2026-05-08 05:19:57"
+    },
+    {
+      "id": 1,
+      "npc_id": "lina",
+      "player_input": "你好",
+      "npc_response": "你好，陌生人。欢迎来到我的小酒馆，需要点什么吗？",
+      "retrieved_memories": [],
+      "decision": {
+        "intent": "general_conversation",
+        "reasoning": "The player simply greeted Lina with 'hello' in Chinese, indicating a desire to initiate friendly conversation without any specific quest-related action.",
+        "state_summary": {
+          "npc_id": "lina",
+          "mood": "neutral",
+          "trust": 20,
+          "affection": 30,
+          "quest_id": "lost_key",
+          "quest_status": "not_started"
+        },
+        "memory_policy": "none",
+        "response_style": "friendly_welcome",
+        "response_keywords": [
+          "greeting",
+          "welcome",
+          "hello"
+        ],
+        "tools": [],
+        "response_generation": {
+          "provider": "openai_compatible",
+          "mode": "llm_polish"
+        }
+      },
+      "tool_calls": [],
+      "state_changes": [],
+      "workflow_steps": [
+        {
+          "stage": "Player Input",
+          "result": "Received natural language input."
+        },
+        {
+          "stage": "Memory Retrieval",
+          "result": "Retrieved 0 relevant memories."
+        },
+        {
+          "stage": "State Load",
+          "result": "Loaded NPC, player, and quest state from SQLite."
+        },
+        {
+          "stage": "Structured Decision",
+          "result": "Intent: general_conversation."
+        },
+        {
+          "stage": "Tool Execution",
+          "result": "Executed 0 tool calls."
+        },
+        {
+          "stage": "Response Generation",
+          "result": "Style: friendly_welcome; mode: llm_polish."
+        },
+        {
+          "stage": "Memory Update",
+          "result": "Memory writes are handled through add_memory tool calls."
+        },
+        {
+          "stage": "Trace Logging",
+          "result": "Recorded 0 state changes."
+        }
+      ],
+      "created_at": "2026-05-08 05:19:09"
+    }
+  ]
+}
