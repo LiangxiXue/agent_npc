@@ -1,17 +1,27 @@
+# Python/runtime caches
 __pycache__/
 *.py[cod]
 .pytest_cache/
 .venv/
 venv/
+
+# Local configuration
 .env
 .vscode/
 .streamlit/
+
+# Large/local references
 *.pdf
+
+# Generated SQLite databases
 data/*.db
 data/**/*.db
 data/*.db-journal
 data/*.db-shm
 data/*.db-wal
+data/*.log
+
+# Trace artifacts: keep the canonical demo trace and archived history.
 agent_trace_export.json
 !data/agent_trace_export.json
 !data/history/*.json

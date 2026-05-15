@@ -7,7 +7,9 @@
 证明系统不是普通聊天机器人，而是具备：
 
 - SQLite 持久化状态；
-- 长期记忆；
+- 短期 / 长期记忆分层；
+- 类型化长期记忆；
+- Memory Policy；
 - 结构化决策；
 - 工具调用；
 - 状态变化；
@@ -35,7 +37,7 @@ streamlit run app.py
 
 - `intent` 为 `withhold_ruins_entrance`；
 - Lina 拒绝透露入口；
-- 工具调用 `add_memory`；
+- 无长期记忆写入，或 trace 中显示 `memory_policy` 不写入长期记忆的原因；
 - `trust` 不提升；
 - `underground_ruins_entrance` 不会出现在已解锁地点中。
 
@@ -50,7 +52,8 @@ streamlit run app.py
 预期现象：
 
 - `intent` 为 `complete_lost_key_quest`；
-- 工具调用包括 `add_memory`、`update_trust`、`update_affection`、`update_quest_status`、`give_item`；
+- 行为工具调用包括 `update_trust`、`update_affection`、`update_quest_status`、`give_item`；
+- `memory_policy` 写入 `quest`、`event`、`relationship` 类型长期记忆；
 - Lina 的 `trust` 从 20 变为 30；
 - Lina 的 `affection` 从 30 变为 38；
 - `lost_key` 任务状态变为 `completed`；
@@ -67,7 +70,7 @@ streamlit run app.py
 预期现象：
 
 - `intent` 为 `reveal_ruins_entrance`；
-- 系统检索到玩家帮助 Lina 的记忆；
+- 系统检索到玩家帮助 Lina 的长期记忆，并显示 `retrieval_score` / `retrieval_reason`；
 - 工具调用 `unlock_location`；
 - 玩家已解锁地点中出现 `underground_ruins_entrance`。
 

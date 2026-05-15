@@ -19,6 +19,16 @@ ENV_KEYS = {
     "AGENT_NPC_LLM_BASE_URL",
     "AGENT_NPC_LLM_TIMEOUT",
     "AGENT_NPC_LLM_RETRIES",
+    "AGENT_NPC_MEMORY_LLM_ENABLED",
+    "AGENT_NPC_EMBEDDING_PROVIDER",
+    "AGENT_NPC_EMBEDDING_API_KEY",
+    "AGENT_NPC_EMBEDDING_MODEL",
+    "AGENT_NPC_EMBEDDING_BASE_URL",
+    "AGENT_NPC_EMBEDDING_TIMEOUT",
+    "AGENT_NPC_EMBEDDING_ALLOW_FALLBACK",
+    "AGENT_NPC_RETRIEVAL_BACKEND",
+    "AGENT_NPC_MOCK_EMBEDDING_DIM",
+    "OPENAI_API_KEY",
 }
 
 
@@ -80,6 +90,7 @@ def get_provider_status() -> dict[str, Any]:
         "uses_api_key": bool(settings.api_key),
         "timeout_seconds": settings.timeout_seconds,
         "retries": settings.retries,
+        "memory_llm_enabled": os.environ.get("AGENT_NPC_MEMORY_LLM_ENABLED", "1").strip() not in {"0", "false", "False"},
         "env_file": {
             "path": str(ENV_FILE_PATH),
             "exists": ENV_FILE_PATH.exists(),

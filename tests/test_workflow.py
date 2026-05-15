@@ -4,7 +4,9 @@ from pathlib import Path
 from unittest.mock import patch
 
 from src.agent.decision import decide_next_action, validate_decision
+from src.agent.lore_retrieval import retrieve_lore
 from src.agent.llm_client import get_provider_status
+from src.agent.memory_policy import MemoryPolicyInput, apply_memory_policy
 from src.agent.response import generate_npc_response
 from src.agent.workflow import run_agent_turn
 from src.storage import database
@@ -21,27 +23,35 @@ class AgentWorkflowTest(unittest.TestCase):
     def setUp(self) -> None:
         database.reset_database()
         os.environ["AGENT_NPC_LLM_PROVIDER"] = "mock"
+        os.environ["AGENT_NPC_EMBEDDING_PROVIDER"] = "mock_hash"
+        os.environ["AGENT_NPC_RETRIEVAL_BACKEND"] = "sqlite_cosine"
 
     def test_low_trust_ruins_question_is_withheld(self) -> None:
         run = run_agent_turn("我想打听一下地下遗迹的入口。")
 
         self.assertEqual(run.decision["intent"], "withhold_ruins_entrance")
+        self.assertEqual(run.decision["social_intent"], "conceal")
+        self.assertEqual(run.decision["social_stance"]["target"], "ruins_access")
         self.assertNotIn("underground_ruins_entrance", run.player_state["unlocked_locations"])
         self.assertEqual(database.get_npc("lina")["trust"], 20)
 
     def test_returning_key_updates_state_and_logs_tools(self) -> None:
         run = run_agent_turn("我把你丢失的钥匙找回来了。")
         tool_names = [tool["name"] for tool in run.tool_calls]
+        memory_types = [write["arguments"]["memory_type"] for write in run.memory_writes]
 
         self.assertEqual(run.decision["intent"], "complete_lost_key_quest")
         self.assertEqual(database.get_npc("lina")["trust"], 30)
         self.assertEqual(database.get_npc("lina")["affection"], 38)
         self.assertEqual(database.get_quest("lost_key")["status"], "completed")
         self.assertIn("tavern_discount_coupon", database.get_player_state()["inventory"])
-        self.assertIn("add_memory", tool_names)
         self.assertIn("update_trust", tool_names)
         self.assertIn("update_affection", tool_names)
         self.assertIn("give_item", tool_names)
+        self.assertIn("quest", memory_types)
+        self.assertIn("event", memory_types)
+        self.assertIn("relationship", memory_types)
+        self.assertEqual(run.memory_policy["summary"], "Wrote 4 long-term memory record(s).")
         self.assertGreaterEqual(len(run.workflow_steps), 8)
 
     def test_asking_key_details_starts_lost_key_quest(self) -> None:
@@ -60,9 +70,111 @@ class AgentWorkflowTest(unittest.TestCase):
 
         self.assertEqual(run.decision["intent"], "reveal_ruins_entrance")
         self.assertTrue(any("lost_key" in memory["tags"] for memory in run.retrieved_memories))
+        self.assertTrue(all("retrieval_score" in memory for memory in run.retrieved_memories))
         self.assertIn("underground_ruins_entrance", database.get_player_state()["unlocked_locations"])
         self.assertEqual(len(database.get_interaction_logs()), 2)
         self.assertEqual(database.get_world_events(limit=1)[0]["content"], "Lina revealed the underground ruins entrance.")
+
+    def test_semantic_retrieval_handles_implicit_help_reference(self) -> None:
+        database.add_memory(
+            npc_id="lina",
+            content="Player returned Lina's lost key.",
+            importance=8,
+            tags=["event", "help", "lost_key"],
+            memory_type="event",
+            confidence=1.0,
+        )
+
+        memories = database.search_memories(
+            "我之前替你解决过那个麻烦，现在能告诉我入口吗？",
+            mode="semantic",
+        )
+
+        self.assertTrue(any("lost_key" in memory.get("tags", []) for memory in memories))
+        self.assertTrue(all("semantic_score" in memory for memory in memories))
+        self.assertTrue(all("score_breakdown" in memory for memory in memories))
+
+    def test_hybrid_retrieval_includes_rule_and_semantic_scores(self) -> None:
+        run_agent_turn("我把你丢失的钥匙找回来了。")
+        run = run_agent_turn(
+            "上次那件事之后，你应该更愿意相信我了吧？现在能告诉我遗迹入口吗？",
+            memory_retrieval_mode="hybrid",
+        )
+
+        self.assertEqual(run.decision["intent"], "reveal_ruins_entrance")
+        self.assertTrue(run.retrieved_memories)
+        self.assertTrue(any(memory.get("semantic_score", 0) > 0 for memory in run.retrieved_memories))
+        self.assertTrue(all("score_breakdown" in memory for memory in run.retrieved_memories))
+        self.assertTrue(
+            all(
+                memory.get("retrieval_backend") == "sqlite_cosine"
+                for memory in run.retrieved_memories
+                if memory.get("semantic_score", 0) > 0
+            )
+        )
+
+    def test_faiss_backend_falls_back_when_optional_dependency_is_missing(self) -> None:
+        os.environ["AGENT_NPC_RETRIEVAL_BACKEND"] = "faiss"
+        database.add_memory(
+            npc_id="lina",
+            content="Player returned Lina's lost key.",
+            importance=8,
+            tags=["event", "help", "lost_key"],
+            memory_type="event",
+            confidence=1.0,
+        )
+
+        memories = database.search_memories(
+            "我之前替你解决过那个麻烦，现在能告诉我入口吗？",
+            mode="semantic",
+        )
+
+        self.assertTrue(memories)
+        self.assertTrue(all(memory.get("requested_retrieval_backend") == "faiss" for memory in memories))
+        self.assertTrue(all(memory.get("retrieval_backend") in {"faiss", "sqlite_cosine"} for memory in memories))
+
+    def test_seed_includes_multiple_npcs(self) -> None:
+        npc_ids = {npc["npc_id"] for npc in database.list_npcs()}
+
+        self.assertTrue({"lina", "ron", "mira", "sable"} <= npc_ids)
+        self.assertEqual(database.get_primary_quest_for_npc("ron")["quest_id"], "gate_badge")
+        self.assertEqual(database.get_primary_quest_for_npc("mira")["quest_id"], "ancient_notes")
+        self.assertEqual(database.get_primary_quest_for_npc("sable")["quest_id"], "relic_tip")
+        self.assertEqual(database.get_npc("sable")["hidden_alignment"], "exploit_ruins")
+
+    def test_seed_includes_shared_and_npc_lore(self) -> None:
+        lina_lore = database.get_lore_documents(npc_id="lina", limit=100)
+        ron_lore = database.get_lore_documents(npc_id="ron", limit=100)
+
+        self.assertGreaterEqual(len(lina_lore), 3)
+        self.assertTrue(any(document["scope"] == "global" for document in lina_lore))
+        self.assertTrue(any(document["lore_id"] == "npc:lina:profile" for document in lina_lore))
+        self.assertTrue(any(document["lore_id"] == "npc:ron:profile" for document in ron_lore))
+        self.assertTrue(any(document["lore_id"] == "world:social_deduction_rules" for document in ron_lore))
+        self.assertTrue(any(document["lore_id"] == "npc:sable:profile" for document in database.get_lore_documents(npc_id="sable", limit=100)))
+
+    def test_lore_retrieval_uses_embedding_metadata(self) -> None:
+        lore = retrieve_lore("城门巡逻和守卫徽章有什么线索？", npc_id="ron", limit=3)
+
+        self.assertTrue(lore)
+        self.assertTrue(any(item["lore_id"] == "npc:ron:profile" for item in lore))
+        self.assertTrue(all("semantic_score" in item for item in lore))
+        self.assertTrue(all(item["query_embedding_provider"] == "mock_hash" for item in lore))
+
+    def test_multi_npc_turn_uses_selected_npc_and_keeps_memory_isolated(self) -> None:
+        ron_run = run_agent_turn(
+            "以后请直接告诉我线索，不要绕弯子。",
+            npc_id="ron",
+            memory_retrieval_mode="typed",
+        )
+
+        self.assertEqual(ron_run.npc_id, "ron")
+        self.assertEqual(ron_run.npc_state["npc_id"], "ron")
+        self.assertEqual(ron_run.quest_state["quest_id"], "gate_badge")
+        self.assertEqual(ron_run.decision["intent"], "general_conversation")
+        self.assertTrue(any(write["arguments"]["npc_id"] == "ron" for write in ron_run.memory_writes))
+        self.assertFalse(database.get_recent_memories("lina", limit=10))
+        self.assertTrue(database.get_recent_memories("ron", limit=10))
 
     def test_logs_store_trace_artifacts(self) -> None:
         run = run_agent_turn("我把你丢失的钥匙找回来了。")
@@ -71,7 +183,15 @@ class AgentWorkflowTest(unittest.TestCase):
         self.assertEqual(len(logs), 1)
         self.assertEqual(logs[0]["decision"]["intent"], run.decision["intent"])
         self.assertEqual(logs[0]["workflow_steps"][0]["stage"], "Player Input")
-        self.assertEqual(logs[0]["tool_calls"][0]["name"], "add_memory")
+        self.assertEqual(logs[0]["memory_writes"][0]["name"], "add_memory")
+        self.assertTrue(run.retrieved_lore)
+        self.assertTrue(logs[0]["retrieved_lore"])
+        self.assertIn("state_snapshot", logs[0])
+        self.assertIn("context_inputs", logs[0]["decision"])
+        self.assertIn("social_intent", logs[0]["decision"])
+        self.assertIn("social_stance", logs[0]["decision"])
+        self.assertEqual(logs[0]["recent_context"], [])
+        self.assertTrue(logs[0]["memory_policy"]["candidates"])
         self.assertTrue(logs[0]["state_changes"])
 
     def test_default_decision_has_llm_ready_shape(self) -> None:
@@ -85,9 +205,57 @@ class AgentWorkflowTest(unittest.TestCase):
         self.assertIn("memory_policy", run.decision)
         self.assertIn("response_style", run.decision)
         self.assertIn("response_keywords", run.decision)
+        self.assertIn("social_intent", run.decision)
+        self.assertIn("social_stance", run.decision)
         self.assertIn("response_generation", run.decision)
         self.assertIsInstance(run.decision["tools"], list)
         self.assertEqual(run.decision["response_generation"]["mode"], "fallback_template")
+        self.assertFalse(run.memory_writes)
+        self.assertEqual(run.memory_policy["candidates"][0]["should_write"], False)
+
+    def test_ron_gate_badge_quest_can_start_and_complete(self) -> None:
+        start = run_agent_turn("城门巡逻记录和守卫徽章有什么线索？", npc_id="ron")
+        complete = run_agent_turn("我找到守卫徽章了，登记册签名也能对上。", npc_id="ron")
+
+        self.assertEqual(start.decision["intent"], "start_gate_badge_quest")
+        self.assertEqual(start.decision["social_intent"], "probe")
+        self.assertEqual(complete.decision["intent"], "complete_gate_badge_quest")
+        self.assertEqual(complete.decision["social_intent"], "cooperate")
+        self.assertEqual(database.get_quest("gate_badge")["status"], "completed")
+        self.assertIn("guard_route_note", database.get_player_state()["inventory"])
+        self.assertTrue(any(write["arguments"]["npc_id"] == "ron" for write in complete.memory_writes))
+
+    def test_ron_ruins_request_probes_for_evidence_without_tools(self) -> None:
+        run = run_agent_turn("我想进入遗迹，守卫这边能放行吗？", npc_id="ron")
+
+        self.assertEqual(run.decision["intent"], "probe_for_evidence")
+        self.assertEqual(run.decision["social_intent"], "probe")
+        self.assertEqual(run.tool_calls, [])
+
+    def test_mira_ancient_notes_quest_can_start_and_complete(self) -> None:
+        start = run_agent_turn("我想问问遗迹铭文和田野笔记该怎么记录。", npc_id="mira")
+        complete = run_agent_turn("我看到遗迹门边有三角符号和封闭石门，这是我的一手观察。", npc_id="mira")
+
+        self.assertEqual(start.decision["intent"], "start_ancient_notes_quest")
+        self.assertEqual(start.decision["social_intent"], "ally")
+        self.assertEqual(complete.decision["intent"], "complete_ancient_notes_quest")
+        self.assertIn(complete.decision["social_intent"], {"ally", "cooperate"})
+        self.assertEqual(database.get_quest("ancient_notes")["status"], "completed")
+        self.assertIn("ruins_research_note", database.get_player_state()["inventory"])
+        self.assertTrue(any(write["arguments"]["npc_id"] == "mira" for write in complete.memory_writes))
+
+    def test_sable_relic_tip_uses_deception_without_unlocking_ruins(self) -> None:
+        start = run_agent_turn("Sable，你知道遗迹入口或者古物线索吗？", npc_id="sable")
+        complete = run_agent_turn("我听说入口在酒馆后巷，我接受你说的先查换岗记录。", npc_id="sable")
+
+        self.assertEqual(start.decision["intent"], "start_relic_tip_quest")
+        self.assertIn(start.decision["social_intent"], {"deceive", "redirect"})
+        self.assertEqual(complete.decision["intent"], "complete_relic_tip_quest")
+        self.assertEqual(complete.decision["social_intent"], "deceive")
+        self.assertEqual(database.get_quest("relic_tip")["status"], "completed")
+        self.assertNotIn("underground_ruins_entrance", database.get_player_state()["unlocked_locations"])
+        self.assertTrue(any("Sable" in event["content"] for event in database.get_world_events(limit=10)))
+        self.assertTrue(any(write["arguments"]["npc_id"] == "sable" for write in complete.memory_writes))
 
     def test_response_generation_can_use_llm_polish(self) -> None:
         os.environ["AGENT_NPC_LLM_PROVIDER"] = "openai_compatible"
@@ -158,7 +326,8 @@ class AgentWorkflowTest(unittest.TestCase):
             npc_state=npc_state,
             player_state=player_state,
             quest_state=quest_state,
-            memories=[],
+            retrieved_long_term_memories=[],
+            recent_short_term_context=[],
         )
 
         self.assertFalse(get_provider_status()["configured"])
@@ -174,6 +343,26 @@ class AgentWorkflowTest(unittest.TestCase):
                     "response_style": "none",
                     "response_keywords": [],
                     "tools": [{"name": "delete_database", "args": {}}],
+                }
+            )
+
+    def test_decision_rejects_invalid_social_intent(self) -> None:
+        with self.assertRaises(ValueError):
+            validate_decision(
+                {
+                    "intent": "general_conversation",
+                    "reasoning": "test",
+                    "memory_policy": "none",
+                    "social_intent": "mind_control",
+                    "social_stance": {
+                        "target": "player",
+                        "attitude": "cautious",
+                        "intensity": 0.5,
+                        "reason": "test",
+                    },
+                    "response_style": "none",
+                    "response_keywords": [],
+                    "tools": [],
                 }
             )
 
@@ -244,6 +433,14 @@ class AgentWorkflowTest(unittest.TestCase):
                     }
                 ],
             },
+            {
+                "intent": "general_conversation",
+                "reasoning": "test",
+                "memory_policy": "none",
+                "response_style": "empathetic",
+                "response_keywords": ["孤独", "倾听"],
+                "tools": [{"name": "update_affection", "args": {"npc_id": "lina", "delta": 5}}],
+            },
         ]
 
         for decision in invalid_decisions:
@@ -251,32 +448,138 @@ class AgentWorkflowTest(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     validate_decision(decision)
 
-    def test_reveal_memory_is_normalized_to_lina_as_actor(self) -> None:
-        decision = validate_decision(
-            {
-                "intent": "reveal_ruins_entrance",
-                "reasoning": "test",
-                "memory_policy": "test",
-                "response_style": "warm",
-                "response_keywords": ["ruins"],
-                "tools": [
-                    {"name": "unlock_location", "args": {"location": "underground_ruins_entrance"}},
+    def test_relationship_memory_requires_player_help_event(self) -> None:
+        npc_before = database.get_npc("lina")
+        player_before = database.get_player_state()
+        quest_before = database.get_quest("lost_key")
+        database.update_npc_number("lina", "affection", 5)
+        database.update_npc_number("lina", "trust", 3)
+        npc_after = database.get_npc("lina")
+
+        policy, writes = apply_memory_policy(
+            MemoryPolicyInput(
+                npc_id="lina",
+                player_input="我是一个孤独的人，感觉无人会帮助我",
+                npc_response="我可以听你说。",
+                retrieved_long_term_memories=[],
+                recent_short_term_context=[],
+                npc_before=npc_before,
+                npc_after=npc_after,
+                player_before=player_before,
+                player_after=database.get_player_state(),
+                quest_before=quest_before,
+                quest_after=database.get_quest("lost_key"),
+                tool_calls=[
                     {
-                        "name": "add_memory",
-                        "args": {
-                            "npc_id": "lina",
-                            "content": "Player revealed the ruins entrance after returning the lost key.",
-                            "importance": 7,
-                            "tags": ["ruins"],
-                        },
+                        "name": "update_affection",
+                        "arguments": {"npc_id": "lina", "delta": 5},
+                        "result": {"npc_id": "lina", "field": "affection", "before": 30, "after": 35},
+                    },
+                    {
+                        "name": "update_trust",
+                        "arguments": {"npc_id": "lina", "delta": 3},
+                        "result": {"npc_id": "lina", "field": "trust", "before": 20, "after": 23},
                     },
                 ],
-            }
+                state_changes=[
+                    {"scope": "npc", "field": "affection", "before": 30, "after": 35},
+                    {"scope": "npc", "field": "trust", "before": 20, "after": 23},
+                ],
+            )
         )
 
-        memory_tool = next(tool for tool in decision["tools"] if tool["name"] == "add_memory")
-        self.assertTrue(memory_tool["args"]["content"].startswith("Lina revealed"))
-        self.assertIn("location", memory_tool["args"]["tags"])
+        self.assertEqual(writes, [])
+        self.assertEqual(policy["candidates"][0]["memory_type"], "none")
+
+    def test_llm_memory_candidate_and_review_can_write_player_profile(self) -> None:
+        os.environ["AGENT_NPC_LLM_PROVIDER"] = "openai_compatible"
+        os.environ["AGENT_NPC_LLM_API_KEY"] = "test-key"
+        os.environ["AGENT_NPC_MEMORY_LLM_ENABLED"] = "1"
+        npc = database.get_npc("lina")
+        player = database.get_player_state()
+        quest = database.get_quest("lost_key")
+
+        with patch(
+            "src.agent.llm_memory_candidate.call_openai_compatible_json",
+            return_value={
+                "candidates": [
+                    {
+                        "should_write": True,
+                        "memory_type": "player_profile",
+                        "content": "Player described themselves as lonely and worried nobody would help them.",
+                        "importance": 5,
+                        "confidence": 0.85,
+                        "tags": ["player_profile", "lonely", "needs_support"],
+                        "evidence_text": "我是一个孤独的人，感觉无人会帮助我",
+                        "reason": "The player explicitly described their emotional state.",
+                    }
+                ]
+            },
+        ), patch(
+            "src.agent.memory_candidate_review.call_openai_compatible_json",
+            return_value={
+                "reviews": [
+                    {
+                        "candidate_index": 0,
+                        "verdict": "approve",
+                        "approved_memory_type": "player_profile",
+                        "approved_content": "Player described themselves as lonely and worried nobody would help them.",
+                        "approved_importance": 5,
+                        "approved_confidence": 0.85,
+                        "approved_tags": ["player_profile", "lonely", "needs_support"],
+                        "approved_evidence_text": "我是一个孤独的人，感觉无人会帮助我",
+                        "reason": "Grounded in the player's own words and does not imply the player helped Lina.",
+                        "risk": "low",
+                    }
+                ]
+            },
+        ):
+            policy, writes = apply_memory_policy(
+                MemoryPolicyInput(
+                    npc_id="lina",
+                    player_input="我是一个孤独的人，感觉无人会帮助我",
+                    npc_response="我可以听你说。",
+                    retrieved_long_term_memories=[],
+                    recent_short_term_context=[],
+                    npc_before=npc,
+                    npc_after=npc,
+                    player_before=player,
+                    player_after=player,
+                    quest_before=quest,
+                    quest_after=quest,
+                    tool_calls=[],
+                    state_changes=[],
+                )
+            )
+
+        self.assertEqual(len(writes), 1)
+        self.assertEqual(writes[0]["arguments"]["memory_type"], "player_profile")
+        self.assertIn("llm_memory_policy", policy)
+        self.assertEqual(policy["llm_memory_policy"]["candidate_review"]["status"], "ok")
+
+    def test_repeated_key_return_deduplicates_long_term_memory(self) -> None:
+        first = run_agent_turn("我把你丢失的钥匙找回来了。")
+        database.update_quest_status("lost_key", "not_started")
+        second = run_agent_turn("我又把你丢失的钥匙找回来了。")
+
+        self.assertTrue(first.memory_writes)
+        self.assertLess(len(second.memory_writes), len(first.memory_writes))
+        self.assertTrue(
+            any(
+                candidate["reason"] == "Similar memory already exists."
+                for candidate in second.memory_policy["candidates"]
+            )
+        )
+
+    def test_recent_interactions_are_short_term_context_only_for_chat(self) -> None:
+        first = run_agent_turn("你好，Lina。")
+        second = run_agent_turn("刚才我是在和你打招呼。")
+
+        self.assertFalse(first.memory_writes)
+        self.assertFalse(second.memory_writes)
+        self.assertEqual(len(second.recent_context), 1)
+        self.assertEqual(database.get_recent_interactions(limit=5)[0]["player_input"], "你好，Lina。")
+        self.assertEqual(database.get_recent_memories(limit=10), [])
 
 
 if __name__ == "__main__":

@@ -19,12 +19,14 @@
 
 ```text
 Player Input
--> Memory Retrieval
+-> Short-Term Context Load
+-> Long-Term Memory Retrieval
 -> State Load
 -> Structured Decision
 -> Tool Execution
 -> Response Generation
--> Memory Update
+-> Memory Policy
+-> Short-Term Interaction Write
 -> Trace Logging
 ```
 
@@ -39,16 +41,16 @@ Player Input
 
 ### 3.2 记忆系统
 
-- SQLite 长期记忆表；
-- importance 排序；
-- 简单关键词检索；
+- `recent_interactions` 短期上下文；
+- 类型化 `memories` 长期记忆表；
+- Memory Policy 写入规则；
+- `retrieval_score` 和 `retrieval_reason`；
 - 后续可替换为向量检索。
 
 ### 3.3 工具调用
 
 重点说明工具调用会真实修改 SQLite：
 
-- `add_memory`
 - `update_trust`
 - `update_affection`
 - `give_item`
@@ -60,6 +62,8 @@ Player Input
 页面展示：
 
 - 检索到的记忆；
+- Memory Policy 判断；
+- 长期记忆写入；
 - workflow steps；
 - 结构化决策；
 - 工具调用；

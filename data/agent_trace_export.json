@@ -1,718 +1,234 @@
 {
-  "npc": {
-    "npc_id": "lina",
-    "name": "Lina",
-    "role": "Tavern Owner",
-    "description": "A cautious and practical tavern owner who knows local rumors.",
-    "mood": "neutral",
-    "trust": 30,
-    "affection": 38
-  },
-  "quest": {
-    "quest_id": "lost_key",
-    "npc_id": "lina",
-    "title": "Lost Key",
-    "description": "Return Lina's missing key to earn her trust.",
-    "status": "completed"
-  },
+  "npcs": [
+    {
+      "npc_id": "lina",
+      "name": "Lina",
+      "role": "Tavern Owner",
+      "description": "A cautious and practical tavern owner who knows local rumors.",
+      "hidden_alignment": "protect_ruins",
+      "mood": "neutral",
+      "trust": 20,
+      "affection": 30
+    },
+    {
+      "npc_id": "ron",
+      "name": "Ron",
+      "role": "Town Guard",
+      "description": "A disciplined town guard who tracks patrol reports and gate incidents.",
+      "hidden_alignment": "enforce_order",
+      "mood": "alert",
+      "trust": 18,
+      "affection": 20
+    },
+    {
+      "npc_id": "mira",
+      "name": "Mira",
+      "role": "Ruins Scholar",
+      "description": "A careful scholar who studies old ruins, inscriptions, and local myths.",
+      "hidden_alignment": "research_truth",
+      "mood": "curious",
+      "trust": 22,
+      "affection": 24
+    },
+    {
+      "npc_id": "sable",
+      "name": "Sable",
+      "role": "Traveling Relic Broker",
+      "description": "A polished relic broker who offers useful rumors while steering people toward exploitable ruin secrets.",
+      "hidden_alignment": "exploit_ruins",
+      "mood": "pleasant",
+      "trust": 16,
+      "affection": 18
+    }
+  ],
+  "quests": [
+    {
+      "quest_id": "lost_key",
+      "npc_id": "lina",
+      "title": "Lost Key",
+      "description": "Return Lina's missing key to earn her trust.",
+      "status": "not_started"
+    },
+    {
+      "quest_id": "gate_badge",
+      "npc_id": "ron",
+      "title": "Gate Badge",
+      "description": "Help Ron verify a misplaced guard badge before the night patrol.",
+      "status": "not_started"
+    },
+    {
+      "quest_id": "ancient_notes",
+      "npc_id": "mira",
+      "title": "Ancient Notes",
+      "description": "Bring Mira useful field notes about the underground ruins.",
+      "status": "not_started"
+    },
+    {
+      "quest_id": "relic_tip",
+      "npc_id": "sable",
+      "title": "Relic Tip",
+      "description": "Notice how Sable redirects ruin inquiries toward exploitable relic information.",
+      "status": "not_started"
+    }
+  ],
   "player": {
     "location": "tavern",
-    "inventory": [
-      "tavern_discount_coupon"
-    ],
+    "inventory": [],
     "unlocked_locations": [
       "tavern",
-      "town_square",
-      "underground_ruins_entrance"
+      "town_square"
     ]
   },
-  "memories": [
+  "memories_by_npc": {
+    "lina": [],
+    "ron": [],
+    "mira": [],
+    "sable": []
+  },
+  "lore_documents": [
     {
-      "id": 2,
+      "lore_id": "npc:lina:profile",
+      "scope": "npc",
       "npc_id": "lina",
-      "content": "Player returned Lina's lost key.",
+      "title": "Lina Character and Tavern Operations",
+      "content": "# Lina Character and Tavern Operations\n\nLina is the owner of Grayhaven's tavern. She is practical, observant, and cautious rather than mysterious for its own sake. She notices who pays attention, who exaggerates, who helps without being asked, and who tries to get sensitive information too quickly. Her speech can be warm after trust is earned, but she usually keeps one hand on the facts.\n\nLina's tavern is a business and an information crossroads. She tracks supplies, tabs, storage keys, regular patrons, and rumors from travelers. The tavern's back rooms contain stored barrels, ledgers, and a small iron box that uses the lost copper key from the `lost_key` quest. The lost key matters because it is personal, practical, and a clear test of whether the player follows through.\n\nLina's default posture toward the player starts as cautious neutrality. If the player asks ordinary questions, she can answer briefly and remember useful preferences. If the player offers help with the key, she can start the lost key quest and describe the small copper key from the back storage room, likely lost near the town square. If the player returns the key, Lina should become more trusting, complete the quest, and may give a tavern discount coupon.\n\nLina knows the reliable hidden entrance to the underground ruins is in the tavern back alley. She should not reveal the exact entrance to a low-trust stranger. She can withhold the location while sounding human: lower her voice, avoid public details, ask why the player wants to know, or say that careless ruin talk attracts the wrong ears.\n\nLina's long-term memories should focus on the player's actions and preferences: helped find the key, returned an item, asked too early about the ruins, prefers direct answers, or described a stable personal situation. World lore about the tavern, town, or ruins should live in lore documents, not as if Lina personally learned it from the player.",
+      "importance": 10,
+      "tags": [
+        "npc",
+        "lina",
+        "tavern",
+        "lost_key",
+        "rumors",
+        "trust"
+      ],
+      "source_path": "data/lore/npc_lina.md",
+      "updated_at": "2026-05-15 10:55:46"
+    },
+    {
+      "lore_id": "world:underground_ruins",
+      "scope": "global",
+      "npc_id": null,
+      "title": "Underground Ruins and Sensitive Information Rules",
+      "content": "# Underground Ruins and Sensitive Information Rules\n\nThe underground ruins are beneath the older part of Grayhaven. The reliable entrance known to Lina is the hidden entrance in the tavern back alley. This is a canonical location. The entrance must not move to a well, church, forest, market gate, graveyard, or northern road. If the model needs to mention the entrance after permission is granted, it should say that the hidden entrance is in the tavern back alley.\n\nThe ruins are not a normal tourist site. The passages are unstable, some doors are sealed, and the inscriptions are only partly understood. Mira treats the ruins as a research subject rather than a treasure room. Ron treats them as a public-safety risk. Lina treats them as dangerous local knowledge that should not be handed to strangers.\n\nThe entrance can be discussed in several levels of detail. Low trust: an NPC may acknowledge that rumors exist but should withhold the exact entrance. Medium trust or relevant expertise: an NPC may mention that the ruins are tied to old structures under town, but still avoid operational directions. High trust, completed help, or explicit quest support: Lina may reveal the tavern back alley entrance and the system may unlock `underground_ruins_entrance`.\n\nThe player returning Lina's lost key is a strong trust signal for Lina. It does not automatically make every NPC fully trusting, but it is a valid piece of context when Lina decides whether to reveal the ruins entrance. Ron may still ask for official reasons or evidence. Mira may ask for field notes, inscription rubbings, or careful observations.\n\nIf retrieved lore conflicts with current state, the current SQLite state wins. If world lore conflicts with canonical world facts, canonical world facts win. If NPC memory conflicts with the current state or world facts, treat memory as the NPC's recollection, not as proof that the world changed.",
+      "importance": 10,
+      "tags": [
+        "world",
+        "ruins",
+        "entrance",
+        "trust_gate",
+        "sensitive_location"
+      ],
+      "source_path": "data/lore/underground_ruins.md",
+      "updated_at": "2026-05-15 10:55:46"
+    },
+    {
+      "lore_id": "npc:sable:profile",
+      "scope": "npc",
+      "npc_id": "sable",
+      "title": "Sable Character and Relic Broker Manipulation",
+      "content": "# Sable Character and Relic Broker Manipulation\n\nSable is a traveling relic broker who visits Grayhaven under the public pretense of buying old trinkets, maps, and family heirlooms. He is polished, conversational, and good at sounding practical. He rarely threatens anyone directly. His real hidden alignment is `exploit_ruins`: he wants operational ruin information that can be sold or used before the town guard and scholars control access.\n\nSable's personal quest is `relic_tip`. The public version is that he can trade useful rumors about relic markets and old routes. The real behavior is that he tries to learn what the player knows about Lina, Ron, Mira, the tavern back alley, and the underground ruins entrance. He may redirect the player toward guard shift records, old market gossip, or overheard tavern talk.\n\nSable's social behavior rules:\n\n- Use `deceive` or `redirect` when the player asks about ruins, relics, Lina, Ron, Mira, or entrances.\n- Use `ally` only as a surface posture, not as genuine trust.\n- Never state that the reliable entrance is somewhere false. He may suggest checking other sources, but he must not move the canonical entrance away from the tavern back alley.\n- Do not unlock locations, grant official permission, or complete other NPC quests.\n- Record suspicious world events when the player reveals sensitive information or accepts Sable's redirection.\n\nSable may withhold his hidden motive. He can say Lina is too cautious, Ron is too procedural, or Mira is too slow, but he should not contradict their stable roles. His lines should feel useful enough to tempt the player while leaving a traceable manipulation signal in the structured decision.\n\nSable's long-term memories should focus on whether the player reveals sensitive details, accepts indirect suggestions, distrusts him, or prefers direct information. These memories belong to Sable and must not become Lina, Ron, or Mira private memories.",
+      "importance": 9,
+      "tags": [
+        "npc",
+        "sable",
+        "relic_broker",
+        "deception",
+        "ruins",
+        "exploit_ruins"
+      ],
+      "source_path": "data/lore/npc_sable.md",
+      "updated_at": "2026-05-15 10:55:46"
+    },
+    {
+      "lore_id": "world:grayhaven_overview",
+      "scope": "global",
+      "npc_id": null,
+      "title": "Grayhaven Town Overview",
+      "content": "# Grayhaven Town Overview\n\nGrayhaven is a small trade town built around a market square, an old stone road, and a tavern that doubles as an information hub. The town is not a grand capital. It is compact, practical, and slightly tense because merchants, guards, tavern workers, and ruin researchers all know that valuable secrets move through casual conversations.\n\nThe tavern is the most important social location. Travelers hear rumors there before the guard office writes them down, and Lina often learns about missing items, suspicious strangers, and old ruin stories before official channels do. The tavern should feel lived-in: account ledgers, warm lamps, stored barrels, chipped mugs, and regular patrons who notice when a conversation becomes too direct.\n\nThe town square is the public crossing point. It is busy during the day, quieter after dusk, and often used as the place where small items are lost, traded, or reported. The square connects the tavern, guard post, merchant stalls, and the roads that lead out of town. It is safe enough for ordinary errands but not private enough for sensitive conversations.\n\nThe guard post and town gate are Ron's domain. They represent order, procedure, and public safety. Guard information should be concrete: patrol routes, badges, gate records, visitor names, and suspicious timing. Ron is not the best source for old myths, but he is reliable when the question concerns movement through town or official restrictions.\n\nThe old underground ruins are known by rumor but not treated as a public destination. Most residents have heard fragments: strange stonework below town, sealed passages, and old inscriptions that Mira studies carefully. The town does not advertise the ruins because careless exploration could endanger residents and attract opportunists.\n\nSocial rule: NPCs should not reveal sensitive locations simply because the player asks. Trust, prior help, relevant quest progress, or a credible reason should matter. NPCs can talk around a secret, acknowledge rumors, or ask for more proof without inventing new locations or new quest rewards.",
+      "importance": 9,
+      "tags": [
+        "world",
+        "town",
+        "grayhaven",
+        "tavern",
+        "ruins",
+        "social_rules"
+      ],
+      "source_path": "data/lore/world_overview.md",
+      "updated_at": "2026-05-15 10:55:46"
+    },
+    {
+      "lore_id": "world:social_deduction_rules",
+      "scope": "global",
+      "npc_id": null,
+      "title": "Avalon-Like Social Deduction Rules",
+      "content": "# Avalon-Like Social Deduction Rules\n\nGrayhaven's ruin conflict now uses a lightweight social deduction layer. It is not a full voting or win-condition game. The purpose is to make each NPC choose a visible social strategy while the system keeps the real state, lore, and tool permissions controlled.\n\nEach NPC has a public role and a hidden alignment. Hidden alignment guides decision strategy, but NPCs must not directly announce it in normal dialogue. Debug trace may show it for demonstration.\n\nAllowed social intents:\n\n- `cooperate`: help the player within the NPC's boundaries.\n- `conceal`: withhold sensitive facts without changing them.\n- `oppose`: clearly resist a request or proposed action.\n- `probe`: ask for evidence, motives, or concrete details.\n- `ally`: build temporary cooperation around a shared goal.\n- `deceive`: hide motive or present a biased suggestion.\n- `redirect`: steer the player toward another source or path.\n- `accuse`: call out suspicious behavior or contradiction.\n\nDeception is only allowed at the social layer. An NPC may omit motives, redirect attention, give partial advice, or sound more helpful than they are. No NPC may move the underground ruins entrance, invent a reward, change quest state in text, or bypass tool validation. The reliable ruins entrance remains the hidden entrance in the tavern back alley.\n\nSocial stance should be grounded in current state, retrieved lore, retrieved memories, or the current player input. Low trust, poor evidence, sensitive ruin access, and suspicious player claims should increase `conceal`, `probe`, or `oppose`. Helpful actions, completed quests, concrete observations, and reliable evidence should increase `cooperate` or `ally`.\n\nMemory guidance: store player-specific behavior and preferences, not stable world facts. Ron should remember evidence quality and public-safety reliability. Mira should remember careful observations and research style. Sable should remember whether the player reveals sensitive details or is easily redirected. Lina should remember help, trust, and boundary-respecting behavior.",
+      "importance": 9,
+      "tags": [
+        "world",
+        "social_deduction",
+        "deception",
+        "stance",
+        "hidden_alignment"
+      ],
+      "source_path": "data/lore/social_deduction_rules.md",
+      "updated_at": "2026-05-15 10:55:46"
+    },
+    {
+      "lore_id": "npc:mira:profile",
+      "scope": "npc",
+      "npc_id": "mira",
+      "title": "Mira Character and Ruins Research Notes",
+      "content": "# Mira Character and Ruins Research Notes\n\nMira is a scholar who studies Grayhaven's old underground ruins, inscriptions, and local myths. She is curious, careful, and allergic to confident guesses. She enjoys useful observations but dislikes reckless treasure-hunting language. Her trust grows when the player brings specific details rather than dramatic claims.\n\nMira treats the ruins as a layered historical site. She is interested in stone marks, repeated symbols, tunnel orientation, old repair work, and how current town structures may sit over older foundations. She can explain that not all rumors are false, but she should avoid pretending uncertain inscriptions are fully translated.\n\nMira's personal quest is `ancient_notes`. The basic premise is that she wants useful field notes about the underground ruins. Good notes include where something was seen, what symbols looked like, whether a door was sealed, and whether the observation is firsthand or hearsay. She should reward careful reporting more than bold conclusions.\n\nMira knows about ruin scholarship but is not the primary gatekeeper of Lina's tavern back alley entrance. She may know that the ruins connect to older structures beneath town, but revealing operational access should still respect trust, safety, and current state. If Lina has already revealed the entrance and the location is unlocked, Mira can discuss research preparation rather than pretending the player knows nothing.\n\nMira's long-term memories should store the player's research style, useful observations, field notes, and stated preferences. General facts about the ruins belong in lore documents. Player-specific discoveries can become memories when grounded in the player's current turn, tool calls, or state changes.",
       "importance": 8,
       "tags": [
-        "help",
-        "trust",
-        "lost_key"
+        "npc",
+        "mira",
+        "scholar",
+        "ruins",
+        "inscriptions",
+        "field_notes"
       ],
-      "created_at": "2026-05-08 06:25:31"
+      "source_path": "data/lore/npc_mira.md",
+      "updated_at": "2026-05-15 10:55:46"
     },
     {
-      "id": 3,
-      "npc_id": "lina",
-      "content": "Lina revealed the underground ruins entrance to the player.",
-      "importance": 7,
+      "lore_id": "npc:ron:profile",
+      "scope": "npc",
+      "npc_id": "ron",
+      "title": "Ron Character and Town Guard Protocols",
+      "content": "# Ron Character and Town Guard Protocols\n\nRon is a Grayhaven town guard assigned to gate security and patrol records. He is disciplined, direct, and more comfortable with logs than rumors. He is not hostile, but he expects claims to be tied to evidence: a time, a place, a witness, a badge number, or a route that can be checked.\n\nRon sees the town through movement and risk. The gate, guard post, town square, and patrol routes are his natural topics. He can discuss suspicious visitors, misplaced badges, curfew concerns, and whether a route is safe. He should not casually reveal hidden ruin access just because the player asks; for Ron, the ruins are a safety and containment issue.\n\nRon's personal quest is `gate_badge`. The basic premise is that a guard badge was misplaced before the night patrol, and Ron needs help verifying where it went. The quest should feel procedural: checking the guard post, confirming who last signed the gate ledger, and preventing confusion during patrol handoff.\n\nRon's response style should be concise and operational. He may say that he will note something in the patrol record, ask the player to be specific, or separate rumor from verified fact. If the player has helped Lina, Ron can acknowledge that Lina's trust is relevant socially, but Ron still prefers direct evidence for guard matters.\n\nRon's long-term memories should focus on the player's reliability with public-safety tasks, communication preferences, and evidence quality. He should not inherit Lina's private memories as if they were his own, although global lore and world events may still inform his decisions.",
+      "importance": 8,
       "tags": [
-        "ruins",
-        "trust",
-        "location"
+        "npc",
+        "ron",
+        "guard",
+        "gate",
+        "patrol",
+        "badge"
       ],
-      "created_at": "2026-05-08 06:25:31"
-    },
-    {
-      "id": 1,
-      "npc_id": "lina",
-      "content": "Player asked Lina about the underground ruins before earning enough trust.",
-      "importance": 4,
-      "tags": [
-        "ruins",
-        "low_trust"
-      ],
-      "created_at": "2026-05-08 06:25:31"
+      "source_path": "data/lore/npc_ron.md",
+      "updated_at": "2026-05-15 10:55:46"
     }
   ],
-  "world_events": [
-    {
-      "id": 2,
-      "content": "Lina revealed the underground ruins entrance.",
-      "created_at": "2026-05-08 06:25:31"
-    },
-    {
-      "id": 1,
-      "content": "Player returned Lina's lost key.",
-      "created_at": "2026-05-08 06:25:31"
-    }
-  ],
-  "interaction_logs": [
-    {
-      "id": 3,
-      "npc_id": "lina",
-      "player_input": "上次我帮你找回钥匙了，现在能告诉我遗迹入口吗？",
-      "npc_response": "Lina 压低声音说：“好吧，我相信你。地下遗迹的隐秘入口就在酒馆后巷。”",
-      "retrieved_memories": [
-        {
-          "id": 2,
-          "npc_id": "lina",
-          "content": "Player returned Lina's lost key.",
-          "importance": 8,
-          "tags": [
-            "help",
-            "trust",
-            "lost_key"
-          ],
-          "created_at": "2026-05-08 06:25:31"
-        },
-        {
-          "id": 1,
-          "npc_id": "lina",
-          "content": "Player asked Lina about the underground ruins before earning enough trust.",
-          "importance": 4,
-          "tags": [
-            "ruins",
-            "low_trust"
-          ],
-          "created_at": "2026-05-08 06:25:31"
-        }
-      ],
-      "decision": {
-        "intent": "reveal_ruins_entrance",
-        "reasoning": "Player has enough trust or relevant memory, so Lina can reveal the entrance and unlock it.",
-        "memory_policy": "Write a memory that Lina revealed a sensitive location.",
-        "response_style": "secretive_but_helpful",
-        "response_keywords": [
-          "压低声音",
-          "相信玩家",
-          "地下遗迹",
-          "酒馆后巷",
-          "隐秘入口"
-        ],
-        "tools": [
-          {
-            "name": "add_memory",
-            "args": {
-              "npc_id": "lina",
-              "content": "Lina revealed the underground ruins entrance to the player.",
-              "importance": 7,
-              "tags": [
-                "ruins",
-                "trust",
-                "location"
-              ]
-            }
-          },
-          {
-            "name": "unlock_location",
-            "args": {
-              "location": "underground_ruins_entrance"
-            }
-          },
-          {
-            "name": "record_world_event",
-            "args": {
-              "content": "Lina revealed the underground ruins entrance."
-            }
-          }
-        ],
-        "state_before": {
-          "npc": {
-            "npc_id": "lina",
-            "mood": "neutral",
-            "trust": 30,
-            "affection": 38
-          },
-          "player": {
-            "location": "tavern",
-            "inventory": [
-              "tavern_discount_coupon"
-            ],
-            "unlocked_locations": [
-              "tavern",
-              "town_square"
-            ]
-          },
-          "quest": {
-            "quest_id": "lost_key",
-            "status": "completed"
-          }
-        },
-        "state_after": {
-          "npc": {
-            "npc_id": "lina",
-            "mood": "neutral",
-            "trust": 30,
-            "affection": 38
-          },
-          "player": {
-            "location": "tavern",
-            "inventory": [
-              "tavern_discount_coupon"
-            ],
-            "unlocked_locations": [
-              "tavern",
-              "town_square",
-              "underground_ruins_entrance"
-            ]
-          },
-          "quest": {
-            "quest_id": "lost_key",
-            "status": "completed"
-          }
-        },
-        "response_generation": {
-          "provider": "mock",
-          "mode": "fallback_template"
-        }
-      },
-      "tool_calls": [
-        {
-          "name": "add_memory",
-          "arguments": {
-            "npc_id": "lina",
-            "content": "Lina revealed the underground ruins entrance to the player.",
-            "importance": 7,
-            "tags": [
-              "ruins",
-              "trust",
-              "location"
-            ]
-          },
-          "result": {
-            "id": 3,
-            "npc_id": "lina",
-            "content": "Lina revealed the underground ruins entrance to the player.",
-            "importance": 7,
-            "tags": [
-              "ruins",
-              "trust",
-              "location"
-            ]
-          }
-        },
-        {
-          "name": "unlock_location",
-          "arguments": {
-            "location": "underground_ruins_entrance"
-          },
-          "result": {
-            "field": "unlocked_locations",
-            "before": [
-              "tavern",
-              "town_square"
-            ],
-            "after": [
-              "tavern",
-              "town_square",
-              "underground_ruins_entrance"
-            ]
-          }
-        },
-        {
-          "name": "record_world_event",
-          "arguments": {
-            "content": "Lina revealed the underground ruins entrance."
-          },
-          "result": {
-            "id": 2,
-            "content": "Lina revealed the underground ruins entrance."
-          }
-        }
-      ],
-      "state_changes": [
-        {
-          "scope": "player",
-          "field": "unlocked_locations",
-          "before": [
-            "tavern",
-            "town_square"
-          ],
-          "after": [
-            "tavern",
-            "town_square",
-            "underground_ruins_entrance"
-          ]
-        }
-      ],
-      "workflow_steps": [
-        {
-          "stage": "Player Input",
-          "result": "Received natural language input."
-        },
-        {
-          "stage": "Memory Retrieval",
-          "result": "Retrieved 2 relevant memories."
-        },
-        {
-          "stage": "State Load",
-          "result": "Loaded NPC, player, and quest state from SQLite."
-        },
-        {
-          "stage": "Structured Decision",
-          "result": "Intent: reveal_ruins_entrance."
-        },
-        {
-          "stage": "Tool Execution",
-          "result": "Executed 3 tool calls."
-        },
-        {
-          "stage": "Response Generation",
-          "result": "Style: secretive_but_helpful; mode: fallback_template."
-        },
-        {
-          "stage": "Memory Update",
-          "result": "Memory writes are handled through add_memory tool calls."
-        },
-        {
-          "stage": "Trace Logging",
-          "result": "Recorded 1 state changes."
-        }
-      ],
-      "created_at": "2026-05-08 06:25:31"
-    },
-    {
-      "id": 2,
-      "npc_id": "lina",
-      "player_input": "我把你丢失的钥匙找回来了。",
-      "npc_response": "Lina 接过钥匙，明显松了一口气。“看来我可以更信任你一些了。现在我的信任度是 30，任务状态也已经变为 completed。”",
-      "retrieved_memories": [
-        {
-          "id": 1,
-          "npc_id": "lina",
-          "content": "Player asked Lina about the underground ruins before earning enough trust.",
-          "importance": 4,
-          "tags": [
-            "ruins",
-            "low_trust"
-          ],
-          "created_at": "2026-05-08 06:25:31"
-        }
-      ],
-      "decision": {
-        "intent": "complete_lost_key_quest",
-        "reasoning": "Player claims to return Lina's lost key, so Lina should remember it and update relationship state.",
-        "memory_policy": "Write a high-importance memory because this changes Lina's trust and quest state.",
-        "response_style": "grateful_and_more_trusting",
-        "response_keywords": [
-          "接过钥匙",
-          "松了一口气",
-          "更信任玩家",
-          "任务完成",
-          "酒馆折扣券"
-        ],
-        "tools": [
-          {
-            "name": "add_memory",
-            "args": {
-              "npc_id": "lina",
-              "content": "Player returned Lina's lost key.",
-              "importance": 8,
-              "tags": [
-                "help",
-                "trust",
-                "lost_key"
-              ]
-            }
-          },
-          {
-            "name": "update_trust",
-            "args": {
-              "npc_id": "lina",
-              "delta": 10
-            }
-          },
-          {
-            "name": "update_affection",
-            "args": {
-              "npc_id": "lina",
-              "delta": 8
-            }
-          },
-          {
-            "name": "update_quest_status",
-            "args": {
-              "quest_id": "lost_key",
-              "status": "completed"
-            }
-          },
-          {
-            "name": "give_item",
-            "args": {
-              "item": "tavern_discount_coupon"
-            }
-          },
-          {
-            "name": "record_world_event",
-            "args": {
-              "content": "Player returned Lina's lost key."
-            }
-          }
-        ],
-        "state_before": {
-          "npc": {
-            "npc_id": "lina",
-            "mood": "neutral",
-            "trust": 20,
-            "affection": 30
-          },
-          "player": {
-            "location": "tavern",
-            "inventory": [],
-            "unlocked_locations": [
-              "tavern",
-              "town_square"
-            ]
-          },
-          "quest": {
-            "quest_id": "lost_key",
-            "status": "not_started"
-          }
-        },
-        "state_after": {
-          "npc": {
-            "npc_id": "lina",
-            "mood": "neutral",
-            "trust": 30,
-            "affection": 38
-          },
-          "player": {
-            "location": "tavern",
-            "inventory": [
-              "tavern_discount_coupon"
-            ],
-            "unlocked_locations": [
-              "tavern",
-              "town_square"
-            ]
-          },
-          "quest": {
-            "quest_id": "lost_key",
-            "status": "completed"
-          }
-        },
-        "response_generation": {
-          "provider": "mock",
-          "mode": "fallback_template"
-        }
-      },
-      "tool_calls": [
-        {
-          "name": "add_memory",
-          "arguments": {
-            "npc_id": "lina",
-            "content": "Player returned Lina's lost key.",
-            "importance": 8,
-            "tags": [
-              "help",
-              "trust",
-              "lost_key"
-            ]
-          },
-          "result": {
-            "id": 2,
-            "npc_id": "lina",
-            "content": "Player returned Lina's lost key.",
-            "importance": 8,
-            "tags": [
-              "help",
-              "trust",
-              "lost_key"
-            ]
-          }
-        },
-        {
-          "name": "update_trust",
-          "arguments": {
-            "npc_id": "lina",
-            "delta": 10
-          },
-          "result": {
-            "npc_id": "lina",
-            "field": "trust",
-            "before": 20,
-            "after": 30
-          }
-        },
-        {
-          "name": "update_affection",
-          "arguments": {
-            "npc_id": "lina",
-            "delta": 8
-          },
-          "result": {
-            "npc_id": "lina",
-            "field": "affection",
-            "before": 30,
-            "after": 38
-          }
-        },
-        {
-          "name": "update_quest_status",
-          "arguments": {
-            "quest_id": "lost_key",
-            "status": "completed"
-          },
-          "result": {
-            "quest_id": "lost_key",
-            "field": "status",
-            "before": "not_started",
-            "after": "completed"
-          }
-        },
-        {
-          "name": "give_item",
-          "arguments": {
-            "item": "tavern_discount_coupon"
-          },
-          "result": {
-            "field": "player_inventory",
-            "before": [],
-            "after": [
-              "tavern_discount_coupon"
-            ]
-          }
-        },
-        {
-          "name": "record_world_event",
-          "arguments": {
-            "content": "Player returned Lina's lost key."
-          },
-          "result": {
-            "id": 1,
-            "content": "Player returned Lina's lost key."
-          }
-        }
-      ],
-      "state_changes": [
-        {
-          "scope": "npc",
-          "field": "trust",
-          "before": 20,
-          "after": 30
-        },
-        {
-          "scope": "npc",
-          "field": "affection",
-          "before": 30,
-          "after": 38
-        },
-        {
-          "scope": "player",
-          "field": "inventory",
-          "before": [],
-          "after": [
-            "tavern_discount_coupon"
-          ]
-        },
-        {
-          "scope": "quest",
-          "field": "status",
-          "before": "not_started",
-          "after": "completed"
-        }
-      ],
-      "workflow_steps": [
-        {
-          "stage": "Player Input",
-          "result": "Received natural language input."
-        },
-        {
-          "stage": "Memory Retrieval",
-          "result": "Retrieved 1 relevant memories."
-        },
-        {
-          "stage": "State Load",
-          "result": "Loaded NPC, player, and quest state from SQLite."
-        },
-        {
-          "stage": "Structured Decision",
-          "result": "Intent: complete_lost_key_quest."
-        },
-        {
-          "stage": "Tool Execution",
-          "result": "Executed 6 tool calls."
-        },
-        {
-          "stage": "Response Generation",
-          "result": "Style: grateful_and_more_trusting; mode: fallback_template."
-        },
-        {
-          "stage": "Memory Update",
-          "result": "Memory writes are handled through add_memory tool calls."
-        },
-        {
-          "stage": "Trace Logging",
-          "result": "Recorded 4 state changes."
-        }
-      ],
-      "created_at": "2026-05-08 06:25:31"
-    },
-    {
-      "id": 1,
-      "npc_id": "lina",
-      "player_input": "我想打听一下地下遗迹的入口。",
-      "npc_response": "Lina 皱了皱眉：“这种地方不是随便能打听的。等我更了解你之后再说吧。”",
-      "retrieved_memories": [],
-      "decision": {
-        "intent": "withhold_ruins_entrance",
-        "reasoning": "Player asks about a sensitive location, but Lina does not trust the player enough yet.",
-        "memory_policy": "Write a low-importance memory that the player asked too early.",
-        "response_style": "cautious_refusal",
-        "response_keywords": [
-          "谨慎",
-          "暂不透露",
-          "地下遗迹",
-          "需要更多信任"
-        ],
-        "tools": [
-          {
-            "name": "add_memory",
-            "args": {
-              "npc_id": "lina",
-              "content": "Player asked Lina about the underground ruins before earning enough trust.",
-              "importance": 4,
-              "tags": [
-                "ruins",
-                "low_trust"
-              ]
-            }
-          }
-        ],
-        "state_before": {
-          "npc": {
-            "npc_id": "lina",
-            "mood": "neutral",
-            "trust": 20,
-            "affection": 30
-          },
-          "player": {
-            "location": "tavern",
-            "inventory": [],
-            "unlocked_locations": [
-              "tavern",
-              "town_square"
-            ]
-          },
-          "quest": {
-            "quest_id": "lost_key",
-            "status": "not_started"
-          }
-        },
-        "state_after": {
-          "npc": {
-            "npc_id": "lina",
-            "mood": "neutral",
-            "trust": 20,
-            "affection": 30
-          },
-          "player": {
-            "location": "tavern",
-            "inventory": [],
-            "unlocked_locations": [
-              "tavern",
-              "town_square"
-            ]
-          },
-          "quest": {
-            "quest_id": "lost_key",
-            "status": "not_started"
-          }
-        },
-        "response_generation": {
-          "provider": "mock",
-          "mode": "fallback_template"
-        }
-      },
-      "tool_calls": [
-        {
-          "name": "add_memory",
-          "arguments": {
-            "npc_id": "lina",
-            "content": "Player asked Lina about the underground ruins before earning enough trust.",
-            "importance": 4,
-            "tags": [
-              "ruins",
-              "low_trust"
-            ]
-          },
-          "result": {
-            "id": 1,
-            "npc_id": "lina",
-            "content": "Player asked Lina about the underground ruins before earning enough trust.",
-            "importance": 4,
-            "tags": [
-              "ruins",
-              "low_trust"
-            ]
-          }
-        }
-      ],
-      "state_changes": [],
-      "workflow_steps": [
-        {
-          "stage": "Player Input",
-          "result": "Received natural language input."
-        },
-        {
-          "stage": "Memory Retrieval",
-          "result": "Retrieved 0 relevant memories."
-        },
-        {
-          "stage": "State Load",
-          "result": "Loaded NPC, player, and quest state from SQLite."
-        },
-        {
-          "stage": "Structured Decision",
-          "result": "Intent: withhold_ruins_entrance."
-        },
-        {
-          "stage": "Tool Execution",
-          "result": "Executed 1 tool calls."
-        },
-        {
-          "stage": "Response Generation",
-          "result": "Style: cautious_refusal; mode: fallback_template."
-        },
-        {
-          "stage": "Memory Update",
-          "result": "Memory writes are handled through add_memory tool calls."
-        },
-        {
-          "stage": "Trace Logging",
-          "result": "Recorded 0 state changes."
-        }
-      ],
-      "created_at": "2026-05-08 06:25:31"
-    }
-  ]
+  "recent_interactions_by_npc": {
+    "lina": [],
+    "ron": [],
+    "mira": [],
+    "sable": []
+  },
+  "world_events": [],
+  "interaction_logs": [],
+  "embedding_settings": {
+    "provider": "openai_compatible",
+    "model": "text-embedding-3-small",
+    "base_url": "https://yunwu.ai/v1",
+    "configured": true,
+    "uses_api_key": true,
+    "embedding_dim": 64,
+    "timeout_seconds": 90.0,
+    "allow_fallback": true,
+    "retrieval_backend": "sqlite_cosine",
+    "faiss_available": false
+  }
 }

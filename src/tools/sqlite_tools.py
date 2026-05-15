@@ -18,8 +18,17 @@ def add_memory(
     content: str,
     importance: int,
     tags: list[str] | None = None,
+    memory_type: str = "event",
+    confidence: float = 1.0,
 ) -> ToolExecution:
-    result = database.add_memory(npc_id, content, importance, tags)
+    result = database.add_memory(
+        npc_id=npc_id,
+        content=content,
+        importance=importance,
+        tags=tags,
+        memory_type=memory_type,
+        confidence=confidence,
+    )
     return ToolExecution(
         name="add_memory",
         arguments={
@@ -27,6 +36,8 @@ def add_memory(
             "content": content,
             "importance": importance,
             "tags": tags or [],
+            "memory_type": memory_type,
+            "confidence": confidence,
         },
         result=result,
     )

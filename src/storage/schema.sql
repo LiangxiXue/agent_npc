@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS npcs (
     name TEXT NOT NULL,
     role TEXT NOT NULL,
     description TEXT NOT NULL,
+    hidden_alignment TEXT NOT NULL DEFAULT 'neutral',
     mood TEXT NOT NULL,
     trust INTEGER NOT NULL,
     affection INTEGER NOT NULL
@@ -34,8 +35,59 @@ CREATE TABLE IF NOT EXISTS memories (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     npc_id TEXT NOT NULL,
     content TEXT NOT NULL,
+    memory_type TEXT NOT NULL DEFAULT 'event',
     importance INTEGER NOT NULL,
+    confidence REAL NOT NULL DEFAULT 1.0,
     tags TEXT NOT NULL DEFAULT '[]',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_accessed_at TEXT,
+    access_count INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY (npc_id) REFERENCES npcs (npc_id)
+);
+
+CREATE TABLE IF NOT EXISTS memory_embeddings (
+    memory_id INTEGER PRIMARY KEY,
+    embedding TEXT NOT NULL,
+    embedding_model TEXT NOT NULL,
+    embedding_provider TEXT NOT NULL DEFAULT 'mock_hash',
+    embedding_dim INTEGER NOT NULL,
+    source_text_hash TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (memory_id) REFERENCES memories (id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS lore_documents (
+    lore_id TEXT PRIMARY KEY,
+    scope TEXT NOT NULL,
+    npc_id TEXT,
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    importance INTEGER NOT NULL DEFAULT 5,
+    tags TEXT NOT NULL DEFAULT '[]',
+    source_path TEXT NOT NULL DEFAULT '',
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (npc_id) REFERENCES npcs (npc_id)
+);
+
+CREATE TABLE IF NOT EXISTS lore_embeddings (
+    lore_id TEXT PRIMARY KEY,
+    embedding TEXT NOT NULL,
+    embedding_model TEXT NOT NULL,
+    embedding_provider TEXT NOT NULL DEFAULT 'mock_hash',
+    embedding_dim INTEGER NOT NULL,
+    source_text_hash TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (lore_id) REFERENCES lore_documents (lore_id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS recent_interactions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    npc_id TEXT NOT NULL,
+    player_input TEXT NOT NULL,
+    npc_response TEXT NOT NULL,
+    metadata TEXT NOT NULL DEFAULT '{}',
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (npc_id) REFERENCES npcs (npc_id)
 );
@@ -51,7 +103,12 @@ CREATE TABLE IF NOT EXISTS interaction_logs (
     npc_id TEXT NOT NULL,
     player_input TEXT NOT NULL,
     npc_response TEXT NOT NULL,
+    recent_context TEXT NOT NULL DEFAULT '[]',
+    retrieved_lore TEXT NOT NULL DEFAULT '[]',
     retrieved_memories TEXT NOT NULL,
+    state_snapshot TEXT NOT NULL DEFAULT '{}',
+    memory_policy TEXT NOT NULL DEFAULT '{}',
+    memory_writes TEXT NOT NULL DEFAULT '[]',
     decision TEXT NOT NULL,
     tool_calls TEXT NOT NULL,
     state_changes TEXT NOT NULL,
