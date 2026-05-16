@@ -1,88 +1,150 @@
-# MVP Architecture
+# Current Architecture
 
 ## Project Positioning
 
-This MVP uses a text-adventure NPC scenario only as a controlled test environment. The main object is the Agent workflow, not the game plot.
+This project uses a text-adventure NPC scene as a controlled testbed for an Agent workflow. The core deliverable is the stateful Agent system: context retrieval, structured decision, tool execution, state persistence, memory writing, and explainable trace.
 
-## Workflow
+## Runtime Surfaces
+
+| Surface | File / module | Purpose |
+| --- | --- | --- |
+| Streamlit debug UI | `app.py` | Inspect provider status, NPC state, retrieval, trace, tools, logs, and exports |
+| Player UI | `frontend/` | React/Vite pixel RPG experience for normal interaction |
+| Player API | `src/api/server.py` | FastAPI wrapper around the same workflow, plus preview/export/index/job endpoints |
+| CLI demo | `scripts/run_mvp_demo.py` | Stable four-NPC mock demonstration |
+| Background memory CLI | `scripts/process_memory_jobs.py` | Processes queued long-term memory jobs |
+
+## Synchronous Turn Workflow
 
 ```text
 Player Input
--> Short-Term Context Load
+-> Recent Context Load
+-> Lore Retrieval
 -> Long-Term Memory Retrieval
 -> State Load
+-> Turn Classification
 -> Structured Decision
+-> Program-Owned Quest State Machine
 -> Tool Execution
 -> Response Generation
--> Memory Policy
-   -> LLM Memory Candidate Generation
-   -> LLM Memory Candidate Review
-   -> Programmatic Gate
+-> Background Memory Job Enqueue
 -> Short-Term Interaction Write
 -> Trace Logging
 ```
 
+The synchronous path is optimized for player latency. It records enough information for memory processing, but it does not wait for LLM memory candidate generation, review, deduplication, or embedding updates.
+
+## Background Memory Workflow
+
+```text
+memory_jobs pending row
+-> MemoryPolicyInput reconstruction
+-> rule memory candidates
+-> optional LLM candidate generation
+-> optional LLM review
+-> programmatic gate
+-> deduplication
+-> SQLite memory write
+-> embedding update
+-> memory_jobs status update
+```
+
+Background processing is available through:
+
+```powershell
+python scripts/process_memory_jobs.py --limit 10
+```
+
+The FastAPI app also exposes `/api/process-memory-jobs` for the player UI/debug flow.
+
 ## Module Responsibilities
 
 | Module | Responsibility |
-|---|---|
-| `app.py` | Streamlit UI and trace visualization |
-| `src/agent/workflow.py` | Agent turn orchestration and mock structured decision |
-| `src/agent/decision.py` | LLM-ready structured decision layer, currently backed by deterministic mock logic |
-| `src/agent/memory_policy.py` | Long-term memory write entrypoint, combining rule candidates, LLM candidates, LLM review, hard gate checks, and deduplication |
-| `src/agent/llm_memory_candidate.py` | OpenAI-compatible memory candidate generator; proposes memories but never writes SQLite |
-| `src/agent/memory_candidate_review.py` | OpenAI-compatible review agent for subject, evidence, overreach, and type checks |
-| `src/agent/memory_candidate_gate.py` | Programmatic hard gate for allowed types, evidence support, state/tool support, and player-grounded memories |
-| `src/agent/response.py` | Final NPC response generation from decision keywords, using optional LLM polish with deterministic fallback |
-| `src/agent/llm_client.py` | Optional OpenAI-compatible client using standard library HTTP |
-| `src/agent/prompts.py` | Prompt and output schema template for later LLM integration |
-| `src/agent/world_facts.py` | Canonical facts and narrow major-fact guards for response validation |
-| `src/storage/database.py` | SQLite initialization, persistence, queries, logs |
-| `src/storage/schema.sql` | Database schema |
+| --- | --- |
+| `src/agent/workflow.py` | Agent turn orchestration, timing capture, memory job enqueue, trace logging |
+| `src/agent/context.py` | Explicit context pack assembly for lore, memory, state, and recent dialogue |
+| `src/agent/lore_retrieval.py` | Stable world/NPC lore retrieval |
+| `src/agent/decision.py` | Structured decision, social metadata, intent validation, universal task state machine |
+| `src/agent/turn_classifier.py` | Fast routing between simple rule path, ambiguous turns, sensitive requests, and social maneuvers |
+| `src/agent/response.py` | Final NPC response generation with optional LLM polish and deterministic fallback |
+| `src/agent/memory_jobs.py` | Queue and process background long-term memory work |
+| `src/agent/memory_policy.py` | Long-term memory write policy, candidate orchestration, gate, dedup |
+| `src/agent/llm_memory_candidate.py` | OpenAI-compatible memory candidate generator |
+| `src/agent/memory_candidate_review.py` | OpenAI-compatible memory candidate reviewer |
+| `src/agent/memory_candidate_gate.py` | Programmatic hard gate for evidence/type/state support |
+| `src/agent/embedding_client.py` | `mock_hash` and OpenAI-compatible embedding provider abstraction |
+| `src/agent/semantic_retrieval.py` | Memory embedding indexing and semantic retrieval |
+| `src/agent/trace_export.py` | Shared trace export payload and file writer |
+| `src/storage/database.py` | SQLite initialization, migrations, persistence, queries, logs, memory jobs |
+| `src/storage/schema.sql` | Canonical schema for state, lore, memory, jobs, and logs |
 | `src/tools/sqlite_tools.py` | Tool functions that mutate SQLite state |
-| `tests/test_workflow.py` | Regression tests for the core Agent behavior |
+| `src/api/server.py` | FastAPI player/debug API |
 
-## Why This Is Agent-Oriented
+## Data Ownership
 
-The system does not simply retrieve memory and generate a reply. It uses memory and state as decision inputs, then executes tools that change external state.
+SQLite is the source of truth for:
 
-Example:
+- NPC state and hidden alignment;
+- player location, inventory, and unlocked locations;
+- quest lifecycle;
+- recent interactions;
+- long-term memories;
+- memory/lore embeddings;
+- lore documents;
+- memory jobs;
+- world events;
+- interaction logs.
+
+LLM calls can propose decision JSON, polish response text, generate memory candidates, or review memory candidates. They do not own canonical state snapshots, tool permissions, quest lifecycle, or final memory writes.
+
+## Quest And Social Safety
+
+All NPC tasks use the same lifecycle:
 
 ```text
-Player returns Lina's key
--> update_trust
--> update_affection
--> update_quest_status
--> give_item
--> memory_policy generates and reviews memory candidates
--> programmatic gate approves quest/event/relationship memories
--> log_interaction
+not_started -> in_progress -> completed
 ```
 
-These effects are written into SQLite and influence later turns.
+`src/agent/decision.py` blocks:
 
-## Persistent Trace
+- direct `not_started -> completed` jumps;
+- one NPC mutating another NPC's primary quest;
+- quest updates from unrelated intents;
+- unsupported tools or invalid tool arguments;
+- social deception that tries to unlock or rewrite canonical locations.
+
+Social behavior is represented as metadata:
+
+```text
+social_intent
+social_stance.target
+social_stance.attitude
+social_stance.intensity
+social_stance.reason
+```
+
+This lets Sable deceive or redirect in dialogue while the program keeps facts and state changes bounded.
+
+## Trace
 
 Each interaction log stores:
 
-- retrieved memories;
-- short-term context;
-- memory policy result and long-term memory writes;
-- structured decision;
-- system-generated `state_before` and `state_after`;
-- response keywords and response-generation metadata;
-- tool calls;
-- state changes;
-- workflow steps.
+- `recent_context`;
+- `retrieved_lore`;
+- `retrieved_memories`;
+- system-generated `state_snapshot`;
+- `memory_policy`;
+- `memory_writes`;
+- structured `decision`;
+- `tool_calls`;
+- `state_changes`;
+- `workflow_steps`.
 
-This makes the behavior reproducible for reports and classroom demos.
+The `decision` also carries route, classification, timing-adjacent metadata, response generation info, background memory job status, and state-machine blocks when applicable.
 
-## Current Limitation
+## Current Boundaries
 
-The MVP can run fully in deterministic mock mode. In OpenAI-compatible mode, the LLM may now participate in four places: structured decision generation, final NPC response polishing, memory candidate generation, and memory candidate review. All four paths use the same `src/agent/llm_client.py` OpenAI-compatible API settings from `.env`.
-
-SQLite remains the source of truth for state snapshots. LLM memory modules only produce or review candidates. The final write still happens inside `memory_policy.py` after programmatic gate checks and deduplication.
-
-The guardrails are deliberately narrow: business rules protect task and tool consistency, while response validation only blocks major fact conflicts. Lina is still allowed to vary phrasing, gestures, and small atmosphere details so the NPC does not become a rigid template.
-
-An optional OpenAI-compatible path already exists. It is disabled by default and controlled through environment variables, so the project remains runnable for grading even without paid API access.
+- Agent orchestration is still a custom Python workflow, not LangGraph.
+- Background memory jobs are queue-based but not yet run by a permanent worker.
+- Real LLM and real embedding providers are optional; tests and demos keep deterministic mock paths.
+- FAISS is optional and falls back to SQLite cosine retrieval when unavailable.

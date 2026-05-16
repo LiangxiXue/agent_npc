@@ -1,95 +1,162 @@
-# MVP Demo Script
+# Demo Script
 
-本脚本用于课堂展示 Memory-Driven Interactive Character Agent 的最小可运行版本。
+本脚本用于课堂展示当前 Memory-Driven Interactive Character Agent，而不是早期单 Lina MVP。
 
 ## 展示目标
 
-证明系统不是普通聊天机器人，而是具备：
+证明系统具备：
 
 - SQLite 持久化状态；
-- 短期 / 长期记忆分层；
-- 类型化长期记忆；
-- Memory Policy；
-- 结构化决策；
-- 工具调用；
-- 状态变化；
+- 四 NPC 独立任务和记忆；
+- lore / memory / state / recent context 分层；
+- Hybrid RAG 检索；
+- 社交策略 metadata；
+- 程序拥有的任务状态机；
+- 结构化决策和工具调用；
+- 后台 memory jobs；
 - 可解释执行轨迹。
 
-## 演示步骤
+## 方案 A：Streamlit 调试台
 
-### 1. 启动应用
+启动：
 
-```bash
+```powershell
 streamlit run app.py
 ```
 
-打开页面后，点击左侧 `Reset SQLite Demo Data`，保证从初始状态开始。
+演示前点击 `Reset SQLite Demo Data`。
 
-### 2. 低信任询问遗迹入口
-
-输入：
+### 1. Lina 低信任拒绝入口
 
 ```text
 我想打听一下地下遗迹的入口。
 ```
 
-预期现象：
+观察：
 
-- `intent` 为 `withhold_ruins_entrance`；
-- Lina 拒绝透露入口；
-- 无长期记忆写入，或 trace 中显示 `memory_policy` 不写入长期记忆的原因；
-- `trust` 不提升；
-- `underground_ruins_entrance` 不会出现在已解锁地点中。
+- intent: `withhold_ruins_entrance`;
+- social intent: `conceal`;
+- no `unlock_location`;
+- `underground_ruins_entrance` 未解锁。
 
-### 3. 归还钥匙
-
-输入：
+### 2. Lina 归还钥匙
 
 ```text
 我把你丢失的钥匙找回来了。
 ```
 
-预期现象：
+观察：
 
-- `intent` 为 `complete_lost_key_quest`；
-- 行为工具调用包括 `update_trust`、`update_affection`、`update_quest_status`、`give_item`；
-- `memory_policy` 写入 `quest`、`event`、`relationship` 类型长期记忆；
-- Lina 的 `trust` 从 20 变为 30；
-- Lina 的 `affection` 从 30 变为 38；
-- `lost_key` 任务状态变为 `completed`；
-- 玩家背包获得 `tavern_discount_coupon`。
+- intent: `complete_lost_key_quest`;
+- trust / affection 上升；
+- `lost_key` 变为 `completed`;
+- 获得 `tavern_discount_coupon`;
+- trace 中出现 background memory job status。
 
-### 4. 基于记忆和状态再次询问入口
+可随后运行：
 
-输入：
-
-```text
-上次我帮你找回钥匙了，现在能告诉我遗迹入口吗？
+```powershell
+python scripts/process_memory_jobs.py --limit 10
 ```
 
-预期现象：
+再检查长期记忆是否写入并索引。
 
-- `intent` 为 `reveal_ruins_entrance`；
-- 系统检索到玩家帮助 Lina 的长期记忆，并显示 `retrieval_score` / `retrieval_reason`；
-- 工具调用 `unlock_location`；
-- 玩家已解锁地点中出现 `underground_ruins_entrance`。
+### 3. Ron 证据型守卫任务
 
-## 备用命令行演示
+```text
+我想进入遗迹，守卫这边能放行吗？
+我找到守卫徽章了，登记册签名也能对上。
+```
 
-如果现场 Web 演示不稳定，可以运行：
+观察：
 
-```bash
+- 第一轮是 `probe_for_evidence`，不直接放行；
+- 第二轮完成 `gate_badge`;
+- Ron 的任务和记忆与 Lina 隔离。
+
+### 4. Mira 研究型任务
+
+```text
+我想问问遗迹铭文和田野笔记该怎么记录。
+我看到遗迹门边有三角符号和封闭石门，这是我的一手观察。
+```
+
+观察：
+
+- `ancient_notes` 从 `not_started` 到 `in_progress` 再到 `completed`;
+- Mira 的社交策略偏 `ally` / `cooperate`;
+- 玩家获得研究相关物品。
+
+### 5. Sable 误导型社交任务
+
+```text
+Sable，你知道遗迹入口或者古物线索吗？
+我听说入口在酒馆后巷，我接受你说的先查换岗记录。
+```
+
+观察：
+
+- `social_intent` 包含 `redirect` / `deceive`;
+- 记录可疑世界事件；
+- 不调用 `unlock_location`；
+- Sable 的欺骗只影响对话和可疑事件，不改写 canonical ruins access。
+
+## 方案 B：React 玩家端
+
+启动 API：
+
+```powershell
+python -m uvicorn src.api.server:app --host 127.0.0.1 --port 8000
+```
+
+启动前端：
+
+```powershell
+cd frontend
+npm run dev
+```
+
+打开：
+
+```text
+http://127.0.0.1:5173/
+```
+
+展示重点：
+
+- 像素风地图、NPC 头像、任务、背包、记忆；
+- 同一套 Agent workflow 驱动玩家端；
+- 开发者 trace 面板可折叠查看。
+
+## 方案 C：命令行稳定演示
+
+如果现场 Web 不稳定，运行：
+
+```powershell
 python scripts/run_mvp_demo.py
 ```
 
-该命令会自动重置数据库，连续执行三轮交互，并打印每轮的 intent、workflow、工具调用和状态变化。
+该脚本会重置数据库并执行 8 轮四 NPC 演示，打印：
+
+- intent；
+- social intent / stance；
+- workflow steps；
+- tool calls；
+- memory policy；
+- memory writes；
+- state changes；
+- final state。
 
 ## 导出实验结果
 
-Web 页面中可以点击 `Download Trace JSON` 导出当前 trace。也可以运行：
-
-```bash
+```powershell
 python scripts/export_trace.py
 ```
 
-导出的 `data/agent_trace_export.json` 可用于报告附录、截图核验或 PPT 备份。Web 页面显示 interaction log 时也会自动把同一份 trace 写入 `data/agent_trace_export.json`。
+导出文件：
+
+```text
+data/agent_trace_export.json
+```
+
+该文件用于报告附录、截图核验或 PPT 备份。Streamlit 页面显示 interaction log 时也会自动刷新同一路径。

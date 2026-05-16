@@ -2,25 +2,33 @@
 
 ## Goal
 
-Verify that the MVP behaves like an Agent system with stateful actions, not a plain chatbot.
+Verify that the project behaves like an Agent system with stateful actions, retrieval, tool execution, memory jobs, and explainable traces, not a plain chatbot.
 
 ## Automated Tests
 
 Run:
 
-```bash
+```powershell
 python -m unittest discover -s tests -v
 ```
 
-Current test file:
+Current result:
 
 ```text
+41 tests passed
+```
+
+Current test files:
+
+```text
+tests/test_api.py
+tests/test_display_translation.py
 tests/test_workflow.py
 ```
 
 ## Covered Behaviors
 
-### Low Trust Refusal
+### Lina Low-Trust Refusal
 
 Input:
 
@@ -30,28 +38,12 @@ Input:
 
 Expected:
 
-- intent: `withhold_ruins_entrance`
-- no location unlock
-- trust remains 20
+- intent: `withhold_ruins_entrance`;
+- `social_intent`: `conceal`;
+- no location unlock;
+- trust remains 20.
 
-### Quest Completion
-
-Input:
-
-```text
-我把你丢失的钥匙找回来了。
-```
-
-Expected:
-
-- intent: `complete_lost_key_quest`
-- trust becomes 30
-- affection becomes 38
-- quest status becomes `completed`
-- player receives `tavern_discount_coupon`
-- tool calls include memory and state-changing tools
-
-### Memory/State-Based Unlock
+### Lina Quest Completion And Later Unlock
 
 Inputs:
 
@@ -62,66 +54,129 @@ Inputs:
 
 Expected:
 
-- second intent: `reveal_ruins_entrance`
-- unlocked locations include `underground_ruins_entrance`
-- interaction logs are persisted
+- first task path completes `lost_key`;
+- trust and affection increase;
+- player receives `tavern_discount_coupon`;
+- later ruins request can unlock `underground_ruins_entrance`;
+- trace stores tools, state changes, decision, workflow steps, and memory job status.
 
-### Trace Logging
-
-Expected:
-
-- interaction log stores decision;
-- interaction log stores short-term context;
-- interaction log stores memory policy and memory writes;
-- interaction log stores tool calls;
-- interaction log stores state changes.
-- interaction log stores workflow steps.
-
-### Chinese Memory Retrieval
+### Four-NPC Quest Lines
 
 Expected:
 
-- after returning Lina's key, a later Chinese input mentioning `钥匙` and `入口` retrieves the `lost_key` memory;
-- retrieved long-term memory includes `retrieval_score` and `retrieval_reason`;
-- the retrieved memory then helps the decision layer choose `reveal_ruins_entrance`.
+- Ron can start/complete `gate_badge`;
+- Mira can start/complete `ancient_notes`;
+- Sable can start/complete `relic_tip`;
+- Sable can redirect/deceive but cannot unlock the ruins;
+- each NPC keeps its own quest, memories, recent context, and logs.
 
-### Semantic And Hybrid Retrieval
+### Universal Task State Machine
 
 Expected:
 
-- `mode="semantic"` can retrieve the lost-key/help memory for an implicit input such as `我之前替你解决过那个麻烦，现在能告诉我入口吗？`;
-- `mode="hybrid"` includes both rule and semantic fields in retrieved memories;
-- retrieved memories include `semantic_score` and `score_breakdown` when semantic retrieval participates.
+- tasks cannot complete from `not_started`;
+- one NPC cannot mutate another NPC's quest;
+- unsupported LLM intents/tools are rejected;
+- blocked transitions become `probe_for_evidence` with `state_machine.blocked` in trace.
+
+### Background Memory Jobs
+
+Expected:
+
+- synchronous turns enqueue `memory_jobs`;
+- `process_pending_memory_jobs()` writes approved long-term memories later;
+- memory jobs record status, memory writes, embedding updates, and errors;
+- FastAPI `/api/process-memory-jobs` processes queued work.
+
+### Retrieval And Context
+
+Expected:
+
+- lore retrieval returns shared and NPC-specific lore;
+- semantic retrieval handles implicit references;
+- hybrid retrieval includes rule and semantic scores;
+- FAISS fallback works when optional dependencies are unavailable.
+
+### API And Player UI Contract
+
+Expected:
+
+- bootstrap returns player UI state;
+- `/api/turn` runs workflow and returns refreshed state;
+- preview and trace endpoints are available;
+- translation debug endpoint uses display translation when configured.
+
+### Display Translation
+
+Expected:
+
+- Chinese text is skipped;
+- translation is disabled without OpenAI-compatible LLM;
+- translation uses existing LLM config and cache when enabled.
 
 ## Manual UI Test
 
-Run:
+Streamlit debug UI:
 
-```bash
+```powershell
 streamlit run app.py
 ```
 
-Then perform the same three inputs in the UI and verify:
+Verify:
 
-- current NPC state panel changes;
-- short-term context and retrieved long-term memories are visible;
-- memory policy and memory writes are visible;
-- tool calls are visible;
-- state changes are visible;
-- interaction log expands correctly.
+- NPC selector works for Lina/Ron/Mira/Sable;
+- state panel shows selected NPC and primary quest;
+- retrieval preview exposes lore/memory scores;
+- trace shows social intent, tools, state changes, timings, memory job status;
+- trace export writes `data/agent_trace_export.json`.
+
+React player UI:
+
+```powershell
+python -m uvicorn src.api.server:app --host 127.0.0.1 --port 8000
+cd frontend
+npm run dev
+```
+
+Verify:
+
+- browser opens `http://127.0.0.1:5173/`;
+- NPC selection and pixel assets render;
+- dialogue updates state and task panels;
+- developer trace panel remains inspectable.
 
 ## Memory Evaluation
 
 Run:
 
-```bash
+```powershell
 python scripts/run_memory_eval.py
 ```
 
-Expected:
+Expected outputs:
 
-- `no_long_term_memory` passes as a control with zero long-term memory writes;
-- `legacy_keyword_memory` remains as a keyword/tag baseline and should fail some open-expression scenarios;
-- `typed_memory_policy` passes with typed retrieval, Memory Policy writes, and retrieval reasons;
-- `semantic_rag` and `hybrid_rag` pass the added open-expression scenarios;
-- reports are written to `data/eval/memory_eval_report.json` and `data/eval/memory_eval_summary.md`.
+```text
+data/eval/memory_eval_report.json
+data/eval/memory_eval_summary.md
+```
+
+Expected modes:
+
+- `no_long_term_memory`;
+- `legacy_keyword_memory`;
+- `typed_memory_policy`;
+- `semantic_rag`;
+- `hybrid_rag`.
+
+The report should show where semantic/hybrid retrieval improves open-expression cases over legacy keyword retrieval.
+
+## Frontend Build
+
+Run:
+
+```powershell
+cd frontend
+npm run build
+```
+
+Expected: TypeScript build and Vite build pass.

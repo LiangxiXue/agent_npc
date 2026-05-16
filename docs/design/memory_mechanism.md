@@ -1,37 +1,37 @@
-# 当前 NPC 记忆机制说明
+# Current Memory Mechanism
 
-本文档说明当前项目中 Lina 的记忆系统。当前版本已经从“单一长期记忆表”升级为：
+本文档说明当前项目的记忆与上下文系统。当前版本不再是单 Lina 长期记忆表，而是四层上下文加后台长期记忆任务：
 
 ```text
-短期上下文 recent_interactions
-+ 类型化长期记忆 memories
-+ 记忆向量索引 memory_embeddings
-+ 独立 Memory Policy
-+ 可解释规则/语义检索分数和写入原因
+recent_context      = 最近几轮短期对话
+retrieved_memories  = 玩家/NPC 相关长期记忆
+retrieved_lore      = 稳定世界设定和 NPC 设定
+state_snapshot      = SQLite 当前事实
+memory_jobs         = 后台长期记忆写入任务
 ```
 
-## 1. 总体流程
-
-每轮交互的记忆相关流程是：
+## 1. 同步回合中的记忆路径
 
 ```text
 玩家输入
--> 读取最近几轮短期交互
--> 检索长期记忆（typed / semantic / hybrid）
+-> 读取 recent_interactions
+-> 检索 lore_documents
+-> 检索 memories（off / legacy / typed / semantic / hybrid）
 -> 读取 NPC / 玩家 / 任务状态
--> decision 层决定当前行为工具
+-> decision 层决定 intent、社交策略和工具
+-> 程序状态机校验任务生命周期
 -> 执行动作工具并更新 SQLite 状态
 -> response 层生成 NPC 回复
--> memory_policy 判断是否写入长期记忆
--> 写入本轮短期交互
--> interaction log 记录完整 trace
+-> enqueue memory_jobs
+-> 写入本轮 recent_interactions
+-> interaction_logs 记录完整 trace
 ```
 
-关键点：`decision.py` 不再直接决定长期记忆写入。长期记忆统一由 `src/agent/memory_policy.py` 串联候选生成、审查、硬校验、去重和写入，避免普通闲聊或重复事件污染长期记忆。
+关键点：实时玩家回合不再同步执行完整长期记忆写入。它只把本轮证据保存成 `memory_jobs`，让后台流程完成候选生成、审查、gate、写入和 embedding 更新。
 
 ## 2. 短期记忆
 
-短期记忆保存在 `recent_interactions` 表：
+短期记忆保存在 `recent_interactions`：
 
 ```sql
 CREATE TABLE IF NOT EXISTS recent_interactions (
@@ -40,23 +40,36 @@ CREATE TABLE IF NOT EXISTS recent_interactions (
     player_input TEXT NOT NULL,
     npc_response TEXT NOT NULL,
     metadata TEXT NOT NULL DEFAULT '{}',
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (npc_id) REFERENCES npcs (npc_id)
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 ```
 
-它保存最近几轮原始对话，用来帮助 NPC 理解当前话题连续性。短期记忆不代表“重要事实”，也不会直接进入长期记忆表。
+短期记忆用于话题连续性，不代表重要事实，也不会直接写入长期记忆表。
 
-相关函数：
+## 3. 稳定设定 Lore
+
+稳定世界/NPC 背景保存在 `lore_documents`，向量索引保存在 `lore_embeddings`。
 
 ```text
-database.add_recent_interaction()
-database.get_recent_interactions()
+data/lore/world_overview.md
+data/lore/underground_ruins.md
+data/lore/social_deduction_rules.md
+data/lore/npc_lina.md
+data/lore/npc_ron.md
+data/lore/npc_mira.md
+data/lore/npc_sable.md
 ```
 
-## 3. 长期记忆
+Lore 与 memory 的边界：
 
-长期记忆保存在 `memories` 表：
+- lore：稳定世界规则、NPC 背景、社交玩法规则；
+- memory：玩家在交互中造成或表达的事件、关系、偏好、画像；
+- state_snapshot：当前真相，例如任务状态、trust、背包、地点；
+- recent_context：短期对话连续性。
+
+## 4. 长期记忆
+
+长期记忆保存在 `memories`：
 
 ```sql
 CREATE TABLE IF NOT EXISTS memories (
@@ -69,137 +82,117 @@ CREATE TABLE IF NOT EXISTS memories (
     tags TEXT NOT NULL DEFAULT '[]',
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     last_accessed_at TEXT,
-    access_count INTEGER NOT NULL DEFAULT 0,
-    FOREIGN KEY (npc_id) REFERENCES npcs (npc_id)
+    access_count INTEGER NOT NULL DEFAULT 0
 );
 ```
 
-长期记忆字段含义：
+支持类型：
 
-| 字段 | 含义 |
-| --- | --- |
-| `content` | 记忆正文 |
-| `memory_type` | 记忆类型，例如 `event`、`quest`、`relationship`、`preference` |
-| `importance` | 重要性，1-10 |
-| `confidence` | 可信度，0-1 |
-| `tags` | 可检索标签 |
-| `last_accessed_at` | 最近一次被检索时间 |
-| `access_count` | 被检索次数 |
-
-旧数据库会在初始化时自动补齐新字段，不需要手动删库。
-
-## 4. 记忆向量索引
-
-语义检索使用单独的 `memory_embeddings` 表，不把向量直接塞进 `memories`：
-
-```sql
-CREATE TABLE IF NOT EXISTS memory_embeddings (
-    memory_id INTEGER PRIMARY KEY,
-    embedding TEXT NOT NULL,
-    embedding_model TEXT NOT NULL,
-    embedding_dim INTEGER NOT NULL,
-    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (memory_id) REFERENCES memories (id) ON DELETE CASCADE
-);
+```text
+quest
+event
+relationship
+preference
+player_profile
 ```
 
-当前默认 embedding provider 是 `mock_hash`，用确定性特征和 hash 向量实现，不需要 API key。写入长期记忆后，workflow 会调用 `ensure_embeddings_for_memory_writes()` 为新记忆补索引；已有记忆可通过 `python scripts/rebuild_memory_embeddings.py` 重建索引。
+长期记忆按 NPC 隔离。Ron 的长期记忆不会污染 Lina；Sable 的可疑线索也不会变成全局事实，除非通过工具写入 `world_events`。
 
-## 5. Memory Policy
+## 5. Embedding Index
 
-`src/agent/memory_policy.py` 负责判断“本轮是否值得写入长期记忆”。
+长期记忆索引保存在 `memory_embeddings`：
 
-输入包括：
+```text
+memory_id
+embedding
+embedding_model
+embedding_provider
+embedding_dim
+source_text_hash
+created_at
+updated_at
+```
+
+`source_text_hash` 让系统能在 memory 内容、tags、provider 或 model 变化时刷新索引。
+
+默认 provider 是 `mock_hash`，不需要 API key。真实 provider 可通过 OpenAI-compatible `/embeddings` 接入。
+
+## 6. Background Memory Jobs
+
+`memory_jobs` 保存后台长期记忆处理所需的完整证据：
 
 ```text
 npc_id
 player_input
 npc_response
-retrieved_long_term_memories
-recent_short_term_context
-npc_before / npc_after
-player_before / player_after
-quest_before / quest_after
+recent_context
+retrieved_lore
+retrieved_memories
+state_before
+state_after
 tool_calls
 state_changes
+status
+memory_policy
+memory_writes
+embedding_updates
+error
 ```
+
+处理命令：
+
+```powershell
+python scripts/process_memory_jobs.py --limit 10
+```
+
+状态含义：
+
+| Status | Meaning |
+| --- | --- |
+| `pending` | 已入队，等待后台处理 |
+| `written` | 已处理，没有需要索引的新长期记忆 |
+| `indexed` | 已写入长期记忆并更新 embedding |
+| `failed` | 后台处理失败，`error` 字段保存原因 |
+
+## 7. Memory Policy
+
+后台处理时，`src/agent/memory_jobs.py` 会重建 `MemoryPolicyInput` 并调用 `src/agent/memory_policy.py`。
 
 当前写入链路：
 
 ```text
 rule candidates
--> LLM memory candidate generator
--> LLM memory review agent
+-> optional LLM memory candidate generator
+-> optional LLM memory review agent
 -> programmatic gate
 -> deduplication
 -> SQLite write
 -> embedding update
 ```
 
-`src/agent/llm_memory_candidate.py` 和 `src/agent/memory_candidate_review.py` 都通过 `src/agent/llm_client.py` 使用同一套 `.env` OpenAI-compatible API 配置。它们只生成和审查候选，不直接写 SQLite。
+硬 gate 检查：
 
-`src/agent/memory_candidate_gate.py` 做不可绕过的硬校验：
-
-| 校验 | 说明 |
+| Check | Purpose |
 | --- | --- |
 | allowed type | 只允许 `quest`、`event`、`relationship`、`preference`、`player_profile` |
-| evidence | LLM 候选必须引用本轮输入、回复、工具或状态变化中的证据 |
-| tool/state support | `event`、`quest`、`relationship` 必须有工具调用或状态变化支撑 |
-| player-grounded | `player_profile`、`preference` 必须来自玩家自述 |
-| dedup | 写入前仍会检查相似记忆 |
+| evidence | 候选必须引用本轮输入、回复、工具或状态变化中的证据 |
+| tool/state support | 任务、事件、关系类记忆需要工具或状态变化支撑 |
+| player-grounded | 玩家画像和偏好必须来自玩家自述 |
+| dedup | 防止同 NPC、同类型、相似内容重复写入 |
 
-输出会进入 trace：
+## 8. Retrieval Modes
 
-```text
-memory_policy:
-  candidates:
-    - should_write
-    - content
-    - memory_type
-    - importance
-    - tags
-    - confidence
-    - reason
-    - evidence_text
-    - source
-    - gate
-  llm_memory_policy
-  summary
-```
+长期记忆检索入口仍是 `database.search_memories(...)`，支持：
 
-当前规则：
-
-| 类型 | 触发条件 |
-| --- | --- |
-| `quest` | 任务状态从非 `completed` 变为 `completed` |
-| `event` | 归还钥匙、解锁敏感地点等关键事件 |
-| `relationship` | `trust` 或 `affection` 明显上升，且有玩家帮助 Lina 或其他可验证关系变化证据 |
-| `preference` | 玩家明确表达稳定交流偏好 |
-| `player_profile` | 玩家表达可长期参考的自我描述、处境或情绪需求，并通过 LLM 生成和审查 |
-| 不写入 | 普通问候、普通闲聊、无长期意义或重复记忆 |
-
-写入前会做基础去重：同 NPC、同类型、内容相同或核心标签高度重合的近期记忆不会重复写入。重复原因也会记录在 trace 中。
-
-## 6. 长期记忆检索
-
-长期记忆检索入口：
-
-```text
-database.search_memories(player_input, npc_id="lina")
-```
-
-支持模式：
-
-| 模式 | 行为 |
+| Mode | Behavior |
 | --- | --- |
 | `off` | 不检索长期记忆，用作消融实验 |
 | `legacy` | 旧版关键词/标签检索 |
-| `typed` | 关键词、标签、记忆类型、重要性、可信度和新近度评分 |
-| `semantic` | 只按 embedding similarity 检索，适合开放表达 |
-| `hybrid` | 合并 typed rule score 和 semantic score |
+| `typed` | 关键词、标签、记忆类型、重要性、可信度、新近度评分 |
+| `semantic` | embedding similarity 检索 |
+| `hybrid` | typed rule score + semantic score |
 
-返回结果会包含可解释字段：
+返回字段包括：
 
 ```text
 retrieval_score
@@ -210,93 +203,40 @@ matched_tags
 retrieval_reason
 semantic_reason
 score_breakdown
+retrieval_backend
+backend_fallback_reason
+query_embedding_latency_ms
 ```
 
-评分由以下部分组成：
+## 9. Trace 中的记忆信息
 
-```text
-keyword_score
-+ tag_score
-+ type_bonus
-+ importance_bonus
-+ recency_bonus
-+ confidence_bonus
-```
+每轮 trace 可以解释：
 
-系统会先用规则推断本轮输入更关心哪些记忆类型。例如：
+- 本轮用了哪些 recent context；
+- 检索到了哪些 lore；
+- 检索到了哪些长期记忆；
+- 每条 memory 为什么被选中；
+- 本轮是否 enqueue 了 memory job；
+- 后台处理后写入了哪些长期记忆；
+- 重大状态变化来自哪个工具调用。
 
-| 玩家输入 | 偏向记忆类型 |
-| --- | --- |
-| 任务、线索、遗迹、入口 | `quest`、`event`、`relationship` |
-| 你还记得我吗、上次、信任 | `relationship`、`event` |
-| 以后直接告诉我、不要绕弯 | `preference` |
-
-被检索出的长期记忆会更新 `last_accessed_at` 和 `access_count`，为后续“记忆强化/遗忘”留下数据基础。
-
-## 7. 记忆如何影响决策
-
-workflow 会把两类上下文传给 `decide_next_action()`：
-
-```text
-recent_short_term_context
-retrieved_long_term_memories
-```
-
-短期上下文用于理解当前话题；长期记忆用于判断历史行为、关系、任务和偏好。
-
-例如：
-
-```text
-第 1 轮：玩家归还钥匙
--> 工具更新 trust、affection、quest、reward
--> memory_policy 写入 quest / event / relationship 长期记忆
-
-第 2 轮：玩家询问遗迹入口
--> search_memories 检索到 lost_key / trust 相关长期记忆
--> decision 判断玩家可信
--> Lina 透露地下遗迹入口
-```
-
-## 8. Trace 中新增的记忆信息
-
-每轮 interaction log 现在包含：
-
-| 字段 | 含义 |
-| --- | --- |
-| `recent_context` | 本轮使用的短期上下文 |
-| `retrieved_memories` | 本轮检索到的长期记忆及规则/语义检索解释 |
-| `memory_policy` | 本轮是否应该写长期记忆及原因 |
-| `memory_writes` | 实际写入的长期记忆 |
-| `tool_calls` | 行为工具调用，不再混入长期记忆判断 |
-| `state_changes` | 行为工具造成的状态变化 |
-
-因此 trace 可以解释：
-
-```text
-Lina 为什么接着上一轮话题说？
-本轮检索到了哪些长期记忆？
-这些长期记忆为什么被选中？
-本轮为什么写入或不写入长期记忆？
-```
-
-## 9. 当前能力边界
+## 10. 当前能力边界
 
 已经实现：
 
-- 短期 / 长期记忆分层；
-- 长期记忆类型化；
-- 规则版 Memory Policy；
-- 长期记忆去重；
-- 可解释检索分数；
-- deterministic semantic retrieval；
-- hybrid retrieval；
-- 访问统计；
-- trace 展示 memory policy 和 memory writes。
+- 短期 / 长期 / lore / state 分层；
+- 多 NPC 记忆隔离；
+- 类型化长期记忆；
+- 后台 memory job；
+- rule + semantic + hybrid retrieval；
+- provider/backend-aware embedding layer；
+- LLM candidate/review + programmatic gate；
+- trace 展示 memory policy、memory job 状态和 retrieval scores。
 
 尚未实现：
 
-- 外部 embedding API 的课堂默认路径；
-- 大模型自动总结；
+- 常驻后台 worker；
 - 复杂遗忘机制；
-- 多 NPC 记忆传播；
-- 复杂情绪模型。
+- NPC 间自动记忆传播；
+- 大规模外部向量库；
+- LangGraph 编排。

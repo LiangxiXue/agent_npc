@@ -1,5 +1,7 @@
 # 项目选题计划：Memory-Driven Interactive Character Agent
 
+> 当前状态说明：本文是项目早期选题计划，保留为课程需求和范围参考。当前实现已经超过早期计划中的单 NPC / 简单关键词检索阶段，包含 Lina、Ron、Mira、Sable 四 NPC，Hybrid RAG、lore/context 分层、FastAPI + React 玩家端、后台 memory jobs 和 41 个自动测试。当前实现状态请以根目录 `README.md` 与 `docs/design/` 为准。
+
 ## 1. 项目名称
 
 **Memory-Driven Interactive Character Agent：基于记忆、状态管理与工具调用的交互式角色智能体系统**
@@ -80,7 +82,7 @@
 NPC：
 - Lina：酒馆老板，谨慎、现实、掌握很多情报，作为第一阶段 MVP Agent
 - Ron：小镇守卫，正直但多疑，作为第二阶段扩展 Agent
-- Mira：商人，精明、利益导向，作为第二阶段扩展 Agent
+- Mira：早期计划中曾作为商人扩展角色；当前实现已调整为遗迹学者，商人/古物交易方向由 Sable 承担
 ```
 
 ### 4.3 示例任务线

@@ -1,87 +1,91 @@
 # Memory-Driven Interactive Character Agent
 
-这是一个以文字冒险 NPC 交互为验证场景的记忆驱动角色 Agent 原型。项目重点不是制作完整游戏，而是展示一个角色 Agent 如何在多轮交互中读取记忆、读取状态、生成结构化决策、调用工具修改外部状态，并保存可解释的执行轨迹。
+这是一个以文字冒险 NPC 交互为验证场景的记忆驱动角色 Agent 原型。项目重点不是制作完整游戏，而是展示角色 Agent 如何在多轮交互中读取稳定世界设定、检索玩家相关记忆、读取当前状态、生成结构化决策、调用工具修改外部状态，并保存可解释的执行轨迹。
 
-当前实现已经从单 NPC MVP 扩展为多 NPC 记忆 Agent 原型：Lina 保留完整钥匙/遗迹主线，Ron 和 Mira 作为可复用角色入口验证 NPC 状态、任务、短期上下文和长期记忆隔离。决策会触发 SQLite 工具调用，改变 NPC 关系值、任务状态、玩家解锁地点、世界事件和交互日志。系统默认可用 mock 模式稳定运行，也提供 OpenAI-compatible LLM 和 embedding 实验路径。
+当前实现已经从单 NPC MVP 扩展为四 NPC、多任务、带社交策略的 Agent 原型：Lina 保留钥匙/遗迹主线，Ron、Mira、Sable 分别验证守卫证据、遗迹研究、古物交易与误导式社交行为。系统默认可用 mock 模式稳定运行，也提供 OpenAI-compatible LLM、embedding、Hybrid RAG 和后台记忆任务实验路径。
 
-## 当前项目进度
+## 当前项目状态
 
 ### 已完成
 
-- 多 NPC 原型：`lina`、`ron`、`mira`，其中 Lina 保留完整主线，Ron/Mira 用于验证通用 workflow 和记忆隔离。
-- Streamlit Web Demo：`app.py` 提供 NPC 选择、输入、状态面板、执行轨迹、工具调用、状态变化和日志下载。
-- SQLite 持久化：保存 NPC 状态、玩家状态、玩家物品、地点解锁、任务、长期记忆、世界事件和交互日志。
-- Agent workflow 主链路：
+- 多 NPC 原型：`lina`、`ron`、`mira`、`sable`，每个 NPC 有独立状态、主任务、长期记忆、短期上下文和交互日志。
+- 四条任务线：`lost_key`、`gate_badge`、`ancient_notes`、`relic_tip`，统一经过程序拥有的任务状态机校验。
+- 社交策略层：decision 输出包含 `social_intent` 和 `social_stance`，Sable 使用 `hidden_alignment='exploit_ruins'` 验证欺骗、拉拢、试探、反对等社交行为不会越权改写事实。
+- Streamlit 调试台：`app.py` 提供 NPC 选择、输入、状态面板、检索预览、执行轨迹、工具调用、状态变化和 trace 导出。
+- React/Vite 玩家端：`frontend/` 提供暗色像素 RPG 界面，保留开发者 trace 面板。
+- FastAPI 玩家端接口：`src/api/server.py` 包装同一套 Agent workflow，提供对话、检索预览、trace 导出、embedding rebuild 和后台记忆任务处理接口。
+- SQLite 持久化：保存 NPC 状态、玩家状态、物品、地点、任务、长期记忆、记忆/设定 embedding、后台记忆任务、世界事件和交互日志。
+- 显式上下文层：`retrieved_lore`、`retrieved_memories`、`state_snapshot`、`recent_context` 分离进入 decision/response/trace。
+- 记忆系统：短期交互进入 `recent_interactions`；长期重要事实进入类型化 `memories`；检索支持 `off`、`legacy`、`typed`、`semantic`、`hybrid`。
+- 后台记忆任务：实时回合只 enqueue `memory_jobs`，长期记忆候选、审查、写入和 embedding 更新可由后台脚本或 API 处理，降低玩家端等待时间。
+- Provider-aware retrieval：embedding provider 支持 `mock_hash` 和 OpenAI-compatible；backend 支持 `sqlite_cosine` 和可选 `faiss`，不可用时自动 fallback。
+- 可选真实 LLM：同一 OpenAI-compatible client 可参与结构化 decision、最终回复润色、记忆候选生成和记忆审查；失败时回退到稳定 mock/模板路径。
+- 可解释 trace：每轮记录检索、状态、decision、工具、状态变化、memory job 状态、timings 和 workflow steps。
+
+### 当前工作流
 
 ```text
 Player Input
--> Short-Term Context Load
+-> Recent Context Load
+-> Lore Retrieval
 -> Long-Term Memory Retrieval
 -> State Load
+-> Turn Classification
 -> Structured Decision
+-> Program-Owned Quest State Machine
 -> Tool Execution
 -> Response Generation
--> Memory Policy
+-> Background Memory Job Enqueue
 -> Short-Term Interaction Write
 -> Trace Logging
-```
 
-- 结构化决策层：`src/agent/decision.py` 支持 mock 决策和可选真实 LLM 决策。
-- Memory Policy：`src/agent/memory_policy.py` 负责长期记忆写入入口；OpenAI-compatible 模式下会调用 LLM 生成和审查候选记忆，最后仍由程序 gate 校验证据、类型、工具/状态支撑和去重后写入 SQLite。
-- 回复生成层：`src/agent/response.py` 支持由 Agent decision 输出的 `response_keywords` 约束真实 LLM 润色最终 NPC 台词。
-- 事实与规则护栏：系统生成 `state_before/state_after`，并校验关键工具调用、任务推进和遗迹入口等重大事实。
-- 工具调用层：`src/tools/sqlite_tools.py` 将 Agent 动作落到 SQLite 状态更新。
-- 记忆系统：短期交互进入 `recent_interactions`，长期重要事实进入类型化 `memories`；检索支持 `typed`、`semantic` 和 `hybrid` 模式，并返回 `retrieval_score`、`semantic_score`、`score_breakdown` 和 `retrieval_reason`。
-- 生产级检索层 v1：embedding provider 支持 `mock_hash` 和 OpenAI-compatible；embedding cache 会按 provider、model、memory text hash 刷新；semantic backend 支持 `sqlite_cosine` 和可选 `faiss`，FAISS 不可用时自动回退 SQLite。
-- 可选真实 LLM 接入：`src/agent/llm_client.py` 支持 OpenAI-compatible `/chat/completions` JSON 输出，并带有失败回退到 mock 的机制。
-- 回归测试：`tests/test_workflow.py` 覆盖核心流程、状态更新、日志保存、LLM 配置缺失回退、工具名和参数校验。
-- 演示与交付材料草稿：`docs/` 按 design、evaluation、delivery、reference 分组，分别保存架构设计、评测计划、展示材料和课程参考材料。
+Background:
+memory_jobs
+-> Memory Policy
+-> LLM Memory Candidate Generation
+-> LLM Memory Candidate Review
+-> Programmatic Gate / Dedup
+-> Long-Term Memory Write
+-> Embedding Update
+```
 
 ### 已验证
 
-当前工作区已通过以下验证：
+当前测试命令：
 
-```bash
+```powershell
 python -m unittest discover -s tests -v
 ```
 
-结果：22 个测试全部通过。
+当前验证结果：41 个测试全部通过。
 
-命令行 MVP 演示也已可运行：
+玩家端构建命令：
 
-```bash
-python scripts/run_mvp_demo.py
+```powershell
+cd frontend
+npm run build
 ```
 
-该脚本会重置 demo 数据，连续执行 3 轮典型交互，并输出每轮的 intent、workflow、tool calls、state changes 和最终状态。
+## 运行方式
 
-导出 trace：
+建议使用 Python 3.11 或更高版本。
 
-```bash
-python scripts/export_trace.py
+安装 Python 依赖：
+
+```powershell
+pip install -r requirements.txt
 ```
 
-导出文件：
+启动 Streamlit 调试台：
 
-```text
-data/agent_trace_export.json
+```powershell
+streamlit run app.py
 ```
 
-Web 页面仍保留 `Download Trace JSON` 按钮；同时页面在显示 interaction log 时会自动把同一份 payload 写入 `data/agent_trace_export.json`，不需要再手动下载后复制。
-
-### 玩家端像素风 UI
-
-项目新增独立 React/Vite 玩家端，保留 Streamlit 作为调试台。玩家端把同一套 Agent workflow 包装成暗色像素 RPG 界面，包含地图场景、NPC 像素头像、对话框、任务状态、背包、长期记忆和折叠的开发者 trace 面板。
-
-先启动 API：
+启动玩家端：
 
 ```powershell
 python -m uvicorn src.api.server:app --host 127.0.0.1 --port 8000
-```
-
-再启动玩家端：
-
-```powershell
 cd frontend
 npm install
 npm run dev
@@ -93,39 +97,49 @@ npm run dev
 http://127.0.0.1:5173/
 ```
 
-像素资产位于：
+首次启动会自动创建并初始化：
 
 ```text
-frontend/public/assets/pixel/
+data/agent_state.db
 ```
 
-如需重建首版占位像素图：
+## 关键脚本
+
+命令行四 NPC 演示：
+
+```powershell
+python scripts/run_mvp_demo.py
+```
+
+导出 trace：
+
+```powershell
+python scripts/export_trace.py
+```
+
+处理后台长期记忆任务：
+
+```powershell
+python scripts/process_memory_jobs.py --limit 10
+```
+
+重建 memory embedding：
+
+```powershell
+python scripts/rebuild_memory_embeddings.py
+```
+
+运行记忆检索评测：
+
+```powershell
+python scripts/run_memory_eval.py
+```
+
+生成像素占位资产：
 
 ```powershell
 python scripts/generate_pixel_assets.py
 ```
-
-记忆系统评测与对比实验：
-
-```bash
-python scripts/run_memory_eval.py
-```
-
-该脚本会使用独立数据库 `data/eval/memory_eval_state.db`，对比 `no_long_term_memory`、`legacy_keyword_memory`、`typed_memory_policy`、`semantic_rag` 和 `hybrid_rag` 五种模式，并导出：
-
-```text
-data/eval/memory_eval_report.json
-data/eval/memory_eval_summary.md
-```
-
-### 当前边界
-
-- 当前主线已支持多 NPC 选择和记忆隔离，但 Ron/Mira 还没有完整独立任务树；完整行为剧本仍集中在 Lina。
-- 第一版 Hybrid RAG 已升级为可插拔检索层；默认仍使用 deterministic `mock_hash` 和 `sqlite_cosine` 保证稳定复现，真实 embedding 和 FAISS 作为可选增强路径。
-- Agent 编排当前是自定义 Python workflow，没有迁移到 LangGraph。
-- 真实 LLM 路径已接入为实验能力，但课堂展示和自动测试仍应保留 mock 模式作为稳定兜底。
-- mock 模式下最终回复仍使用确定性模板；OpenAI-compatible 模式下会在工具执行后调用 LLM，根据 intent、response style、response keywords、当前状态和工具结果生成更自然的角色回复。
-- 目前还没有完整课程报告 PDF、PPT、录屏或最终截图材料。
 
 ## 目录结构
 
@@ -134,136 +148,40 @@ agent_npc/
 ├── app.py
 ├── README.md
 ├── requirements.txt
-├── .env.example
-├── archive/
-│   ├── legacy_json_state/
-│   └── review_pending/
 ├── data/
-│   ├── agent_trace_export.json
+│   ├── lore/
 │   ├── eval/
-│   └── history/
+│   ├── history/
+│   └── agent_trace_export.json
 ├── docs/
-│   ├── README.md
 │   ├── delivery/
 │   ├── design/
 │   ├── evaluation/
 │   └── reference/
+├── frontend/
+│   ├── public/assets/pixel/
+│   └── src/
 ├── scripts/
 │   ├── export_trace.py
+│   ├── generate_pixel_assets.py
+│   ├── probe_context_retrieval.py
+│   ├── process_memory_jobs.py
 │   ├── rebuild_memory_embeddings.py
 │   ├── run_memory_eval.py
 │   ├── run_mvp_demo.py
 │   └── test_llm_api.py
 ├── src/
 │   ├── agent/
-│   │   ├── decision.py
-│   │   ├── embedding_client.py
-│   │   ├── llm_client.py
-│   │   ├── memory_policy.py
-│   │   ├── prompts.py
-│   │   ├── response.py
-│   │   ├── semantic_retrieval.py
-│   │   ├── world_facts.py
-│   │   └── workflow.py
+│   ├── api/
 │   ├── storage/
-│   │   ├── database.py
-│   │   └── schema.sql
 │   └── tools/
-│       └── sqlite_tools.py
 └── tests/
+    ├── test_api.py
+    ├── test_display_translation.py
     └── test_workflow.py
 ```
 
-早期 JSON 状态演示代码已经归档到 `archive/legacy_json_state/`，当前运行主线使用 SQLite。`archive/review_pending/` 保存不确定是否仍要保留的参考材料，便于后续人工确认后再删。
-
-本地 SQLite 数据库、Python 缓存和评测临时库是生成物，不作为源码结构的一部分；运行 demo 或评测脚本时会自动重建。
-
-## 核心功能
-
-### 1. 状态和记忆持久化
-
-SQLite schema 位于：
-
-```text
-src/storage/schema.sql
-```
-
-主要数据表：
-
-- `npcs`
-- `player_state`
-- `player_items`
-- `unlocked_locations`
-- `quests`
-- `memories`
-- `recent_interactions`
-- `world_events`
-- `interaction_logs`
-
-### 2. 工具调用
-
-当前 decision 层支持的行为工具：
-
-- `update_trust`
-- `update_affection`
-- `give_item`
-- `update_quest_status`
-- `unlock_location`
-- `record_world_event`
-
-这些工具不是展示用文本，而是真实写入 SQLite 的状态变更。长期记忆写入由 `memory_policy.py` 在工具执行后统一判断；LLM 只能生成和审查候选，底层仍通过 `sqlite_tools.add_memory()` 写入 `memories` 表。
-
-### 3. 可解释执行轨迹
-
-每轮交互都会记录：
-
-- 玩家输入；
-- 短期上下文；
-- 检索到的长期记忆及检索原因；
-- memory policy 判断和长期记忆写入；
-- 结构化 decision；
-- 系统生成的 `state_before` 和 `state_after`；
-- response keywords 和回复生成模式；
-- 工具调用及参数；
-- 状态变化；
-- workflow steps；
-- NPC 最终回复。
-
-这些内容会保存到 `interaction_logs`，也可以通过页面按钮或 `scripts/export_trace.py` 导出为 JSON，用于报告、PPT 和课堂演示。
-
-## 运行方式
-
-建议使用 Python 3.11 或更高版本。
-
-安装依赖：
-
-```bash
-pip install -r requirements.txt
-```
-
-启动 Web demo：
-
-```bash
-streamlit run app.py
-```
-
-启动玩家端像素 UI：
-
-```powershell
-python -m uvicorn src.api.server:app --host 127.0.0.1 --port 8000
-cd frontend
-npm run dev
-```
-
-首次启动时会自动创建并初始化：
-
-```text
-data/agent_state.db
-```
-
-如果需要重置 demo 数据，可以在页面左侧点击 `Reset SQLite Demo Data`。
-
-## LLM 和检索配置
+## 配置
 
 ### Mock 模式
 
@@ -274,28 +192,26 @@ $env:AGENT_NPC_LLM_PROVIDER = "mock"
 streamlit run app.py
 ```
 
-测试文件会强制使用 mock 模式，避免本地 `.env` 影响测试结果。
-
-### OpenAI-Compatible 模式
-
-项目已提供实验性真实 LLM 接入路径。配置方式示例：
+### OpenAI-Compatible LLM
 
 ```powershell
 $env:AGENT_NPC_LLM_PROVIDER = "openai_compatible"
 $env:AGENT_NPC_LLM_API_KEY = "your_api_key"
 $env:AGENT_NPC_LLM_MODEL = "gpt-4o-mini"
 $env:AGENT_NPC_LLM_BASE_URL = "https://api.openai.com/v1"
+$env:AGENT_NPC_LLM_TIMEOUT = "60"
+$env:AGENT_NPC_LLM_RETRIES = "1"
 streamlit run app.py
 ```
 
-DeepSeek 等兼容服务可以修改 `AGENT_NPC_LLM_MODEL` 和 `AGENT_NPC_LLM_BASE_URL`。真实 LLM 现在可在四个位置参与：
+真实 LLM 可参与：
 
-1. 决策阶段返回与 `src/agent/prompts.py` 中约定一致的 JSON decision，其中包括 intent、工具调用和 `response_keywords`。状态快照不由 LLM 返回，而是由系统从 SQLite 读取后写入 trace。
-2. 工具执行前会校验业务规则，例如 `start_lost_key_quest` 只能推进到 `in_progress`，`withhold_ruins_entrance` 不能解锁入口。
-3. 回复阶段根据 decision、关键词、工具结果、最新状态和 canonical world facts 润色生成 `npc_response`。系统只拦截重大事实冲突，仍允许语气、动作和小氛围细节自由发挥。
-4. Memory Policy 阶段生成长期记忆候选，并由 LLM reviewer 审查主语、证据、类型和过度推断风险；最终写入仍由程序 gate 和去重逻辑决定。
+1. 结构化 decision JSON；
+2. 最终 NPC 回复润色；
+3. 长期记忆候选生成；
+4. 长期记忆候选审查。
 
-若 LLM 调用失败、超时或返回非法结构，系统会回退到 mock 决策、固定回复模板或规则记忆候选路径，并在 trace 中记录相关信息。
+SQLite 状态、任务状态机、工具权限、重大事实和最终记忆写入仍由程序控制。
 
 ### Embedding / Retrieval
 
@@ -306,7 +222,7 @@ $env:AGENT_NPC_EMBEDDING_PROVIDER = "mock_hash"
 $env:AGENT_NPC_RETRIEVAL_BACKEND = "sqlite_cosine"
 ```
 
-真实 embedding provider 作为可选增强：
+真实 embedding provider：
 
 ```powershell
 $env:AGENT_NPC_EMBEDDING_PROVIDER = "openai_compatible"
@@ -316,59 +232,62 @@ $env:AGENT_NPC_EMBEDDING_BASE_URL = "https://api.openai.com/v1"
 $env:AGENT_NPC_EMBEDDING_ALLOW_FALLBACK = "1"
 ```
 
-检索 backend 可切换：
+可选 backend：
 
 ```powershell
-$env:AGENT_NPC_RETRIEVAL_BACKEND = "sqlite_cosine"
-# 或可选：
 $env:AGENT_NPC_RETRIEVAL_BACKEND = "faiss"
 ```
 
-如果 FAISS 未安装或真实 embedding 未配置，系统会记录 fallback 原因，并保持 SQLite/mock 路径可运行。评测报告中的 `Retrieval Layer Comparison` 会展示 backend、latency、fallback 和 skipped 配置。
+FAISS 或真实 embedding 不可用时，系统会记录 fallback 原因并保持 SQLite/mock 路径可运行。
 
 ## 建议演示输入
 
-先测试低信任度时询问遗迹入口：
+基础 Lina 主线：
 
 ```text
 我想打听一下地下遗迹的入口。
-```
-
-然后测试归还钥匙，触发工具调用：
-
-```text
 我把你丢失的钥匙找回来了。
+上次我帮你找回钥匙了，现在能告诉我遗迹入口吗？
 ```
 
-再测试基于记忆和状态的后续决策：
+四 NPC 社交/任务演示：
 
 ```text
-上次我帮你找回钥匙了，现在能告诉我遗迹入口吗？
+Ron，我想进入遗迹，守卫这边能放行吗？
+Ron，我找到守卫徽章了，登记册签名也能对上。
+Mira，我想问问遗迹铭文和田野笔记该怎么记录。
+Mira，我看到遗迹门边有三角符号和封闭石门，这是我的一手观察。
+Sable，你知道遗迹入口或者古物线索吗？
+Sable，我听说入口在酒馆后巷，我接受你说的先查换岗记录。
 ```
 
 ## 为什么不是普通聊天机器人
 
-普通聊天机器人通常只根据历史对话生成回复。本项目的 MVP 已经具备可验证的状态和行动闭环：
+普通聊天机器人通常只根据历史对话生成回复。本项目把回复放在一个可验证 Agent 闭环里：
 
-- Lina 的 `trust`、`affection`、任务状态会写入 SQLite；
-- 玩家背包和已解锁地点会写入 SQLite；
-- Agent 每轮会生成结构化决策和回复关键词；
+- NPC、玩家、任务、地点和世界事件都写入 SQLite；
+- decision 是结构化对象，包含 intent、工具调用、社交策略和回复关键词；
 - 工具调用会真实改变数据库；
-- 页面会展示记忆检索、workflow trace、工具调用、状态变化和 interaction log；
-- 后续回复会受到之前状态变化和记忆写入的影响。
+- 任务推进经过程序状态机，不允许 LLM 直接越权完成任务；
+- 长期记忆由后台 policy、review、gate 和 dedup 管理；
+- 检索到的 lore / memory 会进入后续 decision 和 response；
+- trace 能解释每轮“检索了什么、为什么行动、改了什么状态、是否写入记忆”。
 
 因此系统不是“说自己记得”，而是“根据记忆和状态做决策，并把行动结果写回系统”。
 
-## 后续主要方向
+## 当前边界
 
-1. 补全 Ron/Mira 独立任务树：让守卫和学者拥有各自的工具触发条件、任务推进和角色化回复，而不只是通用 workflow 入口。
+- Agent 编排仍是自定义 Python workflow，没有迁移到 LangGraph。
+- 真实 LLM 路径是实验能力；课堂展示和自动测试仍以 mock 模式作为稳定兜底。
+- 后台记忆任务需要通过脚本或 API 主动处理，当前不是独立常驻 worker。
+- FAISS 和真实 embedding 是可选增强，不是默认依赖。
+- 课程最终报告 PDF、PPT、录屏和最终截图仍需基于当前运行结果整理。
 
-2. 强化真实 LLM 稳定性：完善 prompt、JSON schema 校验、工具参数修复策略和失败案例记录，让真实 LLM 路径能稳定产出可执行 decision。
+## 后续方向
 
-3. 引入更强记忆检索：在当前 provider/backend 抽象基础上增加本地 embedding 模型、FAISS 持久化索引或 Qdrant/Chroma 后端。
-
-4. 增加 LangGraph 或显式节点编排：将当前自定义 workflow 拆成更清晰的节点，增强课程汇报中的智能体开发工具使用证据。
-
-5. 完善课程交付材料：基于真实运行日志补充截图、失败案例、对比案例、PPT、书面报告和 AI 使用说明，避免只停留在代码说明。
-
-6. 增加多 Agent 扩展实验：在多 NPC 基础上尝试 NPC 间信息传播、关系网络或间接记忆影响，作为项目加分扩展，而不是 MVP 必需项。
+1. 引入 LangGraph 或显式节点编排，把当前 workflow 拆成更标准的 Agent graph。
+2. 增加常驻后台 worker 或定时任务，让 `memory_jobs` 自动处理。
+3. 增强真实 LLM decision 的 schema 修复、失败案例记录和回归测试。
+4. 扩展多 NPC 信息传播、关系网络和间接记忆影响。
+5. 增加本地 embedding 模型、持久化 FAISS 索引或 Qdrant/Chroma backend。
+6. 完善课程交付材料：报告、PPT、截图、录屏、AI 使用说明和演示脚本。
