@@ -116,6 +116,19 @@ def build_memory_candidates_with_llm(
 ) -> tuple[list[MemoryCandidate], dict[str, Any]]:
     rule_candidates = build_rule_memory_candidates(policy_input)
     rule_candidate_dicts = [asdict(candidate) for candidate in rule_candidates]
+    if rule_candidates:
+        return rule_candidates, {
+            "candidate_generation": {
+                "enabled": False,
+                "stage": "candidate_generation",
+                "reason": "Rule candidates were sufficient for the realtime path.",
+            },
+            "candidate_review": {
+                "enabled": False,
+                "stage": "candidate_review",
+                "reason": "Rule candidates use programmatic gates instead of realtime LLM review.",
+            },
+        }
     llm_candidates, generation_trace = generate_memory_candidates(
         policy_input=policy_input,
         rule_candidates=rule_candidate_dicts,

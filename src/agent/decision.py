@@ -30,6 +30,32 @@ ALLOWED_INTENTS = {
     "probe_for_evidence",
     "general_conversation",
 }
+TASK_INTENTS = {
+    "lost_key": {
+        "npc_id": "lina",
+        "start": "start_lost_key_quest",
+        "complete": "complete_lost_key_quest",
+        "evidence": ["钥匙", "key", "找回", "归还", "还给", "returned"],
+    },
+    "gate_badge": {
+        "npc_id": "ron",
+        "start": "start_gate_badge_quest",
+        "complete": "complete_gate_badge_quest",
+        "evidence": ["徽章", "badge", "登记", "签名", "ledger", "证人", "witness", "能对上"],
+    },
+    "ancient_notes": {
+        "npc_id": "mira",
+        "start": "start_ancient_notes_quest",
+        "complete": "complete_ancient_notes_quest",
+        "evidence": ["观察", "符号", "铭文", "笔记", "封闭石门", "field notes", "inscription", "sealed"],
+    },
+    "relic_tip": {
+        "npc_id": "sable",
+        "start": "start_relic_tip_quest",
+        "complete": "complete_relic_tip_quest",
+        "evidence": ["后巷", "入口", "线索", "换岗记录", "relic", "entrance", "lina说", "接受"],
+    },
+}
 ALLOWED_SOCIAL_INTENTS = {
     "cooperate",
     "conceal",
@@ -119,7 +145,12 @@ def decide_next_action(
                 },
                 settings=settings,
             )
-            return validate_decision(decision)
+            return apply_task_state_machine(
+                validate_decision(decision),
+                player_input=player_input,
+                npc_state=npc_state,
+                quest_state=quest_state,
+            )
         except Exception as exc:
             fallback = mock_decide_next_action(
                 player_input,
@@ -133,14 +164,24 @@ def decide_next_action(
                 "provider": settings.provider,
                 "reason": str(exc),
             }
-            return fallback
-    return mock_decide_next_action(
-        player_input,
-        npc_state,
-        player_state,
-        quest_state,
-        retrieved_long_term_memories,
-        recent_short_term_context or [],
+            return apply_task_state_machine(
+                fallback,
+                player_input=player_input,
+                npc_state=npc_state,
+                quest_state=quest_state,
+            )
+    return apply_task_state_machine(
+        mock_decide_next_action(
+            player_input,
+            npc_state,
+            player_state,
+            quest_state,
+            retrieved_long_term_memories,
+            recent_short_term_context or [],
+        ),
+        player_input=player_input,
+        npc_state=npc_state,
+        quest_state=quest_state,
     )
 
 
@@ -624,6 +665,110 @@ def validate_decision(decision: dict[str, Any]) -> dict[str, Any]:
     normalize_memory_tool_args(decision)
     validate_decision_business_rules(decision)
     return decision
+
+
+def apply_task_state_machine(
+    decision: dict[str, Any],
+    player_input: str,
+    npc_state: dict[str, Any],
+    quest_state: dict[str, Any],
+) -> dict[str, Any]:
+    """Program-owned quest lifecycle guard for mock and LLM decisions."""
+    task = TASK_INTENTS.get(quest_state.get("quest_id"))
+    if not task:
+        return decision
+
+    intent = decision["intent"]
+    quest_id = quest_state["quest_id"]
+    status = quest_state["status"]
+    npc_id = npc_state["npc_id"]
+
+    if npc_id != task["npc_id"]:
+        return safe_task_decision(
+            decision,
+            reason=f"NPC {npc_id} cannot advance quest {quest_id}.",
+            keywords=["当前角色", "任务不匹配", "需要确认对象"],
+        )
+
+    status_updates = [
+        tool for tool in decision["tools"]
+        if tool["name"] == "update_quest_status"
+    ]
+    if any(tool["args"].get("quest_id") != quest_id for tool in status_updates):
+        return safe_task_decision(
+            decision,
+            reason=f"Decision tried to update a non-primary quest for {npc_id}.",
+            keywords=["任务不匹配", "不能越权", "需要重新确认"],
+        )
+
+    if intent == task["start"]:
+        if status != "not_started":
+            return safe_task_decision(
+                decision,
+                reason=f"Quest {quest_id} can start only from not_started, current status is {status}.",
+                keywords=["任务已经开启", "继续提供线索", "不要重复接取"],
+            )
+        return decision
+
+    if intent == task["complete"]:
+        if status != "in_progress":
+            return safe_task_decision(
+                decision,
+                reason=f"Quest {quest_id} can complete only from in_progress, current status is {status}.",
+                keywords=["先说明来龙去脉", "还不能确认完成", "需要先接取任务"],
+            )
+        if not has_completion_evidence(player_input, task["evidence"]):
+            return safe_task_decision(
+                decision,
+                reason=f"Quest {quest_id} completion lacks task-specific evidence.",
+                keywords=["证据不足", "需要具体线索", "不能只凭一句话确认"],
+            )
+        return decision
+
+    if status_updates:
+        return safe_task_decision(
+            decision,
+            reason=f"Intent {intent} is not allowed to update quest {quest_id}.",
+            keywords=["任务状态不能改变", "需要更多证据", "保持当前状态"],
+        )
+    return decision
+
+
+def has_completion_evidence(player_input: str, evidence_terms: list[str]) -> bool:
+    text = player_input.lower()
+    return any(term.lower() in text for term in evidence_terms)
+
+
+def safe_task_decision(
+    original: dict[str, Any],
+    reason: str,
+    keywords: list[str],
+) -> dict[str, Any]:
+    sanitized = dict(original)
+    sanitized.update(
+        {
+            "intent": "probe_for_evidence",
+            "reasoning": f"Task state machine blocked the proposed action: {reason}",
+            "memory_policy": "Do not write task progress memory because the program rejected the state transition.",
+            "response_style": "cautious_state_guard",
+            "response_keywords": keywords,
+            "tools": [],
+            "social_intent": "probe",
+            "social_stance": {
+                "target": "player",
+                "attitude": "cautious",
+                "intensity": 0.65,
+                "reason": "The player claim does not yet satisfy the task state machine.",
+            },
+            "state_machine": {
+                "blocked": True,
+                "original_intent": original.get("intent"),
+                "reason": reason,
+            },
+        }
+    )
+    normalize_social_fields(sanitized)
+    return sanitized
 
 
 def normalize_social_fields(decision: dict[str, Any]) -> None:

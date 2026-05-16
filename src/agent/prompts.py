@@ -17,7 +17,8 @@ Do not write long-term memory directly. The program owns long-term memory policy
 Do not return or guess current or future numeric state values. The program owns state snapshots.
 Use the context layers by priority: state_snapshot for current truth, retrieved_lore for stable world/NPC knowledge, retrieved_long_term_memories for this NPC's player-specific recollections, and recent_short_term_context for local dialogue continuity.
 Use start_lost_key_quest only when the player offers to help find the key or asks for key details.
-Use complete_lost_key_quest only when the player actually returns or claims to have found the key.
+Use complete_* quest intents only when the current quest status is already in_progress and the player provides task-specific evidence. Do not jump from not_started to completed.
+If the player claims a task is complete before it is started, probe for evidence or explain that the task context has not been established yet.
 Always include social_intent and social_stance. Social intent affects conversation strategy only; it does not grant tool permission.
 Do not expose a hidden alignment directly in normal dialogue. Hidden alignment is for decision strategy and trace explanation.
 """

@@ -102,7 +102,7 @@
         "trust"
       ],
       "source_path": "data/lore/npc_lina.md",
-      "updated_at": "2026-05-15 10:55:46"
+      "updated_at": "2026-05-16 11:38:32"
     },
     {
       "lore_id": "world:underground_ruins",
@@ -119,7 +119,7 @@
         "sensitive_location"
       ],
       "source_path": "data/lore/underground_ruins.md",
-      "updated_at": "2026-05-15 10:55:46"
+      "updated_at": "2026-05-16 11:38:32"
     },
     {
       "lore_id": "npc:sable:profile",
@@ -137,7 +137,7 @@
         "exploit_ruins"
       ],
       "source_path": "data/lore/npc_sable.md",
-      "updated_at": "2026-05-15 10:55:46"
+      "updated_at": "2026-05-16 11:38:32"
     },
     {
       "lore_id": "world:grayhaven_overview",
@@ -155,7 +155,7 @@
         "social_rules"
       ],
       "source_path": "data/lore/world_overview.md",
-      "updated_at": "2026-05-15 10:55:46"
+      "updated_at": "2026-05-16 11:38:32"
     },
     {
       "lore_id": "world:social_deduction_rules",
@@ -172,7 +172,7 @@
         "hidden_alignment"
       ],
       "source_path": "data/lore/social_deduction_rules.md",
-      "updated_at": "2026-05-15 10:55:46"
+      "updated_at": "2026-05-16 11:38:32"
     },
     {
       "lore_id": "npc:mira:profile",
@@ -190,7 +190,7 @@
         "field_notes"
       ],
       "source_path": "data/lore/npc_mira.md",
-      "updated_at": "2026-05-15 10:55:46"
+      "updated_at": "2026-05-16 11:38:32"
     },
     {
       "lore_id": "npc:ron:profile",
@@ -208,7 +208,7 @@
         "badge"
       ],
       "source_path": "data/lore/npc_ron.md",
-      "updated_at": "2026-05-15 10:55:46"
+      "updated_at": "2026-05-16 11:38:32"
     }
   ],
   "recent_interactions_by_npc": {
@@ -220,13 +220,13 @@
   "world_events": [],
   "interaction_logs": [],
   "embedding_settings": {
-    "provider": "openai_compatible",
+    "provider": "mock_hash",
     "model": "text-embedding-3-small",
-    "base_url": "https://yunwu.ai/v1",
+    "base_url": "https://api.openai.com/v1",
     "configured": true,
-    "uses_api_key": true,
+    "uses_api_key": false,
     "embedding_dim": 64,
-    "timeout_seconds": 90.0,
+    "timeout_seconds": 30.0,
     "allow_fallback": true,
     "retrieval_backend": "sqlite_cosine",
     "faiss_available": false

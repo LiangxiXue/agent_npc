@@ -69,6 +69,42 @@ data/agent_trace_export.json
 
 Web 页面仍保留 `Download Trace JSON` 按钮；同时页面在显示 interaction log 时会自动把同一份 payload 写入 `data/agent_trace_export.json`，不需要再手动下载后复制。
 
+### 玩家端像素风 UI
+
+项目新增独立 React/Vite 玩家端，保留 Streamlit 作为调试台。玩家端把同一套 Agent workflow 包装成暗色像素 RPG 界面，包含地图场景、NPC 像素头像、对话框、任务状态、背包、长期记忆和折叠的开发者 trace 面板。
+
+先启动 API：
+
+```powershell
+python -m uvicorn src.api.server:app --host 127.0.0.1 --port 8000
+```
+
+再启动玩家端：
+
+```powershell
+cd frontend
+npm install
+npm run dev
+```
+
+浏览器打开：
+
+```text
+http://127.0.0.1:5173/
+```
+
+像素资产位于：
+
+```text
+frontend/public/assets/pixel/
+```
+
+如需重建首版占位像素图：
+
+```powershell
+python scripts/generate_pixel_assets.py
+```
+
 记忆系统评测与对比实验：
 
 ```bash
@@ -209,6 +245,14 @@ pip install -r requirements.txt
 
 ```bash
 streamlit run app.py
+```
+
+启动玩家端像素 UI：
+
+```powershell
+python -m uvicorn src.api.server:app --host 127.0.0.1 --port 8000
+cd frontend
+npm run dev
 ```
 
 首次启动时会自动创建并初始化：

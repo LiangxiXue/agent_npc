@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from time import perf_counter
 from typing import Any
 
 from src.agent.context import build_context_inputs
@@ -33,6 +34,7 @@ class AgentRun:
     memory_writes: list[dict[str, Any]]
     state_changes: list[dict[str, Any]]
     workflow_steps: list[dict[str, str]]
+    timings: dict[str, float]
     log_id: int
 
 
@@ -43,13 +45,17 @@ def run_agent_turn(
     memory_policy_enabled: bool = True,
 ) -> AgentRun:
     """Run the MVP agent workflow from input to trace logging."""
+    total_started = perf_counter()
+    timings: dict[str, float] = {}
     database.initialize_database()
 
+    context_started = perf_counter()
     context_inputs = build_context_inputs(
         player_input=player_input,
         npc_id=npc_id,
         memory_retrieval_mode=memory_retrieval_mode,
     )
+    timings["context_retrieval_ms"] = elapsed_ms(context_started)
     recent_context = context_inputs["recent_context"]
     retrieved_lore = context_inputs["retrieved_lore"]
     retrieved_memories = context_inputs["retrieved_memories"]
@@ -58,6 +64,7 @@ def run_agent_turn(
     player_before = database.get_player_state()
     quest_before = database.get_primary_quest_for_npc(npc_id)
 
+    decision_started = perf_counter()
     decision = decide_next_action(
         player_input=player_input,
         npc_state=npc_before,
@@ -68,9 +75,12 @@ def run_agent_turn(
         state_snapshot=state_snapshot,
         recent_short_term_context=recent_context,
     )
+    timings["decision_ms"] = elapsed_ms(decision_started)
     decision["memory_retrieval_mode"] = memory_retrieval_mode
     decision["state_before"] = build_state_snapshot(npc_before, player_before, quest_before)
+    tools_started = perf_counter()
     tool_executions = execute_tools(decision)
+    timings["tool_execution_ms"] = elapsed_ms(tools_started)
 
     npc_after = database.get_npc(npc_id)
     player_after = database.get_player_state()
@@ -92,6 +102,7 @@ def run_agent_turn(
     }
 
     tool_calls = sqlite_tools.serialize_tool_executions(tool_executions)
+    response_started = perf_counter()
     npc_response, response_generation = generate_npc_response(
         player_input=player_input,
         decision=decision,
@@ -105,8 +116,10 @@ def run_agent_turn(
         tool_calls=tool_calls,
         state_changes=state_changes,
     )
+    timings["response_ms"] = elapsed_ms(response_started)
     decision["response_generation"] = response_generation
     if memory_policy_enabled:
+        memory_started = perf_counter()
         memory_policy, memory_writes = apply_memory_policy(
             MemoryPolicyInput(
                 npc_id=npc_id,
@@ -125,7 +138,10 @@ def run_agent_turn(
                 state_changes=state_changes,
             )
         )
+        timings["memory_policy_ms"] = elapsed_ms(memory_started)
+        embedding_started = perf_counter()
         embedding_updates = ensure_embeddings_for_memory_writes(memory_writes)
+        timings["embedding_write_ms"] = elapsed_ms(embedding_started)
         memory_policy["embedding_updates"] = embedding_updates
     else:
         memory_policy = {
@@ -145,6 +161,9 @@ def run_agent_turn(
             "embedding_updates": [],
         }
         memory_writes = []
+        timings["memory_policy_ms"] = 0.0
+        timings["embedding_write_ms"] = 0.0
+    logging_started = perf_counter()
     database.add_recent_interaction(
         npc_id=npc_id,
         player_input=player_input,
@@ -163,6 +182,8 @@ def run_agent_turn(
         memory_writes=memory_writes,
         state_changes=state_changes,
     )
+    timings["pre_logging_total_ms"] = elapsed_ms(total_started)
+    decision["timings"] = dict(timings)
     log_id = database.log_interaction(
         npc_id=npc_id,
         player_input=player_input,
@@ -178,6 +199,8 @@ def run_agent_turn(
         state_changes=state_changes,
         workflow_steps=workflow_steps,
     )
+    timings["logging_ms"] = elapsed_ms(logging_started)
+    timings["total_ms"] = elapsed_ms(total_started)
 
     return AgentRun(
         npc_id=npc_id,
@@ -196,8 +219,13 @@ def run_agent_turn(
         memory_writes=memory_writes,
         state_changes=state_changes,
         workflow_steps=workflow_steps,
+        timings=timings,
         log_id=log_id,
     )
+
+
+def elapsed_ms(started: float) -> float:
+    return round((perf_counter() - started) * 1000, 3)
 
 
 def execute_tools(decision: dict[str, Any]) -> list[sqlite_tools.ToolExecution]:

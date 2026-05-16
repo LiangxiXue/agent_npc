@@ -5,6 +5,14 @@ __pycache__/
 .venv/
 venv/
 
+# Frontend dependencies/build output
+frontend/node_modules/
+frontend/dist/
+frontend/*.tsbuildinfo
+frontend/**/*.tsbuildinfo
+frontend/vite.config.js
+frontend/vite.config.d.ts
+
 # Local configuration
 .env
 .vscode/
@@ -20,6 +28,9 @@ data/*.db-journal
 data/*.db-shm
 data/*.db-wal
 data/*.log
+agent_npc/data/*.log
+data/translation_cache.json
+data/translation_cache.json.tmp
 
 # Trace artifacts: keep the canonical demo trace and archived history.
 agent_trace_export.json

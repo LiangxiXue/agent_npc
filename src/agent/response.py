@@ -108,6 +108,11 @@ def fallback_response(
         return "Lina 停下擦杯子的手：“是后屋储藏室铁箱的小铜钥匙，我大概是在镇广场附近弄丢的。你肯帮忙，我会记着这份人情。”"
     if intent == "withhold_ruins_entrance":
         return "Lina 皱了皱眉：“这种地方不是随便能打听的。等我更了解你之后再说吧。”"
+    if intent == "probe_for_evidence" and decision.get("state_machine", {}).get("blocked"):
+        return (
+            f"{name} 没有立刻接受这个说法：“先把事情说清楚一点。"
+            "我不能只凭一句话就当作任务已经完成。”"
+        )
     if intent == "start_gate_badge_quest":
         return "Ron 合上巡逻记录：“如果你要查守卫徽章，就给我时间、地点和能核对的人名。没有证据，我不会把传闻写进交接。”"
     if intent == "complete_gate_badge_quest":

@@ -36,12 +36,13 @@ class AgentWorkflowTest(unittest.TestCase):
         self.assertEqual(database.get_npc("lina")["trust"], 20)
 
     def test_returning_key_updates_state_and_logs_tools(self) -> None:
+        run_agent_turn("什么样的钥匙，我这就去帮你找找")
         run = run_agent_turn("我把你丢失的钥匙找回来了。")
         tool_names = [tool["name"] for tool in run.tool_calls]
         memory_types = [write["arguments"]["memory_type"] for write in run.memory_writes]
 
         self.assertEqual(run.decision["intent"], "complete_lost_key_quest")
-        self.assertEqual(database.get_npc("lina")["trust"], 30)
+        self.assertEqual(database.get_npc("lina")["trust"], 40)
         self.assertEqual(database.get_npc("lina")["affection"], 38)
         self.assertEqual(database.get_quest("lost_key")["status"], "completed")
         self.assertIn("tavern_discount_coupon", database.get_player_state()["inventory"])
@@ -53,6 +54,26 @@ class AgentWorkflowTest(unittest.TestCase):
         self.assertIn("relationship", memory_types)
         self.assertEqual(run.memory_policy["summary"], "Wrote 4 long-term memory record(s).")
         self.assertGreaterEqual(len(run.workflow_steps), 8)
+        self.assertIn("total_ms", run.timings)
+
+    def test_unstarted_tasks_reject_direct_completion_claims(self) -> None:
+        cases = [
+            ("lina", "我把你丢失的钥匙找回来了。", "lost_key"),
+            ("ron", "我找到守卫徽章了，登记册签名也能对上。", "gate_badge"),
+            ("mira", "我看到遗迹门边有三角符号和封闭石门，这是我的一手观察。", "ancient_notes"),
+            ("sable", "我听说入口在酒馆后巷，我接受你说的先查换岗记录。", "relic_tip"),
+        ]
+
+        for npc_id, player_input, quest_id in cases:
+            with self.subTest(npc_id=npc_id):
+                database.reset_database()
+                run = run_agent_turn(player_input, npc_id=npc_id)
+
+                self.assertEqual(run.decision["intent"], "probe_for_evidence")
+                self.assertTrue(run.decision["state_machine"]["blocked"])
+                self.assertEqual(database.get_quest(quest_id)["status"], "not_started")
+                self.assertEqual(run.tool_calls, [])
+                self.assertFalse(run.memory_writes)
 
     def test_asking_key_details_starts_lost_key_quest(self) -> None:
         run = run_agent_turn("什么样的钥匙，我这就去帮你找找")
@@ -65,6 +86,7 @@ class AgentWorkflowTest(unittest.TestCase):
         self.assertNotIn("unlock_location", tool_names)
 
     def test_completed_quest_allows_ruins_unlock(self) -> None:
+        run_agent_turn("什么样的钥匙，我这就去帮你找找")
         run_agent_turn("我把你丢失的钥匙找回来了。")
         run = run_agent_turn("上次我帮你找回钥匙了，现在能告诉我遗迹入口吗？")
 
@@ -72,7 +94,7 @@ class AgentWorkflowTest(unittest.TestCase):
         self.assertTrue(any("lost_key" in memory["tags"] for memory in run.retrieved_memories))
         self.assertTrue(all("retrieval_score" in memory for memory in run.retrieved_memories))
         self.assertIn("underground_ruins_entrance", database.get_player_state()["unlocked_locations"])
-        self.assertEqual(len(database.get_interaction_logs()), 2)
+        self.assertEqual(len(database.get_interaction_logs()), 3)
         self.assertEqual(database.get_world_events(limit=1)[0]["content"], "Lina revealed the underground ruins entrance.")
 
     def test_semantic_retrieval_handles_implicit_help_reference(self) -> None:
@@ -95,6 +117,7 @@ class AgentWorkflowTest(unittest.TestCase):
         self.assertTrue(all("score_breakdown" in memory for memory in memories))
 
     def test_hybrid_retrieval_includes_rule_and_semantic_scores(self) -> None:
+        run_agent_turn("什么样的钥匙，我这就去帮你找找")
         run_agent_turn("我把你丢失的钥匙找回来了。")
         run = run_agent_turn(
             "上次那件事之后，你应该更愿意相信我了吧？现在能告诉我遗迹入口吗？",
@@ -177,10 +200,11 @@ class AgentWorkflowTest(unittest.TestCase):
         self.assertTrue(database.get_recent_memories("ron", limit=10))
 
     def test_logs_store_trace_artifacts(self) -> None:
+        run_agent_turn("什么样的钥匙，我这就去帮你找找")
         run = run_agent_turn("我把你丢失的钥匙找回来了。")
         logs = database.get_interaction_logs()
 
-        self.assertEqual(len(logs), 1)
+        self.assertEqual(len(logs), 2)
         self.assertEqual(logs[0]["decision"]["intent"], run.decision["intent"])
         self.assertEqual(logs[0]["workflow_steps"][0]["stage"], "Player Input")
         self.assertEqual(logs[0]["memory_writes"][0]["name"], "add_memory")
@@ -190,7 +214,7 @@ class AgentWorkflowTest(unittest.TestCase):
         self.assertIn("context_inputs", logs[0]["decision"])
         self.assertIn("social_intent", logs[0]["decision"])
         self.assertIn("social_stance", logs[0]["decision"])
-        self.assertEqual(logs[0]["recent_context"], [])
+        self.assertEqual(len(logs[0]["recent_context"]), 1)
         self.assertTrue(logs[0]["memory_policy"]["candidates"])
         self.assertTrue(logs[0]["state_changes"])
 
@@ -332,6 +356,70 @@ class AgentWorkflowTest(unittest.TestCase):
 
         self.assertFalse(get_provider_status()["configured"])
         self.assertEqual(decision["intent"], "withhold_ruins_entrance")
+
+    def test_task_state_machine_blocks_invalid_llm_completion(self) -> None:
+        os.environ["AGENT_NPC_LLM_PROVIDER"] = "openai_compatible"
+        os.environ["AGENT_NPC_LLM_API_KEY"] = "test-key"
+
+        with patch(
+            "src.agent.decision.call_openai_compatible_json",
+            return_value={
+                "intent": "complete_gate_badge_quest",
+                "reasoning": "test",
+                "memory_policy": "test",
+                "social_intent": "cooperate",
+                "social_stance": {
+                    "target": "player",
+                    "attitude": "support",
+                    "intensity": 0.8,
+                    "reason": "test",
+                },
+                "response_style": "formal_cooperation",
+                "response_keywords": ["徽章", "完成"],
+                "tools": [
+                    {"name": "update_trust", "args": {"npc_id": "ron", "delta": 8}},
+                    {"name": "update_quest_status", "args": {"quest_id": "gate_badge", "status": "completed"}},
+                    {"name": "give_item", "args": {"item": "guard_route_note"}},
+                ],
+            },
+        ):
+            run = run_agent_turn("我找到守卫徽章了，登记册签名也能对上。", npc_id="ron")
+
+        self.assertEqual(run.decision["intent"], "probe_for_evidence")
+        self.assertTrue(run.decision["state_machine"]["blocked"])
+        self.assertEqual(run.tool_calls, [])
+        self.assertEqual(database.get_quest("gate_badge")["status"], "not_started")
+
+    def test_task_state_machine_blocks_cross_npc_quest_update(self) -> None:
+        os.environ["AGENT_NPC_LLM_PROVIDER"] = "openai_compatible"
+        os.environ["AGENT_NPC_LLM_API_KEY"] = "test-key"
+
+        with patch(
+            "src.agent.decision.call_openai_compatible_json",
+            return_value={
+                "intent": "complete_gate_badge_quest",
+                "reasoning": "test",
+                "memory_policy": "test",
+                "social_intent": "cooperate",
+                "social_stance": {
+                    "target": "player",
+                    "attitude": "support",
+                    "intensity": 0.8,
+                    "reason": "test",
+                },
+                "response_style": "formal_cooperation",
+                "response_keywords": ["徽章", "完成"],
+                "tools": [
+                    {"name": "update_quest_status", "args": {"quest_id": "gate_badge", "status": "completed"}},
+                ],
+            },
+        ):
+            run = run_agent_turn("我找到守卫徽章了。", npc_id="lina")
+
+        self.assertEqual(run.decision["intent"], "probe_for_evidence")
+        self.assertTrue(run.decision["state_machine"]["blocked"])
+        self.assertEqual(database.get_quest("gate_badge")["status"], "not_started")
+        self.assertEqual(database.get_quest("lost_key")["status"], "not_started")
 
     def test_decision_rejects_unsupported_tools(self) -> None:
         with self.assertRaises(ValueError):
@@ -558,8 +646,9 @@ class AgentWorkflowTest(unittest.TestCase):
         self.assertEqual(policy["llm_memory_policy"]["candidate_review"]["status"], "ok")
 
     def test_repeated_key_return_deduplicates_long_term_memory(self) -> None:
+        run_agent_turn("什么样的钥匙，我这就去帮你找找")
         first = run_agent_turn("我把你丢失的钥匙找回来了。")
-        database.update_quest_status("lost_key", "not_started")
+        database.update_quest_status("lost_key", "in_progress")
         second = run_agent_turn("我又把你丢失的钥匙找回来了。")
 
         self.assertTrue(first.memory_writes)
