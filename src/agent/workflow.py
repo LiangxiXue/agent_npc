@@ -6,9 +6,8 @@ from typing import Any
 
 from src.agent.context import build_context_inputs
 from src.agent.decision import decide_next_action
-from src.agent.memory_policy import MemoryPolicyInput, apply_memory_policy
+from src.agent.memory_jobs import enqueue_memory_job
 from src.agent.response import generate_npc_response
-from src.agent.semantic_retrieval import ensure_embeddings_for_memory_writes
 from src.storage import database
 from src.tools import sqlite_tools
 
@@ -36,6 +35,7 @@ class AgentRun:
     workflow_steps: list[dict[str, str]]
     timings: dict[str, float]
     log_id: int
+    memory_job_status: dict[str, Any]
 
 
 def run_agent_turn(
@@ -76,8 +76,9 @@ def run_agent_turn(
         recent_short_term_context=recent_context,
     )
     timings["decision_ms"] = elapsed_ms(decision_started)
+    state_before = build_state_snapshot(npc_before, player_before, quest_before)
     decision["memory_retrieval_mode"] = memory_retrieval_mode
-    decision["state_before"] = build_state_snapshot(npc_before, player_before, quest_before)
+    decision["state_before"] = state_before
     tools_started = perf_counter()
     tool_executions = execute_tools(decision)
     timings["tool_execution_ms"] = elapsed_ms(tools_started)
@@ -118,31 +119,49 @@ def run_agent_turn(
     )
     timings["response_ms"] = elapsed_ms(response_started)
     decision["response_generation"] = response_generation
+
+    memory_job_status: dict[str, Any]
     if memory_policy_enabled:
         memory_started = perf_counter()
-        memory_policy, memory_writes = apply_memory_policy(
-            MemoryPolicyInput(
-                npc_id=npc_id,
-                player_input=player_input,
-                npc_response=npc_response,
-                retrieved_lore=retrieved_lore,
-                retrieved_long_term_memories=retrieved_memories,
-                recent_short_term_context=recent_context,
-                npc_before=npc_before,
-                npc_after=npc_after,
-                player_before=player_before,
-                player_after=player_after,
-                quest_before=quest_before,
-                quest_after=quest_after,
-                tool_calls=tool_calls,
-                state_changes=state_changes,
-            )
+        memory_job = enqueue_memory_job(
+            npc_id=npc_id,
+            player_input=player_input,
+            npc_response=npc_response,
+            recent_context=recent_context,
+            retrieved_lore=retrieved_lore,
+            retrieved_memories=retrieved_memories,
+            state_before=state_before,
+            state_after=decision["state_after"],
+            tool_calls=tool_calls,
+            state_changes=state_changes,
         )
-        timings["memory_policy_ms"] = elapsed_ms(memory_started)
-        embedding_started = perf_counter()
-        embedding_updates = ensure_embeddings_for_memory_writes(memory_writes)
-        timings["embedding_write_ms"] = elapsed_ms(embedding_started)
-        memory_policy["embedding_updates"] = embedding_updates
+        timings["memory_realtime_ms"] = elapsed_ms(memory_started)
+        timings["memory_policy_ms"] = 0.0
+        timings["embedding_write_ms"] = 0.0
+        memory_job_status = {
+            "id": memory_job["id"],
+            "status": memory_job["status"],
+            "background_memory_enabled": True,
+        }
+        memory_policy = {
+            "candidates": [
+                {
+                    "should_write": False,
+                    "npc_id": npc_id,
+                    "content": "",
+                    "memory_type": "queued",
+                    "importance": 0,
+                    "tags": [],
+                    "confidence": 0.0,
+                    "reason": "Long-term memory policy queued for background processing.",
+                }
+            ],
+            "summary": "Long-term memory queued for background processing.",
+            "embedding_updates": [],
+            "background_memory_enabled": True,
+            "memory_job_status": memory_job_status,
+        }
+        memory_writes = []
     else:
         memory_policy = {
             "candidates": [
@@ -159,10 +178,19 @@ def run_agent_turn(
             ],
             "summary": "Long-term memory policy disabled for ablation.",
             "embedding_updates": [],
+            "background_memory_enabled": False,
         }
         memory_writes = []
         timings["memory_policy_ms"] = 0.0
         timings["embedding_write_ms"] = 0.0
+        timings["memory_realtime_ms"] = 0.0
+        memory_job_status = {
+            "id": None,
+            "status": "disabled",
+            "background_memory_enabled": False,
+        }
+    decision["memory_job_status"] = memory_job_status
+    decision["background_memory_enabled"] = memory_job_status["background_memory_enabled"]
     logging_started = perf_counter()
     database.add_recent_interaction(
         npc_id=npc_id,
@@ -221,6 +249,7 @@ def run_agent_turn(
         workflow_steps=workflow_steps,
         timings=timings,
         log_id=log_id,
+        memory_job_status=memory_job_status,
     )
 
 
@@ -302,7 +331,10 @@ def build_workflow_steps(
             ),
         },
         {"stage": "State Load", "result": "Loaded NPC, player, and quest state from SQLite."},
-        {"stage": "Structured Decision", "result": f"Intent: {decision['intent']}."},
+        {
+            "stage": "Structured Decision",
+            "result": f"Intent: {decision['intent']}; route: {decision.get('decision_route', 'unknown')}.",
+        },
         {
             "stage": "Social Strategy",
             "result": (
@@ -318,7 +350,14 @@ def build_workflow_steps(
                 f"mode: {decision.get('response_generation', {}).get('mode', 'unknown')}."
             ),
         },
-        {"stage": "Memory Policy", "result": f"Wrote {len(memory_writes)} long-term memory record(s)."},
+        {
+            "stage": "Memory Policy",
+            "result": (
+                "Queued long-term memory for background processing."
+                if decision.get("background_memory_enabled")
+                else f"Wrote {len(memory_writes)} long-term memory record(s)."
+            ),
+        },
         {"stage": "Trace Logging", "result": f"Recorded {len(state_changes)} state changes."},
     ]
 

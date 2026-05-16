@@ -31,6 +31,7 @@ class PlayerApiTest(unittest.TestCase):
         self.assertIn("player", data)
         self.assertIn("retrieval_modes", data)
         self.assertIn("display_translation", data["runtime"])
+        self.assertIn("memory_jobs", data["runtime"])
         self.assertEqual(data["selected_npc"]["npc_id"], "lina")
 
     def test_translate_debug_endpoint_uses_display_translation(self) -> None:
@@ -100,6 +101,24 @@ class PlayerApiTest(unittest.TestCase):
         self.assertEqual(data["run"]["decision"]["intent"], "complete_lost_key_quest")
         self.assertEqual(data["state"]["selected_npc"]["trust"], 40)
         self.assertIn("tavern_discount_coupon", data["state"]["player"]["inventory"])
+        self.assertEqual(data["run"]["memory_job_status"]["status"], "pending")
+
+    def test_process_memory_jobs_endpoint_processes_queued_work(self) -> None:
+        self.client.post(
+            "/api/turn",
+            json={
+                "npc_id": "lina",
+                "player_input": "我今天只是有点孤独，想找你聊一会儿。",
+                "retrieval_mode": "hybrid",
+            },
+        )
+
+        response = self.client.post("/api/process-memory-jobs", json={"limit": 5})
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data["processed"], 1)
+        self.assertEqual(data["memory_jobs"]["pending"], 0)
 
     def test_preview_and_trace_endpoints_are_available(self) -> None:
         preview = self.client.post(

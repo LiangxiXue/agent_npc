@@ -79,6 +79,49 @@ def ensure_schema_migrations(connection: sqlite3.Connection) -> None:
 
     connection.execute(
         """
+        CREATE TABLE IF NOT EXISTS memory_jobs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            npc_id TEXT NOT NULL,
+            player_input TEXT NOT NULL,
+            npc_response TEXT NOT NULL,
+            recent_context TEXT NOT NULL DEFAULT '[]',
+            retrieved_lore TEXT NOT NULL DEFAULT '[]',
+            retrieved_memories TEXT NOT NULL DEFAULT '[]',
+            state_before TEXT NOT NULL DEFAULT '{}',
+            state_after TEXT NOT NULL DEFAULT '{}',
+            tool_calls TEXT NOT NULL DEFAULT '[]',
+            state_changes TEXT NOT NULL DEFAULT '[]',
+            status TEXT NOT NULL DEFAULT 'pending',
+            memory_policy TEXT NOT NULL DEFAULT '{}',
+            memory_writes TEXT NOT NULL DEFAULT '[]',
+            embedding_updates TEXT NOT NULL DEFAULT '[]',
+            error TEXT NOT NULL DEFAULT '',
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            processed_at TEXT,
+            FOREIGN KEY (npc_id) REFERENCES npcs (npc_id)
+        )
+        """
+    )
+    memory_job_columns = {
+        row["name"]
+        for row in connection.execute("PRAGMA table_info(memory_jobs)").fetchall()
+    }
+    memory_job_migrations = {
+        "recent_context": "ALTER TABLE memory_jobs ADD COLUMN recent_context TEXT NOT NULL DEFAULT '[]'",
+        "state_before": "ALTER TABLE memory_jobs ADD COLUMN state_before TEXT NOT NULL DEFAULT '{}'",
+        "state_after": "ALTER TABLE memory_jobs ADD COLUMN state_after TEXT NOT NULL DEFAULT '{}'",
+        "memory_policy": "ALTER TABLE memory_jobs ADD COLUMN memory_policy TEXT NOT NULL DEFAULT '{}'",
+        "memory_writes": "ALTER TABLE memory_jobs ADD COLUMN memory_writes TEXT NOT NULL DEFAULT '[]'",
+        "embedding_updates": "ALTER TABLE memory_jobs ADD COLUMN embedding_updates TEXT NOT NULL DEFAULT '[]'",
+        "processed_at": "ALTER TABLE memory_jobs ADD COLUMN processed_at TEXT",
+    }
+    for column, statement in memory_job_migrations.items():
+        if column not in memory_job_columns:
+            connection.execute(statement)
+
+    connection.execute(
+        """
         CREATE TABLE IF NOT EXISTS lore_documents (
             lore_id TEXT PRIMARY KEY,
             scope TEXT NOT NULL,
@@ -161,6 +204,7 @@ def reset_database(db_path: str | Path | None = None) -> None:
             DROP TABLE IF EXISTS recent_interactions;
             DROP TABLE IF EXISTS lore_embeddings;
             DROP TABLE IF EXISTS lore_documents;
+            DROP TABLE IF EXISTS memory_jobs;
             DROP TABLE IF EXISTS memory_embeddings;
             DROP TABLE IF EXISTS memories;
             DROP TABLE IF EXISTS quests;
@@ -1131,6 +1175,150 @@ def clear_interaction_history(npc_id: str = "lina") -> None:
     with connect() as connection:
         connection.execute("DELETE FROM recent_interactions WHERE npc_id = ?", (npc_id,))
         connection.execute("DELETE FROM interaction_logs WHERE npc_id = ?", (npc_id,))
+
+
+def add_memory_job(
+    npc_id: str,
+    player_input: str,
+    npc_response: str,
+    recent_context: list[dict[str, Any]],
+    retrieved_lore: list[dict[str, Any]],
+    retrieved_memories: list[dict[str, Any]],
+    state_before: dict[str, Any],
+    state_after: dict[str, Any],
+    tool_calls: list[dict[str, Any]],
+    state_changes: list[dict[str, Any]],
+) -> dict[str, Any]:
+    with connect() as connection:
+        cursor = connection.execute(
+            """
+            INSERT INTO memory_jobs
+                (
+                    npc_id,
+                    player_input,
+                    npc_response,
+                    recent_context,
+                    retrieved_lore,
+                    retrieved_memories,
+                    state_before,
+                    state_after,
+                    tool_calls,
+                    state_changes
+                )
+            VALUES
+                (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                npc_id,
+                player_input,
+                npc_response,
+                json.dumps(recent_context, ensure_ascii=False),
+                json.dumps(retrieved_lore, ensure_ascii=False),
+                json.dumps(retrieved_memories, ensure_ascii=False),
+                json.dumps(state_before, ensure_ascii=False),
+                json.dumps(state_after, ensure_ascii=False),
+                json.dumps(tool_calls, ensure_ascii=False),
+                json.dumps(state_changes, ensure_ascii=False),
+            ),
+        )
+        job_id = int(cursor.lastrowid)
+    job = get_memory_job(job_id)
+    if job is None:
+        raise RuntimeError(f"Memory job was not persisted: {job_id}")
+    return job
+
+
+def get_memory_job(job_id: int) -> dict[str, Any] | None:
+    with connect() as connection:
+        row = connection.execute(
+            "SELECT * FROM memory_jobs WHERE id = ?",
+            (job_id,),
+        ).fetchone()
+    return parse_memory_job(row_to_dict(row))
+
+
+def get_pending_memory_jobs(limit: int = 10) -> list[dict[str, Any]]:
+    with connect() as connection:
+        rows = connection.execute(
+            """
+            SELECT * FROM memory_jobs
+            WHERE status = 'pending'
+            ORDER BY id
+            LIMIT ?
+            """,
+            (limit,),
+        ).fetchall()
+    return [job for job in (parse_memory_job(dict(row)) for row in rows) if job is not None]
+
+
+def update_memory_job_result(
+    job_id: int,
+    status: str,
+    memory_policy: dict[str, Any] | None = None,
+    memory_writes: list[dict[str, Any]] | None = None,
+    embedding_updates: list[dict[str, Any]] | None = None,
+    error: str = "",
+) -> dict[str, Any]:
+    processed_at = "CURRENT_TIMESTAMP" if status in {"written", "indexed", "failed"} else "NULL"
+    with connect() as connection:
+        connection.execute(
+            f"""
+            UPDATE memory_jobs
+            SET
+                status = ?,
+                memory_policy = ?,
+                memory_writes = ?,
+                embedding_updates = ?,
+                error = ?,
+                updated_at = CURRENT_TIMESTAMP,
+                processed_at = {processed_at}
+            WHERE id = ?
+            """,
+            (
+                status,
+                json.dumps(memory_policy or {}, ensure_ascii=False),
+                json.dumps(memory_writes or [], ensure_ascii=False),
+                json.dumps(embedding_updates or [], ensure_ascii=False),
+                error,
+                job_id,
+            ),
+        )
+    job = get_memory_job(job_id)
+    if job is None:
+        raise KeyError(f"Memory job not found: {job_id}")
+    return job
+
+
+def get_memory_job_counts() -> dict[str, int]:
+    counts = {"pending": 0, "written": 0, "indexed": 0, "failed": 0}
+    with connect() as connection:
+        rows = connection.execute(
+            "SELECT status, COUNT(*) AS count FROM memory_jobs GROUP BY status"
+        ).fetchall()
+    for row in rows:
+        counts[str(row["status"])] = int(row["count"])
+    counts["processed"] = counts.get("written", 0) + counts.get("indexed", 0)
+    return counts
+
+
+def parse_memory_job(job: dict[str, Any] | None) -> dict[str, Any] | None:
+    if job is None:
+        return None
+    parsed = dict(job)
+    for field, default in {
+        "recent_context": [],
+        "retrieved_lore": [],
+        "retrieved_memories": [],
+        "state_before": {},
+        "state_after": {},
+        "tool_calls": [],
+        "state_changes": [],
+        "memory_policy": {},
+        "memory_writes": [],
+        "embedding_updates": [],
+    }.items():
+        parsed[field] = json.loads(parsed.get(field) or json.dumps(default))
+    return parsed
 
 
 def log_interaction(

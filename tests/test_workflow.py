@@ -6,6 +6,7 @@ from unittest.mock import patch
 from src.agent.decision import decide_next_action, validate_decision
 from src.agent.lore_retrieval import retrieve_lore
 from src.agent.llm_client import get_provider_status
+from src.agent.memory_jobs import process_pending_memory_jobs
 from src.agent.memory_policy import MemoryPolicyInput, apply_memory_policy
 from src.agent.response import generate_npc_response
 from src.agent.workflow import run_agent_turn
@@ -39,9 +40,9 @@ class AgentWorkflowTest(unittest.TestCase):
         run_agent_turn("什么样的钥匙，我这就去帮你找找")
         run = run_agent_turn("我把你丢失的钥匙找回来了。")
         tool_names = [tool["name"] for tool in run.tool_calls]
-        memory_types = [write["arguments"]["memory_type"] for write in run.memory_writes]
 
         self.assertEqual(run.decision["intent"], "complete_lost_key_quest")
+        self.assertEqual(run.decision["decision_route"], "rule_fast_path")
         self.assertEqual(database.get_npc("lina")["trust"], 40)
         self.assertEqual(database.get_npc("lina")["affection"], 38)
         self.assertEqual(database.get_quest("lost_key")["status"], "completed")
@@ -49,10 +50,18 @@ class AgentWorkflowTest(unittest.TestCase):
         self.assertIn("update_trust", tool_names)
         self.assertIn("update_affection", tool_names)
         self.assertIn("give_item", tool_names)
+        self.assertEqual(run.memory_writes, [])
+        self.assertEqual(run.memory_job_status["status"], "pending")
+        processed = process_pending_memory_jobs(limit=10)
+        memory_types = [
+            write["arguments"]["memory_type"]
+            for job in processed
+            for write in job["memory_writes"]
+        ]
         self.assertIn("quest", memory_types)
         self.assertIn("event", memory_types)
         self.assertIn("relationship", memory_types)
-        self.assertEqual(run.memory_policy["summary"], "Wrote 4 long-term memory record(s).")
+        self.assertEqual(run.memory_policy["summary"], "Long-term memory queued for background processing.")
         self.assertGreaterEqual(len(run.workflow_steps), 8)
         self.assertIn("total_ms", run.timings)
 
@@ -88,6 +97,7 @@ class AgentWorkflowTest(unittest.TestCase):
     def test_completed_quest_allows_ruins_unlock(self) -> None:
         run_agent_turn("什么样的钥匙，我这就去帮你找找")
         run_agent_turn("我把你丢失的钥匙找回来了。")
+        process_pending_memory_jobs(limit=10)
         run = run_agent_turn("上次我帮你找回钥匙了，现在能告诉我遗迹入口吗？")
 
         self.assertEqual(run.decision["intent"], "reveal_ruins_entrance")
@@ -119,6 +129,7 @@ class AgentWorkflowTest(unittest.TestCase):
     def test_hybrid_retrieval_includes_rule_and_semantic_scores(self) -> None:
         run_agent_turn("什么样的钥匙，我这就去帮你找找")
         run_agent_turn("我把你丢失的钥匙找回来了。")
+        process_pending_memory_jobs(limit=10)
         run = run_agent_turn(
             "上次那件事之后，你应该更愿意相信我了吧？现在能告诉我遗迹入口吗？",
             memory_retrieval_mode="hybrid",
@@ -195,7 +206,8 @@ class AgentWorkflowTest(unittest.TestCase):
         self.assertEqual(ron_run.npc_state["npc_id"], "ron")
         self.assertEqual(ron_run.quest_state["quest_id"], "gate_badge")
         self.assertEqual(ron_run.decision["intent"], "general_conversation")
-        self.assertTrue(any(write["arguments"]["npc_id"] == "ron" for write in ron_run.memory_writes))
+        self.assertEqual(ron_run.memory_writes, [])
+        process_pending_memory_jobs(limit=10)
         self.assertFalse(database.get_recent_memories("lina", limit=10))
         self.assertTrue(database.get_recent_memories("ron", limit=10))
 
@@ -207,7 +219,8 @@ class AgentWorkflowTest(unittest.TestCase):
         self.assertEqual(len(logs), 2)
         self.assertEqual(logs[0]["decision"]["intent"], run.decision["intent"])
         self.assertEqual(logs[0]["workflow_steps"][0]["stage"], "Player Input")
-        self.assertEqual(logs[0]["memory_writes"][0]["name"], "add_memory")
+        self.assertEqual(logs[0]["memory_writes"], [])
+        self.assertEqual(logs[0]["decision"]["memory_job_status"]["status"], "pending")
         self.assertTrue(run.retrieved_lore)
         self.assertTrue(logs[0]["retrieved_lore"])
         self.assertIn("state_snapshot", logs[0])
@@ -235,7 +248,7 @@ class AgentWorkflowTest(unittest.TestCase):
         self.assertIsInstance(run.decision["tools"], list)
         self.assertEqual(run.decision["response_generation"]["mode"], "fallback_template")
         self.assertFalse(run.memory_writes)
-        self.assertEqual(run.memory_policy["candidates"][0]["should_write"], False)
+        self.assertEqual(run.memory_job_status["status"], "pending")
 
     def test_ron_gate_badge_quest_can_start_and_complete(self) -> None:
         start = run_agent_turn("城门巡逻记录和守卫徽章有什么线索？", npc_id="ron")
@@ -247,7 +260,9 @@ class AgentWorkflowTest(unittest.TestCase):
         self.assertEqual(complete.decision["social_intent"], "cooperate")
         self.assertEqual(database.get_quest("gate_badge")["status"], "completed")
         self.assertIn("guard_route_note", database.get_player_state()["inventory"])
-        self.assertTrue(any(write["arguments"]["npc_id"] == "ron" for write in complete.memory_writes))
+        self.assertEqual(complete.memory_writes, [])
+        process_pending_memory_jobs(limit=10)
+        self.assertTrue(database.get_recent_memories("ron", limit=10))
 
     def test_ron_ruins_request_probes_for_evidence_without_tools(self) -> None:
         run = run_agent_turn("我想进入遗迹，守卫这边能放行吗？", npc_id="ron")
@@ -266,7 +281,9 @@ class AgentWorkflowTest(unittest.TestCase):
         self.assertIn(complete.decision["social_intent"], {"ally", "cooperate"})
         self.assertEqual(database.get_quest("ancient_notes")["status"], "completed")
         self.assertIn("ruins_research_note", database.get_player_state()["inventory"])
-        self.assertTrue(any(write["arguments"]["npc_id"] == "mira" for write in complete.memory_writes))
+        self.assertEqual(complete.memory_writes, [])
+        process_pending_memory_jobs(limit=10)
+        self.assertTrue(database.get_recent_memories("mira", limit=10))
 
     def test_sable_relic_tip_uses_deception_without_unlocking_ruins(self) -> None:
         start = run_agent_turn("Sable，你知道遗迹入口或者古物线索吗？", npc_id="sable")
@@ -279,7 +296,9 @@ class AgentWorkflowTest(unittest.TestCase):
         self.assertEqual(database.get_quest("relic_tip")["status"], "completed")
         self.assertNotIn("underground_ruins_entrance", database.get_player_state()["unlocked_locations"])
         self.assertTrue(any("Sable" in event["content"] for event in database.get_world_events(limit=10)))
-        self.assertTrue(any(write["arguments"]["npc_id"] == "sable" for write in complete.memory_writes))
+        self.assertEqual(complete.memory_writes, [])
+        process_pending_memory_jobs(limit=10)
+        self.assertTrue(database.get_recent_memories("sable", limit=10))
 
     def test_response_generation_can_use_llm_polish(self) -> None:
         os.environ["AGENT_NPC_LLM_PROVIDER"] = "openai_compatible"
@@ -648,15 +667,20 @@ class AgentWorkflowTest(unittest.TestCase):
     def test_repeated_key_return_deduplicates_long_term_memory(self) -> None:
         run_agent_turn("什么样的钥匙，我这就去帮你找找")
         first = run_agent_turn("我把你丢失的钥匙找回来了。")
+        first_processed = process_pending_memory_jobs(limit=10)
         database.update_quest_status("lost_key", "in_progress")
         second = run_agent_turn("我又把你丢失的钥匙找回来了。")
+        second_processed = process_pending_memory_jobs(limit=10)
 
-        self.assertTrue(first.memory_writes)
-        self.assertLess(len(second.memory_writes), len(first.memory_writes))
+        first_writes = [write for job in first_processed for write in job["memory_writes"]]
+        second_writes = [write for job in second_processed for write in job["memory_writes"]]
+        self.assertEqual(first.memory_writes, [])
+        self.assertLess(len(second_writes), len(first_writes))
         self.assertTrue(
             any(
                 candidate["reason"] == "Similar memory already exists."
-                for candidate in second.memory_policy["candidates"]
+                for job in second_processed
+                for candidate in job["memory_policy"]["candidates"]
             )
         )
 

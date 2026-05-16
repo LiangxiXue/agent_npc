@@ -4,6 +4,7 @@ from typing import Any
 
 from src.agent.llm_client import call_openai_compatible_json, get_llm_settings
 from src.agent.prompts import DECISION_OUTPUT_SCHEMA, DECISION_SYSTEM_PROMPT, TOOL_ARGUMENT_SCHEMAS
+from src.agent.turn_classifier import classify_turn
 
 
 NPC_ID = "lina"
@@ -117,6 +118,27 @@ def decide_next_action(
     recent_short_term_context: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Return a structured decision using mock by default or optional real LLM."""
+    classification = classify_turn(
+        player_input,
+        npc_id=str(npc_state.get("npc_id", NPC_ID)),
+        quest_status=str(quest_state.get("status", "not_started")),
+    )
+    if classification.turn_type not in {"ambiguous", "social_maneuver"}:
+        routed = apply_task_state_machine(
+            mock_decide_next_action(
+                player_input,
+                npc_state,
+                player_state,
+                quest_state,
+                retrieved_long_term_memories,
+                recent_short_term_context or [],
+            ),
+            player_input=player_input,
+            npc_state=npc_state,
+            quest_state=quest_state,
+        )
+        return annotate_decision_route(routed, "rule_fast_path", classification)
+
     settings = get_llm_settings()
     if settings.provider == "openai_compatible" and settings.is_configured:
         try:
@@ -145,12 +167,13 @@ def decide_next_action(
                 },
                 settings=settings,
             )
-            return apply_task_state_machine(
+            routed = apply_task_state_machine(
                 validate_decision(decision),
                 player_input=player_input,
                 npc_state=npc_state,
                 quest_state=quest_state,
             )
+            return annotate_decision_route(routed, "llm_assisted", classification)
         except Exception as exc:
             fallback = mock_decide_next_action(
                 player_input,
@@ -164,13 +187,14 @@ def decide_next_action(
                 "provider": settings.provider,
                 "reason": str(exc),
             }
-            return apply_task_state_machine(
+            routed = apply_task_state_machine(
                 fallback,
                 player_input=player_input,
                 npc_state=npc_state,
                 quest_state=quest_state,
             )
-    return apply_task_state_machine(
+            return annotate_decision_route(routed, "fallback", classification)
+    routed = apply_task_state_machine(
         mock_decide_next_action(
             player_input,
             npc_state,
@@ -183,6 +207,21 @@ def decide_next_action(
         npc_state=npc_state,
         quest_state=quest_state,
     )
+    return annotate_decision_route(routed, "rule_fast_path", classification)
+
+
+def annotate_decision_route(
+    decision: dict[str, Any],
+    route: str,
+    classification: Any,
+) -> dict[str, Any]:
+    decision["decision_route"] = route
+    decision["turn_classification"] = {
+        "turn_type": classification.turn_type,
+        "confidence": classification.confidence,
+        "reason": classification.reason,
+    }
+    return decision
 
 
 def mock_decide_next_action(

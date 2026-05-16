@@ -12,6 +12,7 @@ from src.agent.display_translation import TRANSLATION_CACHE_PATH, translate_debu
 from src.agent.embedding_client import get_embedding_settings
 from src.agent.lore_retrieval import ensure_lore_embeddings, retrieve_lore
 from src.agent.llm_client import get_provider_status
+from src.agent.memory_jobs import process_pending_memory_jobs
 from src.agent.semantic_retrieval import ensure_embeddings_for_memories
 from src.agent.trace_export import build_trace_export_payload, write_trace_export
 from src.agent.workflow import run_agent_turn
@@ -53,6 +54,10 @@ class PreviewRequest(BaseModel):
 
 class NpcRequest(BaseModel):
     npc_id: str = Field(default="lina")
+
+
+class MemoryJobRequest(BaseModel):
+    limit: int = Field(default=10, ge=1, le=100)
 
 
 class TranslationRequest(BaseModel):
@@ -168,6 +173,26 @@ def rebuild_index(request: NpcRequest) -> dict[str, Any]:
     }
 
 
+@app.post("/api/process-memory-jobs")
+def process_memory_jobs(request: MemoryJobRequest) -> dict[str, Any]:
+    jobs = process_pending_memory_jobs(limit=request.limit)
+    return {
+        "processed": len(jobs),
+        "jobs": [
+            {
+                "id": job["id"],
+                "npc_id": job["npc_id"],
+                "status": job["status"],
+                "memory_writes": len(job.get("memory_writes", [])),
+                "embedding_updates": len(job.get("embedding_updates", [])),
+                "error": job.get("error", ""),
+            }
+            for job in jobs
+        ],
+        "memory_jobs": database.get_memory_job_counts(),
+    }
+
+
 @app.get("/api/trace")
 def trace(limit: int = Query(default=10, ge=1, le=100)) -> dict[str, Any]:
     path = write_trace_export(limit=limit)
@@ -209,6 +234,7 @@ def build_client_state(npc_id: str, limit: int = 10) -> dict[str, Any]:
             "llm": get_provider_status(),
             "embedding": get_embedding_settings(),
             "display_translation": get_display_translation_status(),
+            "memory_jobs": database.get_memory_job_counts(),
         },
         "retrieval_modes": [
             {"value": key, "label": label}

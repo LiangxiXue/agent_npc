@@ -57,6 +57,29 @@ CREATE TABLE IF NOT EXISTS memory_embeddings (
     FOREIGN KEY (memory_id) REFERENCES memories (id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS memory_jobs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    npc_id TEXT NOT NULL,
+    player_input TEXT NOT NULL,
+    npc_response TEXT NOT NULL,
+    recent_context TEXT NOT NULL DEFAULT '[]',
+    retrieved_lore TEXT NOT NULL DEFAULT '[]',
+    retrieved_memories TEXT NOT NULL DEFAULT '[]',
+    state_before TEXT NOT NULL DEFAULT '{}',
+    state_after TEXT NOT NULL DEFAULT '{}',
+    tool_calls TEXT NOT NULL DEFAULT '[]',
+    state_changes TEXT NOT NULL DEFAULT '[]',
+    status TEXT NOT NULL DEFAULT 'pending',
+    memory_policy TEXT NOT NULL DEFAULT '{}',
+    memory_writes TEXT NOT NULL DEFAULT '[]',
+    embedding_updates TEXT NOT NULL DEFAULT '[]',
+    error TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    processed_at TEXT,
+    FOREIGN KEY (npc_id) REFERENCES npcs (npc_id)
+);
+
 CREATE TABLE IF NOT EXISTS lore_documents (
     lore_id TEXT PRIMARY KEY,
     scope TEXT NOT NULL,
