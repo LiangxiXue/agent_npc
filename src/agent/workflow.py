@@ -192,15 +192,6 @@ def run_agent_turn(
     decision["memory_job_status"] = memory_job_status
     decision["background_memory_enabled"] = memory_job_status["background_memory_enabled"]
     logging_started = perf_counter()
-    database.add_recent_interaction(
-        npc_id=npc_id,
-        player_input=player_input,
-        npc_response=npc_response,
-        metadata={
-            "intent": decision["intent"],
-            "log_pending": True,
-        },
-    )
     workflow_steps = build_workflow_steps(
         recent_context=recent_context,
         retrieved_lore=retrieved_lore,
@@ -229,6 +220,16 @@ def run_agent_turn(
     )
     timings["logging_ms"] = elapsed_ms(logging_started)
     timings["total_ms"] = elapsed_ms(total_started)
+    database.add_recent_interaction(
+        npc_id=npc_id,
+        player_input=player_input,
+        npc_response=npc_response,
+        metadata={
+            "intent": decision["intent"],
+            "log_id": log_id,
+            "timings": timings,
+        },
+    )
 
     return AgentRun(
         npc_id=npc_id,

@@ -52,6 +52,10 @@ type Interaction = {
   player_input_zh?: string;
   npc_response: string;
   npc_response_zh?: string;
+  metadata?: {
+    timings?: Record<string, number>;
+    [key: string]: unknown;
+  };
   created_at: string;
 };
 
@@ -449,6 +453,7 @@ export function App() {
                       text={turn.npc_response}
                       translation={turn.npc_response_zh}
                       source={`interaction:${turn.id}:npc_response`}
+                      timing={getTimingSummary(turn.metadata?.timings)}
                       npc
                     />
                   </div>
@@ -593,12 +598,14 @@ function Bubble({
   text,
   translation,
   source,
+  timing,
   npc = false
 }: {
   speaker: string;
   text: string;
   translation?: string;
   source?: string;
+  timing?: TimingSummary | null;
   npc?: boolean;
 }) {
   return (
@@ -606,7 +613,47 @@ function Bubble({
       <span>{speaker}</span>
       <p>{text}</p>
       <TranslatedLine text={translation} original={text} source={source} />
+      {timing && <TimingBreakdown timing={timing} />}
     </article>
+  );
+}
+
+type TimingSummary = {
+  totalMs: number;
+  modules: { key: string; label: string; valueMs: number }[];
+};
+
+const timingLabels: Record<string, string> = {
+  context_retrieval_ms: "上下文检索",
+  decision_ms: "结构化决策",
+  tool_execution_ms: "工具执行",
+  response_ms: "回复生成",
+  memory_realtime_ms: "记忆入队",
+  memory_policy_ms: "记忆策略",
+  embedding_write_ms: "向量写入",
+  logging_ms: "Trace 记录",
+  lore_preview_ms: "Lore 预览",
+  memory_preview_ms: "记忆预览"
+};
+
+function TimingBreakdown({ timing }: { timing: TimingSummary }) {
+  return (
+    <div className="timing-breakdown" aria-label="本次回复耗时">
+      <div className="timing-total">
+        <strong>总用时</strong>
+        <span>{formatDuration(timing.totalMs)}</span>
+      </div>
+      {timing.modules.length > 0 && (
+        <div className="timing-modules">
+          {timing.modules.map((item) => (
+            <span key={item.key}>
+              <strong>{item.label}</strong>
+              {formatDuration(item.valueMs)}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -829,6 +876,29 @@ function getString(item: Record<string, unknown> | undefined, key: string): stri
 function getRecord(item: Record<string, unknown>, key: string): Record<string, unknown> {
   const value = item[key];
   return value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
+}
+
+function getTimingSummary(timings: Record<string, number> | undefined): TimingSummary | null {
+  if (!timings || typeof timings.total_ms !== "number") return null;
+  const modules = Object.entries(timings)
+    .filter(([key, value]) => key.endsWith("_ms") && key !== "total_ms" && key !== "pre_logging_total_ms" && value > 0)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([key, valueMs]) => ({
+      key,
+      label: timingLabels[key] ?? key.replace(/_ms$/, "").replaceAll("_", " "),
+      valueMs
+    }));
+  return {
+    totalMs: timings.total_ms,
+    modules
+  };
+}
+
+function formatDuration(ms: number): string {
+  if (ms >= 1000) return `${(ms / 1000).toFixed(ms >= 10000 ? 1 : 2)}s`;
+  if (ms >= 10) return `${Math.round(ms)}ms`;
+  return `${ms.toFixed(1)}ms`;
 }
 
 function looksTranslatable(text: string): boolean {

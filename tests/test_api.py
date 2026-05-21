@@ -77,6 +77,9 @@ class PlayerApiTest(unittest.TestCase):
         self.assertNotIn("tavern_discount_coupon", data["state"]["player"]["inventory"])
         self.assertTrue(data["run"]["retrieved_lore"])
         self.assertIn("total_ms", data["run"]["timings"])
+        latest_interaction = data["state"]["recent_interactions"][-1]
+        self.assertIn("timings", latest_interaction["metadata"])
+        self.assertIn("total_ms", latest_interaction["metadata"]["timings"])
 
     def test_turn_can_complete_after_task_is_started(self) -> None:
         self.client.post(
