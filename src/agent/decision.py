@@ -378,11 +378,13 @@ def mock_decide_next_action(
     return build_decision(
         intent="general_conversation",
         reasoning="No quest-changing intent detected, so Lina keeps the conversation in memory without changing major state.",
-        response_style="attentive_neutral",
+        response_style="natural_in_character_chat",
         response_keywords=[
-            "认真听完",
-            "会记住",
-            "保持观察",
+            "回应玩家当前语气",
+            "保持Lina谨慎但不冷淡",
+            "自然延续话题",
+            "可轻微追问玩家意图",
+            "不承诺新的状态变化",
         ],
         memory_policy="Store the conversation as low-importance context.",
         social_intent="cooperate",
@@ -471,8 +473,14 @@ def mock_ron_decision(
     return build_decision(
         intent="general_conversation",
         reasoning="No guard-task evidence or sensitive access request was detected.",
-        response_style="guard_attentive",
-        response_keywords=["巡逻记录", "城门安全", "保持警惕"],
+        response_style="natural_guard_conversation",
+        response_keywords=[
+            "回应玩家当前语气",
+            "保持Ron务实克制",
+            "可自然提到证据或秩序",
+            "自然延续话题",
+            "不承诺新的状态变化",
+        ],
         memory_policy="Store stable player preferences or evidence habits for Ron only.",
         social_intent="probe",
         social_stance={
@@ -561,8 +569,14 @@ def mock_mira_decision(
     return build_decision(
         intent="general_conversation",
         reasoning="No concrete research note or rumor correction trigger was detected.",
-        response_style="scholar_attentive",
-        response_keywords=["遗迹笔记", "铭文线索", "谨慎验证"],
+        response_style="natural_scholar_conversation",
+        response_keywords=[
+            "回应玩家当前语气",
+            "保持Mira理性好奇",
+            "可鼓励具体观察",
+            "自然延续话题",
+            "不承诺新的状态变化",
+        ],
         memory_policy="Store useful research preferences or observations for Mira only.",
         social_intent="cooperate",
         social_stance={
@@ -635,8 +649,14 @@ def mock_sable_decision(
     return build_decision(
         intent="general_conversation",
         reasoning="No relic or ruins information opportunity was detected.",
-        response_style="broker_charm",
-        response_keywords=["古物行情", "消息很值钱", "别急着表态"],
+        response_style="natural_broker_conversation",
+        response_keywords=[
+            "回应玩家当前语气",
+            "保持Sable圆滑含蓄",
+            "可轻微试探或转移",
+            "自然延续话题",
+            "不提供虚假事实",
+        ],
         memory_policy="Store whether the player seems easy to redirect or prefers direct information around Sable.",
         social_intent="deceive",
         social_stance={
@@ -664,8 +684,14 @@ def mock_multi_npc_conversation(
             f"{name} is currently handled by the shared multi-NPC workflow. "
             f"No custom quest-changing rule matched for {quest_state['quest_id']}."
         ),
-        response_style=f"{role.lower().replace(' ', '_')}_attentive",
-        response_keywords=["认真听完", "记录下来", "保持观察"],
+        response_style=f"natural_{role.lower().replace(' ', '_')}_conversation",
+        response_keywords=[
+            "回应玩家当前语气",
+            "保持NPC既有身份和性格",
+            "自然延续话题",
+            "可轻微追问玩家意图",
+            "不承诺新的状态变化",
+        ],
         memory_policy=f"Store stable player preferences or profile details for {name} only.",
         social_intent="cooperate",
         social_stance={

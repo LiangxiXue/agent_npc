@@ -307,12 +307,12 @@ class AgentWorkflowTest(unittest.TestCase):
             "intent": "general_conversation",
             "reasoning": "test",
             "response_style": "attentive_neutral",
-            "response_keywords": ["记住", "谨慎"],
+            "response_keywords": ["回应玩家当前语气", "谨慎但不冷淡"],
         }
 
         with patch(
             "src.agent.response.call_openai_compatible_json",
-            return_value={"npc_response": "Lina 点点头：“这件事我会记住，但我还要再观察一下。”"},
+            return_value={"npc_response": "Lina 点点头：“你说得直接，我听明白了。不过我还得再观察一下。”"},
         ):
             response, metadata = generate_npc_response(
                 player_input="你好",
@@ -325,8 +325,32 @@ class AgentWorkflowTest(unittest.TestCase):
                 state_changes=[],
             )
 
-        self.assertIn("我会记住", response)
+        self.assertIn("我听明白了", response)
         self.assertEqual(metadata["mode"], "llm_polish")
+
+    def test_general_conversation_keywords_are_behavioral_guidance(self) -> None:
+        for npc_id, expected_keyword in [
+            ("lina", "保持Lina谨慎但不冷淡"),
+            ("ron", "保持Ron务实克制"),
+            ("mira", "保持Mira理性好奇"),
+            ("sable", "保持Sable圆滑含蓄"),
+        ]:
+            with self.subTest(npc_id=npc_id):
+                npc = database.get_npc(npc_id)
+                quest = database.get_primary_quest_for_npc(npc_id)
+                decision = decide_next_action(
+                    player_input="你好，随便聊聊",
+                    npc_state=npc,
+                    player_state=database.get_player_state(),
+                    quest_state=quest,
+                    retrieved_long_term_memories=[],
+                )
+
+                self.assertEqual(decision["intent"], "general_conversation")
+                self.assertIn(expected_keyword, decision["response_keywords"])
+                self.assertFalse(
+                    any("记住" in keyword or "记录" in keyword for keyword in decision["response_keywords"])
+                )
 
     def test_response_generation_rejects_major_fact_conflict(self) -> None:
         os.environ["AGENT_NPC_LLM_PROVIDER"] = "openai_compatible"

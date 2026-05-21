@@ -135,4 +135,4 @@ def fallback_response(
         return "Mira 合上笔记本，认真回答：“这条线索值得保留，我会和遗迹资料一起核对。”"
     if npc_id == "sable":
         return "Sable 笑了笑：“消息本身就有价格。先别急着表态，我们可以看看谁最想把它藏起来。”"
-    return f"{name} 认真听完你的话：“我会记住这件事的。”"
+    return f"{name} 认真听完你的话：“我明白你的意思了。先让我再想想。”"
