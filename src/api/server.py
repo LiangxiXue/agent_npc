@@ -20,7 +20,7 @@ from src.storage import database
 
 
 RetrievalMode = Literal["typed", "hybrid", "semantic", "legacy", "off"]
-PreviewMode = Literal["fast", "full"]
+PreviewMode = Literal["full"]
 
 RETRIEVAL_LABELS = {
     "typed": "Typed rule retrieval",
@@ -49,7 +49,7 @@ class PreviewRequest(BaseModel):
     npc_id: str = Field(default="lina")
     player_input: str = Field(min_length=1)
     retrieval_mode: RetrievalMode = Field(default="hybrid")
-    preview_mode: PreviewMode = Field(default="fast")
+    preview_mode: PreviewMode = Field(default="full")
 
 
 class NpcRequest(BaseModel):
@@ -117,28 +117,16 @@ def retrieve_preview(request: PreviewRequest) -> dict[str, Any]:
     if not player_input:
         raise HTTPException(status_code=400, detail="player_input cannot be empty")
 
-    if request.preview_mode == "fast":
-        lore_started = perf_counter()
-        retrieved_lore = retrieve_lore_fast(player_input, npc_id=npc_id)
-        timings["lore_preview_ms"] = elapsed_ms(lore_started)
-        memory_started = perf_counter()
-        retrieved_memories = database.search_memories(
-            player_input,
-            npc_id=npc_id,
-            mode="typed" if request.retrieval_mode in {"hybrid", "semantic"} else request.retrieval_mode,
-        )
-        timings["memory_preview_ms"] = elapsed_ms(memory_started)
-    else:
-        lore_started = perf_counter()
-        retrieved_lore = retrieve_lore(player_input, npc_id=npc_id)
-        timings["lore_preview_ms"] = elapsed_ms(lore_started)
-        memory_started = perf_counter()
-        retrieved_memories = database.search_memories(
-            player_input,
-            npc_id=npc_id,
-            mode=request.retrieval_mode,
-        )
-        timings["memory_preview_ms"] = elapsed_ms(memory_started)
+    lore_started = perf_counter()
+    retrieved_lore = retrieve_lore(player_input, npc_id=npc_id)
+    timings["lore_preview_ms"] = elapsed_ms(lore_started)
+    memory_started = perf_counter()
+    retrieved_memories = database.search_memories(
+        player_input,
+        npc_id=npc_id,
+        mode=request.retrieval_mode,
+    )
+    timings["memory_preview_ms"] = elapsed_ms(memory_started)
     timings["total_ms"] = elapsed_ms(total_started)
     return {
         "preview_mode": request.preview_mode,
@@ -483,47 +471,6 @@ def maybe_translate_text(text: Any, source: str) -> str:
     if result.get("status") in {"translated", "cached"}:
         return str(result.get("translated_text", ""))
     return ""
-
-
-def retrieve_lore_fast(player_input: str, npc_id: str, limit: int = 5) -> list[dict[str, Any]]:
-    documents = database.get_lore_documents(npc_id=npc_id, limit=100)
-    keywords = extract_preview_keywords(player_input)
-    candidates = []
-    for document in documents:
-        searchable = f"{document['title']} {document['content']} {' '.join(document['tags'])}".lower()
-        matches = [keyword for keyword in keywords if keyword in searchable]
-        score = len(matches) * 2.0 + float(document["importance"]) * 0.1
-        if matches or document.get("npc_id") == npc_id:
-            item = dict(document)
-            item.update(
-                {
-                    "excerpt": " ".join(document["content"].split())[:360],
-                    "retrieval_score": round(score, 3),
-                    "matched_keywords": matches,
-                    "retrieval_reason": "Fast preview keyword/NPC-scope match without embedding calls.",
-                    "retrieval_backend": "fast_preview",
-                }
-            )
-            candidates.append(item)
-    candidates.sort(key=lambda item: (item["retrieval_score"], item["importance"]), reverse=True)
-    return candidates[:limit]
-
-
-def extract_preview_keywords(text: str) -> list[str]:
-    normalized = text.lower()
-    aliases = {
-        "钥匙": ["钥匙", "key", "找回", "归还"],
-        "徽章": ["徽章", "badge", "守卫", "巡逻", "登记"],
-        "遗迹": ["遗迹", "ruins", "入口", "underground", "entrance"],
-        "笔记": ["笔记", "铭文", "符号", "观察", "notes"],
-        "古物": ["古物", "relic", "sable", "线索"],
-    }
-    keywords = [word.strip("，。！？,.!? ") for word in normalized.split() if word.strip("，。！？,.!? ")]
-    for canonical, words in aliases.items():
-        if any(word.lower() in normalized for word in words):
-            keywords.append(canonical.lower())
-            keywords.extend(word.lower() for word in words)
-    return sorted(set(keyword for keyword in keywords if keyword))
 
 
 def elapsed_ms(started: float) -> float:

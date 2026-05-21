@@ -18,7 +18,6 @@ import {
 } from "lucide-react";
 
 type RetrievalMode = "typed" | "hybrid" | "semantic" | "legacy" | "off";
-type PreviewMode = "fast" | "full";
 
 type Npc = {
   npc_id: string;
@@ -110,7 +109,7 @@ type AgentRun = {
 };
 
 type Preview = {
-  preview_mode: PreviewMode;
+  preview_mode: "full";
   retrieved_lore: Record<string, unknown>[];
   retrieved_memories: Record<string, unknown>[];
   timings: Record<string, number>;
@@ -190,7 +189,6 @@ export function App() {
   const [selectedNpcId, setSelectedNpcId] = useState("lina");
   const [selectedLocationId, setSelectedLocationId] = useState("tavern");
   const [retrievalMode, setRetrievalMode] = useState<RetrievalMode>("hybrid");
-  const [previewMode, setPreviewMode] = useState<PreviewMode>("fast");
   const [playerInput, setPlayerInput] = useState("");
   const [lastRun, setLastRun] = useState<AgentRun | null>(null);
   const [preview, setPreview] = useState<Preview | null>(null);
@@ -249,8 +247,7 @@ export function App() {
         body: JSON.stringify({
           npc_id: selectedNpcId,
           player_input: input,
-          retrieval_mode: retrievalMode,
-          preview_mode: previewMode
+          retrieval_mode: retrievalMode
         })
       });
       setLastRun(data.run);
@@ -275,7 +272,8 @@ export function App() {
         body: JSON.stringify({
           npc_id: selectedNpcId,
           player_input: input,
-          retrieval_mode: retrievalMode
+          retrieval_mode: retrievalMode,
+          preview_mode: "full"
         })
       });
       setPreview(data);
@@ -471,14 +469,6 @@ export function App() {
                 placeholder={`对 ${selectedNpc.name} 说些什么...`}
               />
               <div className="send-actions">
-                <select
-                  value={previewMode}
-                  onChange={(event) => setPreviewMode(event.target.value as PreviewMode)}
-                  aria-label="Preview mode"
-                >
-                  <option value="fast">Fast</option>
-                  <option value="full">Full</option>
-                </select>
                 <button className="secondary-action" onClick={previewRetrieval} disabled={busy || !playerInput.trim()}>
                   <Eye size={17} />
                   <span>Preview</span>

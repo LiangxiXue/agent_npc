@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 import os
 import socket
+import ssl
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -129,7 +130,7 @@ def call_openai_compatible_json(
         method="POST",
     )
 
-    last_timeout: BaseException | None = None
+    last_retryable_error: BaseException | None = None
     attempts = max(active_settings.retries, 0) + 1
     for attempt in range(1, attempts + 1):
         try:
@@ -139,17 +140,22 @@ def call_openai_compatible_json(
         except error.HTTPError as exc:
             error_body = exc.read().decode("utf-8", errors="replace")
             raise RuntimeError(f"HTTP Error {exc.code}: {error_body}") from exc
-        except (TimeoutError, socket.timeout) as exc:
-            last_timeout = exc
+        except (TimeoutError, socket.timeout, error.URLError, ssl.SSLError) as exc:
+            last_retryable_error = exc
             if attempt == attempts:
+                if isinstance(exc, (TimeoutError, socket.timeout)):
+                    raise RuntimeError(
+                        f"LLM request timed out after {active_settings.timeout_seconds}s "
+                        f"({attempts} attempt(s)): {exc}"
+                    ) from exc
                 raise RuntimeError(
-                    f"LLM request timed out after {active_settings.timeout_seconds}s "
-                    f"({attempts} attempt(s)): {exc}"
+                    "LLM request failed with a retryable network error after "
+                    f"{attempts} attempt(s): {exc}"
                 ) from exc
             time.sleep(0.5 * attempt)
 
-    if last_timeout is not None and "raw" not in locals():
-        raise RuntimeError(f"LLM request timed out: {last_timeout}")
+    if last_retryable_error is not None and "raw" not in locals():
+        raise RuntimeError(f"LLM request failed with a retryable network error: {last_retryable_error}")
 
     payload = json.loads(raw)
     content = payload["choices"][0]["message"]["content"]

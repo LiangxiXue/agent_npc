@@ -127,26 +127,24 @@ class PlayerApiTest(unittest.TestCase):
                 "npc_id": "ron",
                 "player_input": "城门巡逻和守卫徽章有什么线索？",
                 "retrieval_mode": "hybrid",
-                "preview_mode": "fast",
             },
         )
-        full_preview = self.client.post(
+        fast_preview = self.client.post(
             "/api/retrieve-preview",
             json={
                 "npc_id": "ron",
                 "player_input": "城门巡逻和守卫徽章有什么线索？",
                 "retrieval_mode": "hybrid",
-                "preview_mode": "full",
+                "preview_mode": "fast",
             },
         )
         trace = self.client.get("/api/trace")
 
         self.assertEqual(preview.status_code, 200)
         self.assertIn("retrieved_lore", preview.json())
-        self.assertEqual(preview.json()["preview_mode"], "fast")
+        self.assertEqual(preview.json()["preview_mode"], "full")
         self.assertIn("total_ms", preview.json()["timings"])
-        self.assertEqual(full_preview.status_code, 200)
-        self.assertEqual(full_preview.json()["preview_mode"], "full")
+        self.assertEqual(fast_preview.status_code, 422)
         self.assertEqual(trace.status_code, 200)
         self.assertIn("payload", trace.json())
 
