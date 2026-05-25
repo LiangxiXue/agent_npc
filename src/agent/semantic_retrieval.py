@@ -225,4 +225,5 @@ def _rank_with_faiss(
 
 def _memory_embedding_text(memory: dict[str, Any]) -> str:
     tags = " ".join(str(tag) for tag in memory.get("tags", []))
-    return f"{memory.get('memory_type', 'event')} {memory.get('content', '')} {tags}"
+    facets = " ".join(str(facet) for facet in memory.get("facets", []))
+    return f"{memory.get('memory_type', 'episodic')} {memory.get('scope', 'npc_specific')} {memory.get('content', '')} {tags} {facets}"

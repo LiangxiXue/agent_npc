@@ -34,7 +34,7 @@ If embedding-specific key/base URL are empty, the OpenAI-compatible embedding cl
 - `embedding_dim`
 - `source_text_hash`
 
-When content, tags, provider, or model changes, the index refreshes. Otherwise the existing embedding is reused.
+When content, tags, facets, scope, provider, or model changes, the index refreshes. Otherwise the existing embedding is reused.
 
 ## Backend
 

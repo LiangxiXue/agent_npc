@@ -21,10 +21,10 @@
 当前验证基线：
 
 ```powershell
-python -m unittest discover -s tests -v
+.venv/bin/python -m unittest discover -s tests -v
 ```
 
-当前结果：41 个测试通过。
+当前结果：46 个测试通过。
 
 ## Architecture After Migration
 
@@ -47,6 +47,8 @@ Player Input
 
 Background Memory Job
 -> Memory Policy
+-> LLM Candidate / Review
+-> Programmatic Gate / Dedup
 -> Memory Write
 -> Embedding Update
 ```
@@ -132,7 +134,7 @@ data/eval/memory_eval_summary.md
 
 ## Remaining Work
 
-- 增加常驻后台 worker 或定时任务处理 memory jobs；
+- 增强常驻后台 worker 的并发锁、失败重试和运行监控；
 - 增加持久化 FAISS index 或外部向量库；
 - 增加更多开放表达和跨 NPC 情景评测；
 - 将当前自定义 workflow 迁移到 LangGraph 或显式节点图；

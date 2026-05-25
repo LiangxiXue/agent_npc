@@ -65,6 +65,8 @@ type Memory = {
   content?: string;
   content_zh?: string;
   tags?: string[];
+  facets?: string[];
+  scope?: string;
   retrieval_score?: number;
   semantic_score?: number;
   retrieval_reason?: string;
@@ -540,6 +542,7 @@ export function App() {
                 <article className="memory-entry" key={`${memory.id ?? index}-${memory.content}`}>
                   <strong>{memory.memory_type ?? "memory"}</strong>
                   <span>{memory.content}</span>
+                  <small>{[memory.scope, ...(memory.facets ?? memory.tags ?? [])].filter(Boolean).join(" / ")}</small>
                   <TranslatedLine
                     text={memory.content_zh}
                     original={memory.content}

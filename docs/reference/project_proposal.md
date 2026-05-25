@@ -1,6 +1,6 @@
 # 项目选题计划：Memory-Driven Interactive Character Agent
 
-> 当前状态说明：本文是项目早期选题计划，保留为课程需求和范围参考。当前实现已经超过早期计划中的单 NPC / 简单关键词检索阶段，包含 Lina、Ron、Mira、Sable 四 NPC，Hybrid RAG、lore/context 分层、FastAPI + React 玩家端、后台 memory jobs 和 41 个自动测试。当前实现状态请以根目录 `README.md` 与 `docs/design/` 为准。
+> 当前状态说明：本文是项目早期选题计划，保留为课程需求和范围参考。当前实现已经超过早期计划中的单 NPC / 简单关键词检索阶段，包含 Lina、Ron、Mira、Sable 四 NPC，Hybrid RAG、lore/context 分层、FastAPI + React 玩家端、后台 memory worker、LLM 友好长期记忆类型和 46 个自动测试。当前实现状态请以根目录 `README.md` 与 `docs/design/` 为准。
 
 ## 1. 项目名称
 

@@ -56,7 +56,7 @@ streamlit run app.py
 可随后运行：
 
 ```powershell
-python scripts/process_memory_jobs.py --limit 10
+python scripts/memory_worker.py --once --limit 10
 ```
 
 再检查长期记忆是否写入并索引。
@@ -114,6 +114,12 @@ python -m uvicorn src.api.server:app --host 127.0.0.1 --port 8000
 ```powershell
 cd frontend
 npm run dev
+```
+
+启动长期记忆 worker：
+
+```powershell
+python scripts/memory_worker.py --limit 5
 ```
 
 打开：

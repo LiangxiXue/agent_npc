@@ -938,6 +938,7 @@ def render_memory_card(memory: dict[str, Any]) -> None:
     if memory.get("retrieval_backend"):
         score_line += f" backend={memory['retrieval_backend']}"
     tags = ", ".join(memory.get("tags", [])) or "no tags"
+    facets = ", ".join(memory.get("facets", [])) or "no facets"
     content = memory.get("content", "")
     translated_content = translation_html(content, f"memory:{memory.get('id', 'unknown')}:content")
     st.markdown(
@@ -947,6 +948,8 @@ def render_memory_card(memory: dict[str, Any]) -> None:
             <div>{h(content)}</div>
             {translated_content}
             <div class="muted">{h(score_line)}</div>
+            <div class="muted">scope: {h(memory.get('scope', 'npc_specific'))}</div>
+            <div class="muted">facets: {h(facets)}</div>
             <div class="muted">tags: {h(tags)}</div>
         </div>
         """,

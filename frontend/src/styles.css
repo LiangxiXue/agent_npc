@@ -626,7 +626,8 @@ textarea {
 }
 
 .memory-entry strong,
-.memory-entry span {
+.memory-entry span,
+.memory-entry small {
   display: block;
 }
 
@@ -641,6 +642,13 @@ textarea {
 .event-entry span {
   color: #e6d0a4;
   line-height: 1.45;
+}
+
+.memory-entry small {
+  color: #a98c6b;
+  font-size: 0.68rem;
+  line-height: 1.35;
+  margin-top: 4px;
 }
 
 .event-entry {

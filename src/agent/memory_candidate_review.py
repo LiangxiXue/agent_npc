@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from src.agent.llm_client import call_openai_compatible_json
+from src.agent.llm_client import get_llm_settings
 from src.agent.llm_memory_candidate import memory_llm_enabled
 
 
@@ -17,12 +18,16 @@ Return one JSON object:
     {
       "candidate_index": 0,
       "verdict": "approve|reject|revise",
-      "approved_memory_type": "player_profile|preference|relationship|event|quest",
+      "approved_memory_type": "semantic|episodic|relational|procedural",
       "approved_content": "short factual memory in English",
       "approved_importance": 1,
       "approved_confidence": 0.0,
       "approved_tags": ["short_tag"],
+      "approved_facets": ["short_facet"],
+      "approved_scope": "npc_specific|player_global",
       "approved_evidence_text": "exact quote from current turn evidence",
+      "approved_stability": 0.0,
+      "approved_future_usefulness": 0.0,
       "reason": "short reason",
       "risk": "low|medium|high"
     }
@@ -31,8 +36,9 @@ Return one JSON object:
 
 Review rules:
 - Reject or revise subject confusion. "Player needs help" is not "player helped an NPC".
-- player_profile and preference must be grounded in the player's own words.
-- event, quest, and relationship must be supported by tool calls, state changes, or explicit current-turn evidence.
+- semantic and procedural memories about player facts/preferences must be grounded in the player's own words.
+- episodic and relational memories must be supported by tool calls, state changes, or explicit current-turn evidence.
+- Reject stable world lore unless the memory is about what the player knows, said, or revealed.
 - Do not approve speculative psychology as fact.
 - Prefer revise when a candidate is useful but has the wrong type or overreaches.
 - The approved_evidence_text must be exact evidence from the current turn.
@@ -45,6 +51,14 @@ def review_memory_candidates(
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     if not candidates:
         return [], {"enabled": False, "stage": "candidate_review", "reason": "No candidates to review."}
+    if get_llm_settings().provider == "mock":
+        return pass_through_reviews(candidates), {
+            "enabled": True,
+            "stage": "candidate_review",
+            "status": "ok",
+            "mode": "mock_pass_through",
+            "review_count": len(candidates),
+        }
     if not memory_llm_enabled():
         return pass_through_reviews(candidates), {
             "enabled": False,
@@ -108,7 +122,11 @@ def pass_through_reviews(candidates: list[dict[str, Any]]) -> list[dict[str, Any
             "approved_importance": candidate.get("importance"),
             "approved_confidence": candidate.get("confidence"),
             "approved_tags": candidate.get("tags", []),
+            "approved_facets": candidate.get("facets", candidate.get("tags", [])),
+            "approved_scope": candidate.get("scope", "npc_specific"),
             "approved_evidence_text": candidate.get("evidence_text", ""),
+            "approved_stability": candidate.get("stability", 0.5),
+            "approved_future_usefulness": candidate.get("future_usefulness", 0.5),
             "reason": "Passed through because memory LLM review is disabled.",
             "risk": "low",
         }
@@ -139,7 +157,11 @@ def normalize_reviews(raw_reviews: Any, candidates: list[dict[str, Any]]) -> lis
             "approved_importance": candidates[index].get("importance"),
             "approved_confidence": candidates[index].get("confidence"),
             "approved_tags": candidates[index].get("tags", []),
+            "approved_facets": candidates[index].get("facets", candidates[index].get("tags", [])),
+            "approved_scope": candidates[index].get("scope", "npc_specific"),
             "approved_evidence_text": candidates[index].get("evidence_text", ""),
+            "approved_stability": candidates[index].get("stability", 0.5),
+            "approved_future_usefulness": candidates[index].get("future_usefulness", 0.5),
             "reason": "Review agent did not return a review for this candidate.",
             "risk": "medium",
         }
@@ -154,17 +176,44 @@ def normalize_review(review: dict[str, Any], index: int, candidate: dict[str, An
     tags = review.get("approved_tags", candidate.get("tags", []))
     if not isinstance(tags, list):
         tags = []
+    facets = review.get("approved_facets", candidate.get("facets", tags))
+    if not isinstance(facets, list):
+        facets = []
     return {
         "candidate_index": index,
         "verdict": verdict,
-        "approved_memory_type": str(review.get("approved_memory_type", candidate.get("memory_type", ""))).strip(),
+        "approved_memory_type": normalize_memory_type(review.get("approved_memory_type", candidate.get("memory_type", ""))),
         "approved_content": str(review.get("approved_content", candidate.get("content", ""))).strip(),
         "approved_importance": review.get("approved_importance", candidate.get("importance", 5)),
         "approved_confidence": review.get("approved_confidence", candidate.get("confidence", 0.7)),
         "approved_tags": [str(tag).strip() for tag in tags if str(tag).strip()],
+        "approved_facets": [str(facet).strip() for facet in facets if str(facet).strip()],
+        "approved_scope": normalize_scope(review.get("approved_scope", candidate.get("scope", "npc_specific"))),
         "approved_evidence_text": str(
             review.get("approved_evidence_text", candidate.get("evidence_text", ""))
         ).strip(),
+        "approved_stability": review.get("approved_stability", candidate.get("stability", 0.5)),
+        "approved_future_usefulness": review.get(
+            "approved_future_usefulness", candidate.get("future_usefulness", 0.5)
+        ),
         "reason": str(review.get("reason", "Reviewed by memory review LLM.")).strip(),
         "risk": str(review.get("risk", "medium")).strip().lower(),
     }
+
+
+def normalize_memory_type(value: Any) -> str:
+    mapping = {
+        "quest": "episodic",
+        "event": "episodic",
+        "relationship": "relational",
+        "preference": "procedural",
+        "player_profile": "semantic",
+    }
+    memory_type = str(value).strip()
+    normalized = mapping.get(memory_type, memory_type)
+    return normalized if normalized in {"semantic", "episodic", "relational", "procedural"} else "episodic"
+
+
+def normalize_scope(value: Any) -> str:
+    scope = str(value).strip()
+    return scope if scope in {"npc_specific", "player_global"} else "npc_specific"

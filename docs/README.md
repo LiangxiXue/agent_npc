@@ -1,6 +1,6 @@
 # Docs Index
 
-文档按用途分组。当前实现以四 NPC、多任务、Hybrid RAG、后台记忆任务和玩家端像素 UI 为基准。
+文档按用途分组。当前实现以四 NPC、多任务、Hybrid RAG、后台记忆 worker、LLM 友好长期记忆类型和玩家端像素 UI 为基准。
 
 ## design
 
@@ -11,6 +11,10 @@
 - `retrieval_layer.md`：可插拔 embedding provider、embedding cache、SQLite/FAISS backend 和 fallback 行为。
 - `llm_integration.md`：OpenAI-compatible LLM 接入方式、decision/response/memory 路径和失败回退策略。
 - `multi_npc.md`：Lina/Ron/Mira/Sable 四 NPC、任务隔离、社交策略和当前行为范围。
+
+## operations
+
+- `run_commands.md`：常用启动、worker、测试、构建和维护命令速查。
 
 ## evaluation
 

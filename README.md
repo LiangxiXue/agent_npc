@@ -16,8 +16,8 @@
 - FastAPI 玩家端接口：`src/api/server.py` 包装同一套 Agent workflow，提供对话、检索预览、trace 导出、embedding rebuild 和后台记忆任务处理接口。
 - SQLite 持久化：保存 NPC 状态、玩家状态、物品、地点、任务、长期记忆、记忆/设定 embedding、后台记忆任务、世界事件和交互日志。
 - 显式上下文层：`retrieved_lore`、`retrieved_memories`、`state_snapshot`、`recent_context` 分离进入 decision/response/trace。
-- 记忆系统：短期交互进入 `recent_interactions`；长期重要事实进入类型化 `memories`；检索支持 `off`、`legacy`、`typed`、`semantic`、`hybrid`。
-- 后台记忆任务：实时回合只 enqueue `memory_jobs`，长期记忆候选、审查、写入和 embedding 更新可由后台脚本或 API 处理，降低玩家端等待时间。
+- 记忆系统：短期交互进入 `recent_interactions`；长期重要事实进入类型化 `memories`，当前长期记忆类型为 `semantic`、`episodic`、`relational`、`procedural`，并带 `facets`、`scope`、`evidence_text`、`stability`、`future_usefulness` 元数据；检索支持 `off`、`legacy`、`typed`、`semantic`、`hybrid`。
+- 后台记忆任务：实时回合只 enqueue `memory_jobs`，长期记忆候选、审查、写入和 embedding 更新由单次脚本、API 或常驻 worker 处理，降低玩家端等待时间。
 - Provider-aware retrieval：embedding provider 支持 `mock_hash` 和 OpenAI-compatible；backend 支持 `sqlite_cosine` 和可选 `faiss`，不可用时自动 fallback。
 - 可选真实 LLM：同一 OpenAI-compatible client 可参与结构化 decision、最终回复润色、记忆候选生成和记忆审查；失败时回退到稳定 mock/模板路径。
 - 可解释 trace：每轮记录检索、状态、decision、工具、状态变化、memory job 状态、timings 和 workflow steps。
@@ -41,10 +41,9 @@ Player Input
 
 Background:
 memory_jobs
--> Memory Policy
 -> LLM Memory Candidate Generation
 -> LLM Memory Candidate Review
--> Programmatic Gate / Dedup
+-> Memory Policy / Programmatic Gate / Dedup
 -> Long-Term Memory Write
 -> Embedding Update
 ```
@@ -54,10 +53,10 @@ memory_jobs
 当前测试命令：
 
 ```powershell
-python -m unittest discover -s tests -v
+.venv/bin/python -m unittest discover -s tests -v
 ```
 
-当前验证结果：41 个测试全部通过。
+当前验证结果：46 个测试全部通过。
 
 玩家端构建命令：
 
@@ -82,13 +81,26 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-启动玩家端：
+启动玩家端需要三个进程：FastAPI 后端、React/Vite 前台和长期记忆 worker。
+
+终端 1，启动 FastAPI 后端：
 
 ```powershell
 python -m uvicorn src.api.server:app --host 127.0.0.1 --port 8000
+```
+
+终端 2，启动 React/Vite 前台：
+
+```powershell
 cd frontend
 npm install
 npm run dev
+```
+
+终端 3，启动长期记忆 worker：
+
+```powershell
+python scripts/memory_worker.py --limit 5
 ```
 
 浏览器打开：
@@ -121,6 +133,12 @@ python scripts/export_trace.py
 
 ```powershell
 python scripts/process_memory_jobs.py --limit 10
+```
+
+常驻处理后台长期记忆任务：
+
+```powershell
+python scripts/memory_worker.py --limit 5
 ```
 
 重建 memory embedding：
@@ -166,6 +184,7 @@ agent_npc/
 │   ├── generate_pixel_assets.py
 │   ├── probe_context_retrieval.py
 │   ├── process_memory_jobs.py
+│   ├── memory_worker.py
 │   ├── rebuild_memory_embeddings.py
 │   ├── run_memory_eval.py
 │   ├── run_mvp_demo.py
@@ -269,7 +288,7 @@ Sable，我听说入口在酒馆后巷，我接受你说的先查换岗记录。
 - decision 是结构化对象，包含 intent、工具调用、社交策略和回复关键词；
 - 工具调用会真实改变数据库；
 - 任务推进经过程序状态机，不允许 LLM 直接越权完成任务；
-- 长期记忆由后台 policy、review、gate 和 dedup 管理；
+- 长期记忆由后台 LLM candidate/review、programmatic gate 和 dedup 管理；
 - 检索到的 lore / memory 会进入后续 decision 和 response；
 - trace 能解释每轮“检索了什么、为什么行动、改了什么状态、是否写入记忆”。
 
@@ -279,14 +298,14 @@ Sable，我听说入口在酒馆后巷，我接受你说的先查换岗记录。
 
 - Agent 编排仍是自定义 Python workflow，没有迁移到 LangGraph。
 - 真实 LLM 路径是实验能力；课堂展示和自动测试仍以 mock 模式作为稳定兜底。
-- 后台记忆任务需要通过脚本或 API 主动处理，当前不是独立常驻 worker。
+- 后台记忆任务支持通过脚本/API 单次处理，也支持 `scripts/memory_worker.py` 常驻消费。
 - FAISS 和真实 embedding 是可选增强，不是默认依赖。
 - 课程最终报告 PDF、PPT、录屏和最终截图仍需基于当前运行结果整理。
 
 ## 后续方向
 
 1. 引入 LangGraph 或显式节点编排，把当前 workflow 拆成更标准的 Agent graph。
-2. 增加常驻后台 worker 或定时任务，让 `memory_jobs` 自动处理。
+2. 增强后台 worker 的并发锁、重试策略、运行监控和服务化启动方式。
 3. 增强真实 LLM decision 的 schema 修复、失败案例记录和回归测试。
 4. 扩展多 NPC 信息传播、关系网络和间接记忆影响。
 5. 增加本地 embedding 模型、持久化 FAISS 索引或 Qdrant/Chroma backend。

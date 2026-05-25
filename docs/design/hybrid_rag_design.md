@@ -16,7 +16,7 @@ typed rule retrieval
 
 | Target | Table | Meaning |
 | --- | --- | --- |
-| Long-term memory | `memories` + `memory_embeddings` | 玩家交互产生的长期事实、任务、关系、偏好、画像 |
+| Long-term memory | `memories` + `memory_embeddings` | 玩家交互产生的长期事实、事件、关系判断和互动方式 |
 | Lore | `lore_documents` + `lore_embeddings` | 稳定世界设定、NPC 背景、社交推演规则 |
 
 ## Data Model
@@ -53,7 +53,10 @@ Player Input
 -> trace logging
 
 Background:
-memory policy
+memory_jobs
+-> LLM/mock memory candidate generation
+-> optional LLM review
+-> programmatic gate / dedup
 -> memory writes
 -> embedding update for new memory writes
 ```

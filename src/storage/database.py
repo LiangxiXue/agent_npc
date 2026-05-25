@@ -168,14 +168,40 @@ def ensure_schema_migrations(connection: sqlite3.Connection) -> None:
         for row in connection.execute("PRAGMA table_info(memories)").fetchall()
     }
     memory_migrations = {
-        "memory_type": "ALTER TABLE memories ADD COLUMN memory_type TEXT NOT NULL DEFAULT 'event'",
+        "memory_type": "ALTER TABLE memories ADD COLUMN memory_type TEXT NOT NULL DEFAULT 'episodic'",
         "confidence": "ALTER TABLE memories ADD COLUMN confidence REAL NOT NULL DEFAULT 1.0",
         "last_accessed_at": "ALTER TABLE memories ADD COLUMN last_accessed_at TEXT",
         "access_count": "ALTER TABLE memories ADD COLUMN access_count INTEGER NOT NULL DEFAULT 0",
+        "facets": "ALTER TABLE memories ADD COLUMN facets TEXT NOT NULL DEFAULT '[]'",
+        "scope": "ALTER TABLE memories ADD COLUMN scope TEXT NOT NULL DEFAULT 'npc_specific'",
+        "evidence_text": "ALTER TABLE memories ADD COLUMN evidence_text TEXT NOT NULL DEFAULT ''",
+        "stability": "ALTER TABLE memories ADD COLUMN stability REAL NOT NULL DEFAULT 0.5",
+        "future_usefulness": "ALTER TABLE memories ADD COLUMN future_usefulness REAL NOT NULL DEFAULT 0.5",
     }
     for column, statement in memory_migrations.items():
         if column not in memory_columns:
             connection.execute(statement)
+    connection.execute(
+        """
+        UPDATE memories
+        SET memory_type = CASE memory_type
+            WHEN 'quest' THEN 'episodic'
+            WHEN 'event' THEN 'episodic'
+            WHEN 'relationship' THEN 'relational'
+            WHEN 'preference' THEN 'procedural'
+            WHEN 'player_profile' THEN 'semantic'
+            ELSE memory_type
+        END
+        WHERE memory_type IN ('quest', 'event', 'relationship', 'preference', 'player_profile')
+        """
+    )
+    connection.execute(
+        """
+        UPDATE memories
+        SET facets = tags
+        WHERE (facets = '[]' OR facets = '') AND tags IS NOT NULL AND tags != '[]'
+        """
+    )
 
     log_columns = {
         row["name"]
@@ -568,7 +594,10 @@ def get_recent_memories(npc_id: str = "lina", limit: int = 5) -> list[dict[str, 
         ).fetchall()
     memories = [dict(row) for row in rows]
     for memory in memories:
-        memory["tags"] = json.loads(memory["tags"])
+        memory["tags"] = json.loads(memory.get("tags") or "[]")
+        memory["facets"] = json.loads(memory.get("facets") or "[]")
+        if not memory["facets"]:
+            memory["facets"] = list(memory["tags"])
     return memories
 
 
@@ -773,11 +802,11 @@ def infer_memory_query_types(player_input: str) -> set[str]:
     text = player_input.lower()
     query_types: set[str] = set()
     if any(word in text for word in ["任务", "线索", "遗迹", "地点", "入口", "quest", "ruins", "entrance"]):
-        query_types.update({"quest", "event", "relationship"})
+        query_types.update({"episodic", "relational", "semantic"})
     if any(word in text for word in ["记得", "之前", "上次", "信任", "关系", "remember", "trust"]):
-        query_types.update({"relationship", "event"})
+        query_types.update({"relational", "episodic"})
     if any(word in text for word in ["以后", "喜欢", "偏好", "直接", "绕弯", "prefer"]):
-        query_types.add("preference")
+        query_types.add("procedural")
     return query_types
 
 
@@ -788,7 +817,8 @@ def score_memory_for_query(
 ) -> dict[str, Any]:
     content = memory["content"].lower()
     tags = [str(tag).lower() for tag in memory["tags"]]
-    tag_set = set(tags)
+    facets = [str(facet).lower() for facet in memory.get("facets", [])]
+    tag_set = set(tags + facets)
     matched_keywords = [keyword for keyword in keywords if keyword.lower() in content]
     matched_tags = [keyword for keyword in keywords if keyword.lower() in tag_set]
 
@@ -813,7 +843,7 @@ def score_memory_for_query(
                 matched_keywords=matched_keywords,
                 matched_tags=matched_tags,
                 query_types=query_types,
-                memory_type=memory.get("memory_type", "event"),
+                memory_type=memory.get("memory_type", "episodic"),
                 fallback=False,
             ),
         }
@@ -825,12 +855,12 @@ def score_memory_for_query_legacy(
     memory: dict[str, Any],
     keywords: list[str],
 ) -> dict[str, Any]:
-    searchable = f"{memory['content']} {' '.join(memory['tags'])}".lower()
+    searchable = f"{memory['content']} {' '.join(memory['tags'])} {' '.join(memory.get('facets', []))}".lower()
     matched_keywords = [keyword for keyword in keywords if keyword.lower() in searchable]
     matched_tags = [
         keyword
         for keyword in keywords
-        if keyword.lower() in {str(tag).lower() for tag in memory["tags"]}
+        if keyword.lower() in {str(tag).lower() for tag in memory["tags"] + memory.get("facets", [])}
     ]
     retrieval_score = round(
         len(matched_keywords) * 2.0 + float(memory["importance"]) * 0.3,
@@ -922,17 +952,26 @@ def find_similar_memory(
     content: str,
     memory_type: str,
     tags: list[str] | None = None,
+    facets: list[str] | None = None,
+    scope: str = "npc_specific",
     limit: int = 20,
 ) -> dict[str, Any] | None:
     normalized_content = normalize_memory_content(content)
+    normalized_type = normalize_memory_type(memory_type)
     target_tags = set(tags or [])
+    target_facets = set(facets or tags or [])
     for memory in get_recent_memories(npc_id=npc_id, limit=limit):
-        if memory.get("memory_type") != memory_type:
+        if memory.get("memory_type") != normalized_type:
+            continue
+        if memory.get("scope", "npc_specific") != scope:
             continue
         if normalize_memory_content(memory["content"]) == normalized_content:
             return memory
         existing_tags = set(memory.get("tags", []))
-        if target_tags and len(target_tags & existing_tags) >= min(2, len(target_tags)):
+        existing_facets = set(memory.get("facets", []))
+        target_terms = target_tags | target_facets
+        existing_terms = existing_tags | existing_facets
+        if target_terms and len(target_terms & existing_terms) >= min(2, len(target_terms)):
             if normalized_content in normalize_memory_content(memory["content"]) or normalize_memory_content(memory["content"]) in normalized_content:
                 return memory
     return None
@@ -942,32 +981,73 @@ def normalize_memory_content(content: str) -> str:
     return " ".join(content.lower().strip().split())
 
 
+def normalize_memory_type(memory_type: str) -> str:
+    mapping = {
+        "quest": "episodic",
+        "event": "episodic",
+        "relationship": "relational",
+        "preference": "procedural",
+        "player_profile": "semantic",
+    }
+    normalized = str(memory_type).strip()
+    return mapping.get(normalized, normalized or "episodic")
+
+
 def add_memory(
     npc_id: str,
     content: str,
     importance: int,
     tags: list[str] | None = None,
-    memory_type: str = "event",
+    memory_type: str = "episodic",
     confidence: float = 1.0,
+    facets: list[str] | None = None,
+    scope: str = "npc_specific",
+    evidence_text: str = "",
+    stability: float = 0.5,
+    future_usefulness: float = 0.5,
 ) -> dict[str, Any]:
-    tags_json = json.dumps(tags or [], ensure_ascii=False)
+    normalized_type = normalize_memory_type(memory_type)
+    normalized_facets = facets or tags or []
+    tags_json = json.dumps(tags or normalized_facets, ensure_ascii=False)
+    facets_json = json.dumps(normalized_facets, ensure_ascii=False)
     with connect() as connection:
         cursor = connection.execute(
             """
-            INSERT INTO memories (npc_id, content, memory_type, importance, confidence, tags)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT INTO memories
+                (
+                    npc_id, content, memory_type, importance, confidence, tags,
+                    facets, scope, evidence_text, stability, future_usefulness
+                )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            (npc_id, content, memory_type, importance, confidence, tags_json),
+            (
+                npc_id,
+                content,
+                normalized_type,
+                importance,
+                confidence,
+                tags_json,
+                facets_json,
+                scope,
+                evidence_text,
+                stability,
+                future_usefulness,
+            ),
         )
         memory_id = cursor.lastrowid
     return {
         "id": memory_id,
         "npc_id": npc_id,
         "content": content,
-        "memory_type": memory_type,
+        "memory_type": normalized_type,
         "importance": importance,
         "confidence": confidence,
-        "tags": tags or [],
+        "tags": tags or normalized_facets,
+        "facets": normalized_facets,
+        "scope": scope,
+        "evidence_text": evidence_text,
+        "stability": stability,
+        "future_usefulness": future_usefulness,
     }
 
 

@@ -9,13 +9,13 @@ Verify that the project behaves like an Agent system with stateful actions, retr
 Run:
 
 ```powershell
-python -m unittest discover -s tests -v
+.venv/bin/python -m unittest discover -s tests -v
 ```
 
 Current result:
 
 ```text
-41 tests passed
+46 tests passed
 ```
 
 Current test files:
@@ -85,6 +85,7 @@ Expected:
 
 - synchronous turns enqueue `memory_jobs`;
 - `process_pending_memory_jobs()` writes approved long-term memories later;
+- `scripts/memory_worker.py` can continuously consume pending memory jobs;
 - memory jobs record status, memory writes, embedding updates, and errors;
 - FastAPI `/api/process-memory-jobs` processes queued work.
 
@@ -136,6 +137,7 @@ React player UI:
 python -m uvicorn src.api.server:app --host 127.0.0.1 --port 8000
 cd frontend
 npm run dev
+python scripts/memory_worker.py --limit 5
 ```
 
 Verify:
@@ -144,6 +146,7 @@ Verify:
 - NPC selection and pixel assets render;
 - dialogue updates state and task panels;
 - developer trace panel remains inspectable.
+- worker changes pending memory jobs into `written` or `indexed`.
 
 ## Memory Evaluation
 

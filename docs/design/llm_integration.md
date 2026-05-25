@@ -14,7 +14,7 @@ streamlit run app.py
 AGENT_NPC_LLM_PROVIDER=mock
 ```
 
-在该模式下，`src/agent/decision.py` 使用确定性 structured decisions，`src/agent/response.py` 使用模板 fallback，Memory Policy 使用规则候选和程序 gate。
+在该模式下，`src/agent/decision.py` 使用确定性 structured decisions，`src/agent/response.py` 使用模板 fallback，Memory Policy 使用 mock memory candidate generator 加程序 gate。规则不再负责编写长期记忆候选，只负责审核边界。
 
 ## OpenAI-Compatible Setup
 
@@ -54,6 +54,17 @@ DeepSeek 等兼容服务只需替换 model 和 base URL。
 4. **Memory candidate review**：后台 memory job 中审查候选证据、主语、类型和过度推断风险。
 
 这四个位置共享 `src/agent/llm_client.py` 的 OpenAI-compatible HTTP client。
+
+长期记忆候选当前使用四类主类型：
+
+```text
+semantic
+episodic
+relational
+procedural
+```
+
+候选还会携带 `facets`、`scope`、`evidence_text`、`stability` 和 `future_usefulness`。最终是否写入仍由程序 gate、去重和 SQLite 写入逻辑控制。
 
 ## Decision Contract
 

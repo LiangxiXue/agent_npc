@@ -76,10 +76,15 @@ CREATE TABLE IF NOT EXISTS memories (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     npc_id TEXT NOT NULL,
     content TEXT NOT NULL,
-    memory_type TEXT NOT NULL DEFAULT 'event',
+    memory_type TEXT NOT NULL DEFAULT 'episodic',
     importance INTEGER NOT NULL,
     confidence REAL NOT NULL DEFAULT 1.0,
     tags TEXT NOT NULL DEFAULT '[]',
+    facets TEXT NOT NULL DEFAULT '[]',
+    scope TEXT NOT NULL DEFAULT 'npc_specific',
+    evidence_text TEXT NOT NULL DEFAULT '',
+    stability REAL NOT NULL DEFAULT 0.5,
+    future_usefulness REAL NOT NULL DEFAULT 0.5,
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     last_accessed_at TEXT,
     access_count INTEGER NOT NULL DEFAULT 0
@@ -89,12 +94,13 @@ CREATE TABLE IF NOT EXISTS memories (
 支持类型：
 
 ```text
-quest
-event
-relationship
-preference
-player_profile
+semantic    = 稳定玩家事实、画像、玩家知识状态
+episodic    = 发生过的具体事件
+relational  = NPC 对玩家的关系变化或关系判断
+procedural  = 后续应该如何与玩家互动
 ```
+
+旧类型会自动迁移：`quest/event -> episodic`，`relationship -> relational`，`preference -> procedural`，`player_profile -> semantic`。
 
 长期记忆按 NPC 隔离。Ron 的长期记忆不会污染 Lina；Sable 的可疑线索也不会变成全局事实，除非通过工具写入 `world_events`。
 
@@ -113,7 +119,7 @@ created_at
 updated_at
 ```
 
-`source_text_hash` 让系统能在 memory 内容、tags、provider 或 model 变化时刷新索引。
+`source_text_hash` 让系统能在 memory 内容、tags、facets、scope、provider 或 model 变化时刷新索引。
 
 默认 provider 是 `mock_hash`，不需要 API key。真实 provider 可通过 OpenAI-compatible `/embeddings` 接入。
 
@@ -145,6 +151,12 @@ error
 python scripts/process_memory_jobs.py --limit 10
 ```
 
+常驻 worker：
+
+```powershell
+python scripts/memory_worker.py --limit 5
+```
+
 状态含义：
 
 | Status | Meaning |
@@ -161,8 +173,7 @@ python scripts/process_memory_jobs.py --limit 10
 当前写入链路：
 
 ```text
-rule candidates
--> optional LLM memory candidate generator
+LLM memory candidate generator
 -> optional LLM memory review agent
 -> programmatic gate
 -> deduplication
@@ -174,10 +185,11 @@ rule candidates
 
 | Check | Purpose |
 | --- | --- |
-| allowed type | 只允许 `quest`、`event`、`relationship`、`preference`、`player_profile` |
+| allowed type | 只允许 `semantic`、`episodic`、`relational`、`procedural` |
 | evidence | 候选必须引用本轮输入、回复、工具或状态变化中的证据 |
-| tool/state support | 任务、事件、关系类记忆需要工具或状态变化支撑 |
-| player-grounded | 玩家画像和偏好必须来自玩家自述 |
+| tool/state support | episodic 和 relational 记忆需要工具或状态变化支撑 |
+| player-grounded | semantic 和 procedural 玩家记忆必须来自玩家自述 |
+| lore boundary | 稳定世界设定应进入 `lore_documents`，不能误写成玩家 memory |
 | dedup | 防止同 NPC、同类型、相似内容重复写入 |
 
 ## 8. Retrieval Modes
@@ -226,8 +238,9 @@ query_embedding_latency_ms
 
 - 短期 / 长期 / lore / state 分层；
 - 多 NPC 记忆隔离；
-- 类型化长期记忆；
+- LLM 友好的类型化长期记忆：`semantic`、`episodic`、`relational`、`procedural`；
 - 后台 memory job；
+- 常驻后台 memory worker；
 - rule + semantic + hybrid retrieval；
 - provider/backend-aware embedding layer；
 - LLM candidate/review + programmatic gate；
@@ -235,7 +248,7 @@ query_embedding_latency_ms
 
 尚未实现：
 
-- 常驻后台 worker；
+- worker 并发锁、失败重试和运行监控；
 - 复杂遗忘机制；
 - NPC 间自动记忆传播；
 - 大规模外部向量库；

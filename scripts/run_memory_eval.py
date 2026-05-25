@@ -121,7 +121,7 @@ def run_key_return(variant: Variant) -> dict[str, Any]:
             "trust_updated": database.get_npc("lina")["trust"] >= 30,
             "quest_completed": database.get_quest("lost_key")["status"] == "completed",
             "typed_long_term_memory_written": (
-                {"quest", "event", "relationship"} <= set(memory_types)
+                {"episodic", "relational"} <= set(memory_types)
                 if policy_expected
                 else len(run.memory_writes) == 0
             ),
@@ -193,7 +193,7 @@ def run_memory_only_ruins_gate(variant: Variant) -> dict[str, Any]:
 def run_preference_memory(variant: Variant) -> dict[str, Any]:
     run = run_turn("以后请直接告诉我线索，不要绕弯子。", variant)
     writes_preference = any(
-        write["arguments"].get("memory_type") == "preference"
+        write["arguments"].get("memory_type") == "procedural"
         for write in run.memory_writes
     )
     return build_result(
@@ -311,7 +311,7 @@ def run_preference_paraphrase(variant: Variant) -> dict[str, Any]:
         content="Player prefers direct hints instead of vague clues.",
         importance=6,
         tags=["preference", "communication_style", "direct"],
-        memory_type="preference",
+        memory_type="procedural",
         confidence=0.85,
     )
     run = run_turn("我不太喜欢你每次都神神秘秘的，有线索就直说吧。", variant)
@@ -322,9 +322,9 @@ def run_preference_paraphrase(variant: Variant) -> dict[str, Any]:
         expected={"semantic_retrieves_preference_memory": expected_success},
         checks={
             "semantic_retrieves_preference_memory": (
-                any(memory.get("memory_type") == "preference" for memory in run.retrieved_memories)
+                any(memory.get("memory_type") == "procedural" for memory in run.retrieved_memories)
                 if expected_success
-                else not any(memory.get("memory_type") == "preference" for memory in run.retrieved_memories)
+                else not any(memory.get("memory_type") == "procedural" for memory in run.retrieved_memories)
             ),
         },
     )
@@ -470,7 +470,7 @@ def summarize_run(run: Any) -> dict[str, Any]:
 
 
 def get_memory_write_types(run: Any) -> list[str]:
-    return [write["arguments"].get("memory_type", "event") for write in run.memory_writes]
+    return [write["arguments"].get("memory_type", "episodic") for write in run.memory_writes]
 
 
 def run_evaluation() -> dict[str, Any]:

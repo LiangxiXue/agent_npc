@@ -4,7 +4,7 @@ from dataclasses import asdict, dataclass, field
 from typing import Any
 
 from src.agent.llm_memory_candidate import generate_memory_candidates
-from src.agent.memory_candidate_gate import player_helped_lina, validate_memory_candidate
+from src.agent.memory_candidate_gate import validate_memory_candidate
 from src.agent.memory_candidate_review import review_memory_candidates
 from src.storage import database
 from src.tools import sqlite_tools
@@ -36,10 +36,14 @@ class MemoryCandidate:
     memory_type: str
     importance: int
     tags: list[str]
+    facets: list[str]
+    scope: str
     confidence: float
+    stability: float
+    future_usefulness: float
     reason: str
     evidence_text: str = ""
-    source: str = "rule"
+    source: str = "llm_candidate"
 
 
 def apply_memory_policy(
@@ -65,6 +69,8 @@ def apply_memory_policy(
                 content=candidate.content,
                 memory_type=candidate.memory_type,
                 tags=candidate.tags,
+                facets=candidate.facets,
+                scope=candidate.scope,
             )
             if duplicate is not None:
                 candidate_dict["should_write"] = False
@@ -80,6 +86,11 @@ def apply_memory_policy(
                 tags=candidate.tags,
                 memory_type=candidate.memory_type,
                 confidence=candidate.confidence,
+                facets=candidate.facets,
+                scope=candidate.scope,
+                evidence_text=candidate.evidence_text,
+                stability=candidate.stability,
+                future_usefulness=candidate.future_usefulness,
             )
             memory_writes.append(asdict(execution))
 
@@ -94,9 +105,6 @@ def apply_memory_policy(
 
 
 def build_memory_candidates(policy_input: MemoryPolicyInput) -> list[MemoryCandidate]:
-    candidates = build_rule_memory_candidates(policy_input)
-    if candidates:
-        return candidates
     return [
         MemoryCandidate(
             should_write=False,
@@ -105,7 +113,11 @@ def build_memory_candidates(policy_input: MemoryPolicyInput) -> list[MemoryCandi
             memory_type="none",
             importance=0,
             tags=[],
+            facets=[],
+            scope="npc_specific",
             confidence=0.0,
+            stability=0.0,
+            future_usefulness=0.0,
             reason="No long-term significant event detected.",
         )
     ]
@@ -114,26 +126,11 @@ def build_memory_candidates(policy_input: MemoryPolicyInput) -> list[MemoryCandi
 def build_memory_candidates_with_llm(
     policy_input: MemoryPolicyInput,
 ) -> tuple[list[MemoryCandidate], dict[str, Any]]:
-    rule_candidates = build_rule_memory_candidates(policy_input)
-    rule_candidate_dicts = [asdict(candidate) for candidate in rule_candidates]
-    if rule_candidates:
-        return rule_candidates, {
-            "candidate_generation": {
-                "enabled": False,
-                "stage": "candidate_generation",
-                "reason": "Rule candidates were sufficient for the realtime path.",
-            },
-            "candidate_review": {
-                "enabled": False,
-                "stage": "candidate_review",
-                "reason": "Rule candidates use programmatic gates instead of realtime LLM review.",
-            },
-        }
     llm_candidates, generation_trace = generate_memory_candidates(
         policy_input=policy_input,
-        rule_candidates=rule_candidate_dicts,
+        rule_candidates=[],
     )
-    combined = merge_candidate_dicts(rule_candidate_dicts, llm_candidates)
+    combined = merge_candidate_dicts([], llm_candidates)
     if not combined:
         return build_memory_candidates(policy_input), {
             "candidate_generation": generation_trace,
@@ -155,13 +152,8 @@ def build_memory_candidates_with_llm(
 
 
 def build_rule_memory_candidates(policy_input: MemoryPolicyInput) -> list[MemoryCandidate]:
-    candidates: list[MemoryCandidate] = []
-    candidates.extend(build_quest_candidates(policy_input))
-    candidates.extend(build_event_candidates(policy_input))
-    candidates.extend(build_relationship_candidates(policy_input))
-    candidates.extend(build_preference_candidates(policy_input))
-
-    return candidates
+    """Rules no longer author memory candidates; they only live in gate validation."""
+    return []
 
 
 def merge_candidate_dicts(
@@ -210,9 +202,15 @@ def apply_candidate_reviews(
                 "importance": review.get("approved_importance", original.get("importance")),
                 "confidence": review.get("approved_confidence", original.get("confidence")),
                 "tags": review.get("approved_tags", original.get("tags", [])),
+                "facets": review.get("approved_facets", original.get("facets", original.get("tags", []))),
+                "scope": review.get("approved_scope", original.get("scope", "npc_specific")),
                 "evidence_text": review.get("approved_evidence_text", original.get("evidence_text", "")),
+                "stability": review.get("approved_stability", original.get("stability", 0.5)),
+                "future_usefulness": review.get(
+                    "approved_future_usefulness", original.get("future_usefulness", 0.5)
+                ),
                 "reason": review.get("reason", "Approved by memory review LLM."),
-                "source": f"{original.get('source', 'rule')}+llm_review",
+                "source": f"{original.get('source', 'llm_candidate')}+llm_review",
                 "review": review,
             }
         )
@@ -224,18 +222,43 @@ def dict_to_candidate(candidate: dict[str, Any], npc_id: str) -> MemoryCandidate
     tags = candidate.get("tags", [])
     if not isinstance(tags, list):
         tags = []
+    facets = candidate.get("facets", tags)
+    if not isinstance(facets, list):
+        facets = []
     return MemoryCandidate(
         should_write=bool(candidate.get("should_write", False)),
         npc_id=str(candidate.get("npc_id") or npc_id),
         content=str(candidate.get("content", "")).strip(),
-        memory_type=str(candidate.get("memory_type", "event")).strip(),
+        memory_type=normalize_memory_type(candidate.get("memory_type", "episodic")),
         importance=clamp_int(candidate.get("importance", 5), 1, 10),
         tags=[str(tag).strip() for tag in tags if str(tag).strip()],
+        facets=[str(facet).strip() for facet in facets if str(facet).strip()],
+        scope=normalize_scope(candidate.get("scope", "npc_specific")),
         confidence=clamp_float(candidate.get("confidence", 0.7), 0.0, 1.0),
+        stability=clamp_float(candidate.get("stability", 0.5), 0.0, 1.0),
+        future_usefulness=clamp_float(candidate.get("future_usefulness", 0.5), 0.0, 1.0),
         reason=str(candidate.get("reason", "")).strip(),
         evidence_text=str(candidate.get("evidence_text", "")).strip(),
-        source=str(candidate.get("source", "rule")).strip(),
+        source=str(candidate.get("source", "llm_candidate")).strip(),
     )
+
+
+def normalize_memory_type(value: Any) -> str:
+    mapping = {
+        "quest": "episodic",
+        "event": "episodic",
+        "relationship": "relational",
+        "preference": "procedural",
+        "player_profile": "semantic",
+    }
+    memory_type = str(value).strip()
+    normalized = mapping.get(memory_type, memory_type)
+    return normalized if normalized in {"semantic", "episodic", "relational", "procedural", "none"} else "episodic"
+
+
+def normalize_scope(value: Any) -> str:
+    scope = str(value).strip()
+    return scope if scope in {"npc_specific", "player_global"} else "npc_specific"
 
 
 def clamp_int(value: Any, lower: int, upper: int) -> int:
@@ -254,182 +277,6 @@ def clamp_float(value: Any, lower: float, upper: float) -> float:
 
 def normalize_content(content: str) -> str:
     return " ".join(content.lower().strip().split())
-
-
-def build_quest_candidates(policy_input: MemoryPolicyInput) -> list[MemoryCandidate]:
-    if (
-        policy_input.quest_before["status"] != "completed"
-        and policy_input.quest_after["status"] == "completed"
-    ):
-        quest_id = policy_input.quest_after["quest_id"]
-        npc_name = policy_input.npc_after.get("name", policy_input.npc_id)
-        return [
-            MemoryCandidate(
-                should_write=True,
-                npc_id=policy_input.npc_id,
-                content=f"Player completed the {quest_id} quest for {npc_name}.",
-                memory_type="quest",
-                importance=9,
-                tags=["quest", "completed", quest_id, policy_input.npc_id],
-                confidence=1.0,
-                reason="Quest status changed to completed.",
-                evidence_text=str(policy_input.quest_after),
-            )
-        ]
-    return []
-
-
-def build_event_candidates(policy_input: MemoryPolicyInput) -> list[MemoryCandidate]:
-    candidates = []
-    tool_names = [tool["name"] for tool in policy_input.tool_calls]
-    recorded_key_return = any(
-        tool["name"] == "record_world_event"
-        and "lost key" in str(tool["arguments"].get("content", "")).lower()
-        for tool in policy_input.tool_calls
-    )
-    if (
-        ("give_item" in tool_names or recorded_key_return)
-        and policy_input.quest_after["quest_id"] == "lost_key"
-    ):
-        candidates.append(
-            MemoryCandidate(
-                should_write=True,
-                npc_id=policy_input.npc_id,
-                content="Player returned Lina's lost key.",
-                memory_type="event",
-                importance=8,
-                tags=["event", "help", "lost_key"],
-                confidence=1.0,
-                reason="Tool execution granted the lost-key quest reward, indicating the key was returned.",
-                evidence_text="Player returned Lina's lost key.",
-            )
-        )
-    if "unlock_location" in tool_names:
-        candidates.append(
-            MemoryCandidate(
-                should_write=True,
-                npc_id=policy_input.npc_id,
-                content="Lina revealed the underground ruins entrance to the player.",
-                memory_type="event",
-                importance=7,
-                tags=["event", "ruins", "location"],
-                confidence=1.0,
-                reason="A sensitive location was unlocked.",
-                evidence_text="unlock_location",
-            )
-        )
-    recorded_events = [
-        str(tool["arguments"].get("content", ""))
-        for tool in policy_input.tool_calls
-        if tool["name"] == "record_world_event"
-    ]
-    for event in recorded_events:
-        normalized = event.lower()
-        if "lost key" in normalized or "underground ruins entrance" in normalized:
-            continue
-        candidates.append(
-            MemoryCandidate(
-                should_write=True,
-                npc_id=policy_input.npc_id,
-                content=event,
-                memory_type="event",
-                importance=7,
-                tags=["event", policy_input.npc_id, policy_input.quest_after["quest_id"]],
-                confidence=0.95,
-                reason="A world event was recorded for this NPC turn.",
-                evidence_text=event,
-            )
-        )
-    return candidates
-
-
-def build_relationship_candidates(policy_input: MemoryPolicyInput) -> list[MemoryCandidate]:
-    candidates = []
-    trust_delta = policy_input.npc_after["trust"] - policy_input.npc_before["trust"]
-    affection_delta = policy_input.npc_after["affection"] - policy_input.npc_before["affection"]
-    helped_lina = player_helped_lina(policy_input)
-    npc_name = policy_input.npc_after.get("name", policy_input.npc_id)
-
-    if policy_input.npc_id == "lina" and trust_delta >= 5 and helped_lina:
-        candidates.append(
-            MemoryCandidate(
-                should_write=True,
-                npc_id=policy_input.npc_id,
-                content="Lina trusts the player more because the player helped her.",
-                memory_type="relationship",
-                importance=7,
-                tags=["relationship", "trust", "help"],
-                confidence=0.95,
-                reason=f"Trust increased by {trust_delta}.",
-                evidence_text="Player returned Lina's lost key.",
-            )
-        )
-    elif policy_input.npc_id != "lina" and trust_delta >= 5:
-        candidates.append(
-            MemoryCandidate(
-                should_write=True,
-                npc_id=policy_input.npc_id,
-                content=f"{npc_name} trusts the player more after the player advanced the {policy_input.quest_after['quest_id']} task.",
-                memory_type="relationship",
-                importance=6,
-                tags=["relationship", "trust", policy_input.npc_id, policy_input.quest_after["quest_id"]],
-                confidence=0.9,
-                reason=f"Trust increased by {trust_delta}.",
-                evidence_text=str(policy_input.state_changes),
-            )
-        )
-    if policy_input.npc_id == "lina" and affection_delta >= 5 and helped_lina:
-        candidates.append(
-            MemoryCandidate(
-                should_write=True,
-                npc_id=policy_input.npc_id,
-                content="Lina feels more warmly toward the player after receiving help.",
-                memory_type="relationship",
-                importance=6,
-                tags=["relationship", "affection", "help"],
-                confidence=0.9,
-                reason=f"Affection increased by {affection_delta}.",
-                evidence_text="Player returned Lina's lost key.",
-            )
-        )
-    elif policy_input.npc_id != "lina" and affection_delta >= 5:
-        candidates.append(
-            MemoryCandidate(
-                should_write=True,
-                npc_id=policy_input.npc_id,
-                content=f"{npc_name} feels more positively toward the player after useful task progress.",
-                memory_type="relationship",
-                importance=5,
-                tags=["relationship", "affection", policy_input.npc_id, policy_input.quest_after["quest_id"]],
-                confidence=0.85,
-                reason=f"Affection increased by {affection_delta}.",
-                evidence_text=str(policy_input.state_changes),
-            )
-        )
-    return candidates
-
-
-def has_player_helped_lina(policy_input: MemoryPolicyInput) -> bool:
-    return player_helped_lina(policy_input)
-
-
-def build_preference_candidates(policy_input: MemoryPolicyInput) -> list[MemoryCandidate]:
-    text = policy_input.player_input.lower()
-    if any(phrase in text for phrase in ["直接告诉", "直接说", "不要绕弯", "别绕弯", "direct hints"]):
-        return [
-            MemoryCandidate(
-                should_write=True,
-                npc_id=policy_input.npc_id,
-                content="Player prefers direct hints instead of vague clues.",
-                memory_type="preference",
-                importance=6,
-                tags=["preference", "communication_style", "direct"],
-                confidence=0.85,
-                reason="Player explicitly expressed a stable communication preference.",
-                evidence_text=policy_input.player_input,
-            )
-        ]
-    return []
 
 
 def summarize_policy_result(

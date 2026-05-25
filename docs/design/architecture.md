@@ -12,7 +12,8 @@ This project uses a text-adventure NPC scene as a controlled testbed for an Agen
 | Player UI | `frontend/` | React/Vite pixel RPG experience for normal interaction |
 | Player API | `src/api/server.py` | FastAPI wrapper around the same workflow, plus preview/export/index/job endpoints |
 | CLI demo | `scripts/run_mvp_demo.py` | Stable four-NPC mock demonstration |
-| Background memory CLI | `scripts/process_memory_jobs.py` | Processes queued long-term memory jobs |
+| Background memory CLI | `scripts/process_memory_jobs.py` | Processes one batch of queued long-term memory jobs |
+| Background memory worker | `scripts/memory_worker.py` | Continuously consumes queued long-term memory jobs |
 
 ## Synchronous Turn Workflow
 
@@ -39,8 +40,7 @@ The synchronous path is optimized for player latency. It records enough informat
 ```text
 memory_jobs pending row
 -> MemoryPolicyInput reconstruction
--> rule memory candidates
--> optional LLM candidate generation
+-> LLM/mock memory candidate generation
 -> optional LLM review
 -> programmatic gate
 -> deduplication
@@ -55,7 +55,13 @@ Background processing is available through:
 python scripts/process_memory_jobs.py --limit 10
 ```
 
-The FastAPI app also exposes `/api/process-memory-jobs` for the player UI/debug flow.
+For continuous background processing:
+
+```powershell
+python scripts/memory_worker.py --limit 5
+```
+
+The FastAPI app also exposes `/api/process-memory-jobs` for explicit player UI/debug flow processing.
 
 ## Module Responsibilities
 
@@ -68,9 +74,9 @@ The FastAPI app also exposes `/api/process-memory-jobs` for the player UI/debug 
 | `src/agent/turn_classifier.py` | Fast routing between simple rule path, ambiguous turns, sensitive requests, and social maneuvers |
 | `src/agent/response.py` | Final NPC response generation with optional LLM polish and deterministic fallback |
 | `src/agent/memory_jobs.py` | Queue and process background long-term memory work |
-| `src/agent/memory_policy.py` | Long-term memory write policy, candidate orchestration, gate, dedup |
-| `src/agent/llm_memory_candidate.py` | OpenAI-compatible memory candidate generator |
-| `src/agent/memory_candidate_review.py` | OpenAI-compatible memory candidate reviewer |
+| `src/agent/memory_policy.py` | Long-term memory write policy, LLM candidate orchestration, gate, dedup |
+| `src/agent/llm_memory_candidate.py` | OpenAI-compatible and mock memory candidate generator |
+| `src/agent/memory_candidate_review.py` | OpenAI-compatible reviewer with mock pass-through review |
 | `src/agent/memory_candidate_gate.py` | Programmatic hard gate for evidence/type/state support |
 | `src/agent/embedding_client.py` | `mock_hash` and OpenAI-compatible embedding provider abstraction |
 | `src/agent/semantic_retrieval.py` | Memory embedding indexing and semantic retrieval |

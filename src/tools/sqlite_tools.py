@@ -18,8 +18,13 @@ def add_memory(
     content: str,
     importance: int,
     tags: list[str] | None = None,
-    memory_type: str = "event",
+    memory_type: str = "episodic",
     confidence: float = 1.0,
+    facets: list[str] | None = None,
+    scope: str = "npc_specific",
+    evidence_text: str = "",
+    stability: float = 0.5,
+    future_usefulness: float = 0.5,
 ) -> ToolExecution:
     result = database.add_memory(
         npc_id=npc_id,
@@ -28,6 +33,11 @@ def add_memory(
         tags=tags,
         memory_type=memory_type,
         confidence=confidence,
+        facets=facets,
+        scope=scope,
+        evidence_text=evidence_text,
+        stability=stability,
+        future_usefulness=future_usefulness,
     )
     return ToolExecution(
         name="add_memory",
@@ -35,9 +45,14 @@ def add_memory(
             "npc_id": npc_id,
             "content": content,
             "importance": importance,
-            "tags": tags or [],
-            "memory_type": memory_type,
+            "tags": tags or facets or [],
+            "memory_type": result["memory_type"],
             "confidence": confidence,
+            "facets": facets or tags or [],
+            "scope": scope,
+            "evidence_text": evidence_text,
+            "stability": stability,
+            "future_usefulness": future_usefulness,
         },
         result=result,
     )

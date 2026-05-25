@@ -26,9 +26,9 @@ Player Input
 -> Trace Logging
 
 Background Memory Job
--> Memory Policy
 -> LLM Candidate / Review
 -> Programmatic Gate
+-> Memory Policy / Dedup
 -> Memory Write
 -> Embedding Update
 ```
@@ -54,7 +54,7 @@ Background Memory Job
 ### 3.2 上下文和记忆系统
 
 - `recent_interactions`：短期上下文；
-- `memories`：玩家交互产生的长期记忆；
+- `memories`：玩家交互产生的长期记忆，类型为 `semantic`、`episodic`、`relational`、`procedural`，并带 facets/scope/evidence/scores；
 - `lore_documents`：稳定世界/NPC 设定；
 - `memory_embeddings` / `lore_embeddings`：语义检索索引；
 - `memory_jobs`：后台长期记忆处理队列。
@@ -144,10 +144,10 @@ Background Memory Job
 当前自动测试：
 
 ```powershell
-python -m unittest discover -s tests -v
+.venv/bin/python -m unittest discover -s tests -v
 ```
 
-当前结果：41 个测试通过。
+当前结果：46 个测试通过。
 
 覆盖：
 
@@ -163,7 +163,7 @@ python -m unittest discover -s tests -v
 ## 7. 局限性与后续工作
 
 - 自定义 workflow 尚未迁移到 LangGraph；
-- 后台 memory job 还不是常驻 worker；
+- 后台 memory worker 已可常驻消费队列，但并发锁、失败重试和运行监控仍可增强；
 - 真实 LLM/embedding 是可选增强，不作为稳定评分路径；
 - 多 NPC 信息传播和复杂关系网络尚未实现；
 - 最终 PPT、录屏、截图和报告需要基于当前版本补齐。

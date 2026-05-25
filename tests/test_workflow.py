@@ -58,9 +58,8 @@ class AgentWorkflowTest(unittest.TestCase):
             for job in processed
             for write in job["memory_writes"]
         ]
-        self.assertIn("quest", memory_types)
-        self.assertIn("event", memory_types)
-        self.assertIn("relationship", memory_types)
+        self.assertIn("episodic", memory_types)
+        self.assertIn("relational", memory_types)
         self.assertEqual(run.memory_policy["summary"], "Long-term memory queued for background processing.")
         self.assertGreaterEqual(len(run.workflow_steps), 8)
         self.assertIn("total_ms", run.timings)
@@ -579,7 +578,7 @@ class AgentWorkflowTest(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     validate_decision(decision)
 
-    def test_relationship_memory_requires_player_help_event(self) -> None:
+    def test_relationship_memory_requires_state_change_evidence(self) -> None:
         npc_before = database.get_npc("lina")
         player_before = database.get_player_state()
         quest_before = database.get_quest("lost_key")
@@ -619,8 +618,9 @@ class AgentWorkflowTest(unittest.TestCase):
             )
         )
 
-        self.assertEqual(writes, [])
-        self.assertEqual(policy["candidates"][0]["memory_type"], "none")
+        self.assertTrue(any(write["arguments"]["memory_type"] == "semantic" for write in writes))
+        self.assertFalse(any(write["arguments"]["memory_type"] == "relational" for write in writes))
+        self.assertFalse(any(candidate["memory_type"] == "relational" for candidate in policy["candidates"]))
 
     def test_llm_memory_candidate_and_review_can_write_player_profile(self) -> None:
         os.environ["AGENT_NPC_LLM_PROVIDER"] = "openai_compatible"
@@ -636,12 +636,16 @@ class AgentWorkflowTest(unittest.TestCase):
                 "candidates": [
                     {
                         "should_write": True,
-                        "memory_type": "player_profile",
+                        "memory_type": "semantic",
                         "content": "Player described themselves as lonely and worried nobody would help them.",
                         "importance": 5,
                         "confidence": 0.85,
                         "tags": ["player_profile", "lonely", "needs_support"],
+                        "facets": ["player_profile", "needs_support"],
+                        "scope": "player_global",
                         "evidence_text": "我是一个孤独的人，感觉无人会帮助我",
+                        "stability": 0.55,
+                        "future_usefulness": 0.65,
                         "reason": "The player explicitly described their emotional state.",
                     }
                 ]
@@ -653,12 +657,16 @@ class AgentWorkflowTest(unittest.TestCase):
                     {
                         "candidate_index": 0,
                         "verdict": "approve",
-                        "approved_memory_type": "player_profile",
+                        "approved_memory_type": "semantic",
                         "approved_content": "Player described themselves as lonely and worried nobody would help them.",
                         "approved_importance": 5,
                         "approved_confidence": 0.85,
                         "approved_tags": ["player_profile", "lonely", "needs_support"],
+                        "approved_facets": ["player_profile", "needs_support"],
+                        "approved_scope": "player_global",
                         "approved_evidence_text": "我是一个孤独的人，感觉无人会帮助我",
+                        "approved_stability": 0.55,
+                        "approved_future_usefulness": 0.65,
                         "reason": "Grounded in the player's own words and does not imply the player helped Lina.",
                         "risk": "low",
                     }
@@ -684,9 +692,133 @@ class AgentWorkflowTest(unittest.TestCase):
             )
 
         self.assertEqual(len(writes), 1)
-        self.assertEqual(writes[0]["arguments"]["memory_type"], "player_profile")
+        self.assertEqual(writes[0]["arguments"]["memory_type"], "semantic")
         self.assertIn("llm_memory_policy", policy)
         self.assertEqual(policy["llm_memory_policy"]["candidate_review"]["status"], "ok")
+
+    def test_mock_memory_policy_writes_procedural_preference(self) -> None:
+        npc = database.get_npc("lina")
+        player = database.get_player_state()
+        quest = database.get_quest("lost_key")
+
+        _, writes = apply_memory_policy(
+            MemoryPolicyInput(
+                npc_id="lina",
+                player_input="以后别绕弯，直接告诉我线索。",
+                npc_response="我明白。",
+                retrieved_long_term_memories=[],
+                recent_short_term_context=[],
+                npc_before=npc,
+                npc_after=npc,
+                player_before=player,
+                player_after=player,
+                quest_before=quest,
+                quest_after=quest,
+                tool_calls=[],
+                state_changes=[],
+            )
+        )
+
+        self.assertEqual(writes[0]["arguments"]["memory_type"], "procedural")
+        self.assertEqual(writes[0]["arguments"]["scope"], "player_global")
+        self.assertIn("communication_style", writes[0]["arguments"]["facets"])
+
+    def test_mock_memory_policy_writes_semantic_profile(self) -> None:
+        npc = database.get_npc("lina")
+        player = database.get_player_state()
+        quest = database.get_quest("lost_key")
+
+        _, writes = apply_memory_policy(
+            MemoryPolicyInput(
+                npc_id="lina",
+                player_input="我是新手，不太熟悉这个镇子的规则。",
+                npc_response="我会解释清楚。",
+                retrieved_long_term_memories=[],
+                recent_short_term_context=[],
+                npc_before=npc,
+                npc_after=npc,
+                player_before=player,
+                player_after=player,
+                quest_before=quest,
+                quest_after=quest,
+                tool_calls=[],
+                state_changes=[],
+            )
+        )
+
+        self.assertEqual(writes[0]["arguments"]["memory_type"], "semantic")
+        self.assertIn("player_profile", writes[0]["arguments"]["facets"])
+
+    def test_world_lore_candidate_is_rejected_from_player_memory(self) -> None:
+        os.environ["AGENT_NPC_LLM_PROVIDER"] = "openai_compatible"
+        os.environ["AGENT_NPC_LLM_API_KEY"] = "test-key"
+        npc = database.get_npc("lina")
+        player = database.get_player_state()
+        quest = database.get_quest("lost_key")
+
+        with patch(
+            "src.agent.llm_memory_candidate.call_openai_compatible_json",
+            return_value={
+                "candidates": [
+                    {
+                        "should_write": True,
+                        "memory_type": "semantic",
+                        "content": "The ruins entrance is behind the tavern.",
+                        "importance": 8,
+                        "confidence": 0.9,
+                        "tags": ["ruins", "entrance"],
+                        "facets": ["stable_world", "ruins"],
+                        "scope": "player_global",
+                        "evidence_text": "遗迹入口在酒馆后巷。",
+                        "stability": 1.0,
+                        "future_usefulness": 0.9,
+                        "reason": "This is a stable world fact.",
+                    }
+                ]
+            },
+        ), patch(
+            "src.agent.memory_candidate_review.call_openai_compatible_json",
+            return_value={
+                "reviews": [
+                    {
+                        "candidate_index": 0,
+                        "verdict": "approve",
+                        "approved_memory_type": "semantic",
+                        "approved_content": "The ruins entrance is behind the tavern.",
+                        "approved_importance": 8,
+                        "approved_confidence": 0.9,
+                        "approved_tags": ["ruins", "entrance"],
+                        "approved_facets": ["stable_world", "ruins"],
+                        "approved_scope": "player_global",
+                        "approved_evidence_text": "遗迹入口在酒馆后巷。",
+                        "approved_stability": 1.0,
+                        "approved_future_usefulness": 0.9,
+                        "reason": "Approved for test.",
+                        "risk": "low",
+                    }
+                ]
+            },
+        ):
+            policy, writes = apply_memory_policy(
+                MemoryPolicyInput(
+                    npc_id="lina",
+                    player_input="遗迹入口在酒馆后巷。",
+                    npc_response="这类信息不能随便传播。",
+                    retrieved_long_term_memories=[],
+                    recent_short_term_context=[],
+                    npc_before=npc,
+                    npc_after=npc,
+                    player_before=player,
+                    player_after=player,
+                    quest_before=quest,
+                    quest_after=quest,
+                    tool_calls=[],
+                    state_changes=[],
+                )
+            )
+
+        self.assertEqual(writes, [])
+        self.assertEqual(policy["candidates"][0]["reason"], "Stable world lore belongs in lore_documents, not player memory.")
 
     def test_repeated_key_return_deduplicates_long_term_memory(self) -> None:
         run_agent_turn("什么样的钥匙，我这就去帮你找找")
