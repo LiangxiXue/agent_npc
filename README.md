@@ -2,7 +2,7 @@
 
 这是一个以文字冒险 NPC 交互为验证场景的记忆驱动角色 Agent 原型。项目重点不是制作完整游戏，而是展示角色 Agent 如何在多轮交互中读取稳定世界设定、检索玩家相关记忆、读取当前状态、生成结构化决策、调用工具修改外部状态，并保存可解释的执行轨迹。
 
-当前实现已经从单 NPC MVP 扩展为四 NPC、多任务、带社交策略的 Agent 原型：Lina 保留钥匙/遗迹主线，Ron、Mira、Sable 分别验证守卫证据、遗迹研究、古物交易与误导式社交行为。系统默认可用 mock 模式稳定运行，也提供 OpenAI-compatible LLM、embedding、Hybrid RAG 和后台记忆任务实验路径。
+当前实现已经从单 NPC MVP 扩展为四 NPC、多任务、带社交策略的 Agent 原型：Lina 保留钥匙/遗迹主线，Ron、Mira、Sable 分别验证守卫证据、遗迹研究、古物交易与误导式社交行为。配置 OpenAI-compatible LLM 后，系统会优先使用 LLM 参与结构化决策、最终回复润色和后台记忆处理；mock/模板路径保留为无 API key、测试、演示和失败时的稳定兜底。检索层支持 OpenAI-compatible embedding、Hybrid RAG 和本地 fallback。
 
 ## 当前项目状态
 
@@ -19,7 +19,7 @@
 - 记忆系统：短期交互进入 `recent_interactions`；长期重要事实进入类型化 `memories`，当前长期记忆类型为 `semantic`、`episodic`、`relational`、`procedural`，并带 `facets`、`scope`、`evidence_text`、`stability`、`future_usefulness` 元数据；检索支持 `off`、`legacy`、`typed`、`semantic`、`hybrid`。
 - 后台记忆任务：实时回合只 enqueue `memory_jobs`，长期记忆候选、审查、写入和 embedding 更新由单次脚本、API 或常驻 worker 处理，降低玩家端等待时间。
 - Provider-aware retrieval：embedding provider 支持 `mock_hash` 和 OpenAI-compatible；backend 支持 `sqlite_cosine` 和可选 `faiss`，不可用时自动 fallback。
-- 可选真实 LLM：同一 OpenAI-compatible client 可参与结构化 decision、最终回复润色、记忆候选生成和记忆审查；失败时回退到稳定 mock/模板路径。
+- LLM 优先路径：同一 OpenAI-compatible client 可参与结构化 decision、最终回复润色、记忆候选生成和记忆审查；未配置或失败时回退到稳定 mock/模板路径。
 - 可解释 trace：每轮记录检索、状态、decision、工具、状态变化、memory job 状态、timings 和 workflow steps。
 
 ### 当前工作流
@@ -202,16 +202,9 @@ agent_npc/
 
 ## 配置
 
-### Mock 模式
+### LLM Provider
 
-mock 模式不需要 API key，适合测试、评分和无网络演示：
-
-```powershell
-$env:AGENT_NPC_LLM_PROVIDER = "mock"
-streamlit run app.py
-```
-
-### OpenAI-Compatible LLM
+配置 OpenAI-compatible provider 后，系统优先使用真实 LLM。LLM 当前可参与：
 
 ```powershell
 $env:AGENT_NPC_LLM_PROVIDER = "openai_compatible"
@@ -223,12 +216,17 @@ $env:AGENT_NPC_LLM_RETRIES = "1"
 streamlit run app.py
 ```
 
-真实 LLM 可参与：
-
 1. 结构化 decision JSON；
 2. 最终 NPC 回复润色；
 3. 长期记忆候选生成；
 4. 长期记忆候选审查。
+
+没有配置 API key、显式设置 mock provider，或真实 LLM 调用失败时，系统会回退到 deterministic decision/mock memory candidate/模板回复，保证测试和无网络演示仍可运行：
+
+```powershell
+$env:AGENT_NPC_LLM_PROVIDER = "mock"
+streamlit run app.py
+```
 
 SQLite 状态、任务状态机、工具权限、重大事实和最终记忆写入仍由程序控制。
 
@@ -297,7 +295,7 @@ Sable，我听说入口在酒馆后巷，我接受你说的先查换岗记录。
 ## 当前边界
 
 - Agent 编排仍是自定义 Python workflow，没有迁移到 LangGraph。
-- 真实 LLM 路径是实验能力；课堂展示和自动测试仍以 mock 模式作为稳定兜底。
+- 已配置真实 LLM 时，回复润色和可用的 LLM 子流程优先走 OpenAI-compatible provider；mock/模板路径用于未配置、测试、无网络演示或失败兜底。
 - 后台记忆任务支持通过脚本/API 单次处理，也支持 `scripts/memory_worker.py` 常驻消费。
 - FAISS 和真实 embedding 是可选增强，不是默认依赖。
 - 课程最终报告 PDF、PPT、录屏和最终截图仍需基于当前运行结果整理。
