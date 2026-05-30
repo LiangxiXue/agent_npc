@@ -15,11 +15,10 @@ sys.path.insert(0, str(PROJECT_ROOT))
 EVAL_DIR = PROJECT_ROOT / "data" / "eval"
 EVAL_DB_PATH = EVAL_DIR / "memory_eval_state.db"
 
-os.environ["AGENT_NPC_LLM_PROVIDER"] = "mock"
-os.environ["AGENT_NPC_SKIP_ENV_FILE"] = "1"
 os.environ["AGENT_NPC_DB_PATH"] = str(EVAL_DB_PATH)
 
 from src.agent.embedding_client import get_embedding_settings  # noqa: E402
+from src.agent.llm_client import get_provider_status  # noqa: E402
 from src.agent.workflow import run_agent_turn  # noqa: E402
 from src.storage import database  # noqa: E402
 
@@ -75,6 +74,16 @@ VARIANTS = [
         description="Combines typed rule scoring with deterministic semantic retrieval.",
     ),
 ]
+
+
+def require_llm_runtime() -> None:
+    status = get_provider_status()
+    if status["provider"] != "openai_compatible" or not status["uses_api_key"]:
+        raise SystemExit(
+            "OpenAI-compatible LLM runtime is required. Set "
+            "AGENT_NPC_LLM_PROVIDER=openai_compatible and "
+            "AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY before running memory evaluation."
+        )
 
 
 def run_turn(player_input: str, variant: Variant):
@@ -769,6 +778,8 @@ def build_observations(report: dict[str, Any]) -> list[str]:
 
 
 def main() -> None:
+    require_llm_runtime()
+    os.environ["AGENT_NPC_SKIP_ENV_FILE"] = "1"
     report = run_evaluation()
     print(f"Wrote JSON report to {REPORT_JSON}")
     print(f"Wrote Markdown summary to {SUMMARY_MD}")

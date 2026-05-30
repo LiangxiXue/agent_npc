@@ -54,8 +54,8 @@ Player Input
 
 Background:
 memory_jobs
--> LLM/mock memory candidate generation
--> optional LLM review
+-> LLM memory candidate generation
+-> LLM review when memory LLM is enabled
 -> programmatic gate / dedup
 -> memory writes
 -> embedding update for new memory writes

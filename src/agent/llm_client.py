@@ -43,18 +43,14 @@ class LLMSettings:
     retries: int
 
     @property
-    def is_mock(self) -> bool:
-        return self.provider == "mock"
-
-    @property
     def is_configured(self) -> bool:
-        return self.is_mock or bool(self.api_key)
+        return self.provider == "openai_compatible" and bool(self.api_key)
 
 
 def get_llm_settings() -> LLMSettings:
     load_local_env_file()
     return LLMSettings(
-        provider=os.environ.get("AGENT_NPC_LLM_PROVIDER", "mock").strip().lower(),
+        provider=os.environ.get("AGENT_NPC_LLM_PROVIDER", "openai_compatible").strip().lower(),
         model=os.environ.get("AGENT_NPC_LLM_MODEL", "gpt-4o-mini"),
         base_url=os.environ.get("AGENT_NPC_LLM_BASE_URL", "https://api.openai.com/v1"),
         api_key=os.environ.get("AGENT_NPC_LLM_API_KEY") or os.environ.get("OPENAI_API_KEY"),
@@ -108,7 +104,7 @@ def call_openai_compatible_json(
     """Call an OpenAI-compatible chat completion API and parse a JSON object."""
     active_settings = settings or get_llm_settings()
     if not active_settings.api_key:
-        raise RuntimeError("AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY is required for non-mock LLM provider.")
+        raise RuntimeError("AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY is required for LLM provider.")
 
     endpoint = active_settings.base_url.rstrip("/") + "/chat/completions"
     body = {

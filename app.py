@@ -478,7 +478,7 @@ def render_sidebar() -> tuple[str, bool, str]:
 def render_runtime_summary() -> None:
     provider = get_provider_status()
     embedding = get_embedding_settings()
-    llm_state = "已配置" if provider["configured"] else "未配置，使用 mock 回退"
+    llm_state = "已配置" if provider["configured"] else "未配置，主回合需要 OpenAI-compatible LLM"
     embedding_state = "可用" if embedding["configured"] else "未配置"
     translation_state = "已启用" if dynamic_translation_enabled() else "已关闭"
     if dynamic_translation_enabled() and not (

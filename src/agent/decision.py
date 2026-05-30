@@ -117,97 +117,55 @@ def decide_next_action(
     state_snapshot: dict[str, Any] | None = None,
     recent_short_term_context: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
-    """Return a structured decision using mock by default or optional real LLM."""
+    """Return a structured decision from the configured LLM with local rule validation."""
     classification = classify_turn(
         player_input,
         npc_id=str(npc_state.get("npc_id", NPC_ID)),
         quest_status=str(quest_state.get("status", "not_started")),
     )
-    if classification.turn_type not in {"ambiguous", "social_maneuver"}:
+    settings = get_llm_settings()
+    if settings.provider != "openai_compatible" or not settings.is_configured:
+        raise RuntimeError("A configured LLM is required for structured decisions.")
+    try:
+        decision = call_openai_compatible_json(
+            system_prompt=DECISION_SYSTEM_PROMPT,
+            user_payload={
+                "player_input": player_input,
+                "npc_state": npc_state,
+                "player_state": player_state,
+                "quest_state": quest_state,
+                "retrieved_lore": retrieved_lore or [],
+                "retrieved_long_term_memories": retrieved_long_term_memories,
+                "state_snapshot": state_snapshot or {
+                    "npc": npc_state,
+                    "player": player_state,
+                    "quest": quest_state,
+                },
+                "turn_classification": {
+                    "turn_type": classification.turn_type,
+                    "confidence": classification.confidence,
+                    "reason": classification.reason,
+                },
+                "recent_short_term_context": recent_short_term_context or [],
+                "expected_output_schema": DECISION_OUTPUT_SCHEMA,
+                "allowed_intents": sorted(ALLOWED_INTENTS),
+                "allowed_social_intents": sorted(ALLOWED_SOCIAL_INTENTS),
+                "allowed_social_targets": sorted(ALLOWED_SOCIAL_TARGETS),
+                "allowed_social_attitudes": sorted(ALLOWED_SOCIAL_ATTITUDES),
+                "allowed_tools": sorted(ALLOWED_TOOL_NAMES),
+                "tool_argument_schemas": TOOL_ARGUMENT_SCHEMAS,
+            },
+            settings=settings,
+        )
         routed = apply_task_state_machine(
-            mock_decide_next_action(
-                player_input,
-                npc_state,
-                player_state,
-                quest_state,
-                retrieved_long_term_memories,
-                recent_short_term_context or [],
-            ),
+            validate_decision(decision),
             player_input=player_input,
             npc_state=npc_state,
             quest_state=quest_state,
         )
-        return annotate_decision_route(routed, "rule_fast_path", classification)
-
-    settings = get_llm_settings()
-    if settings.provider == "openai_compatible" and settings.is_configured:
-        try:
-            decision = call_openai_compatible_json(
-                system_prompt=DECISION_SYSTEM_PROMPT,
-                user_payload={
-                    "player_input": player_input,
-                    "npc_state": npc_state,
-                    "player_state": player_state,
-                    "quest_state": quest_state,
-                    "retrieved_lore": retrieved_lore or [],
-                    "retrieved_long_term_memories": retrieved_long_term_memories,
-                    "state_snapshot": state_snapshot or {
-                        "npc": npc_state,
-                        "player": player_state,
-                        "quest": quest_state,
-                    },
-                    "recent_short_term_context": recent_short_term_context or [],
-                    "expected_output_schema": DECISION_OUTPUT_SCHEMA,
-                    "allowed_intents": sorted(ALLOWED_INTENTS),
-                    "allowed_social_intents": sorted(ALLOWED_SOCIAL_INTENTS),
-                    "allowed_social_targets": sorted(ALLOWED_SOCIAL_TARGETS),
-                    "allowed_social_attitudes": sorted(ALLOWED_SOCIAL_ATTITUDES),
-                    "allowed_tools": sorted(ALLOWED_TOOL_NAMES),
-                    "tool_argument_schemas": TOOL_ARGUMENT_SCHEMAS,
-                },
-                settings=settings,
-            )
-            routed = apply_task_state_machine(
-                validate_decision(decision),
-                player_input=player_input,
-                npc_state=npc_state,
-                quest_state=quest_state,
-            )
-            return annotate_decision_route(routed, "llm_assisted", classification)
-        except Exception as exc:
-            fallback = mock_decide_next_action(
-                player_input,
-                npc_state,
-                player_state,
-                quest_state,
-                retrieved_long_term_memories,
-                recent_short_term_context or [],
-            )
-            fallback["llm_fallback"] = {
-                "provider": settings.provider,
-                "reason": str(exc),
-            }
-            routed = apply_task_state_machine(
-                fallback,
-                player_input=player_input,
-                npc_state=npc_state,
-                quest_state=quest_state,
-            )
-            return annotate_decision_route(routed, "fallback", classification)
-    routed = apply_task_state_machine(
-        mock_decide_next_action(
-            player_input,
-            npc_state,
-            player_state,
-            quest_state,
-            retrieved_long_term_memories,
-            recent_short_term_context or [],
-        ),
-        player_input=player_input,
-        npc_state=npc_state,
-        quest_state=quest_state,
-    )
-    return annotate_decision_route(routed, "rule_fast_path", classification)
+        return annotate_decision_route(routed, "llm_assisted", classification)
+    except Exception as exc:
+        raise RuntimeError(f"LLM decision failed: {exc}") from exc
 
 
 def annotate_decision_route(
@@ -232,7 +190,7 @@ def mock_decide_next_action(
     retrieved_long_term_memories: list[dict[str, Any]],
     recent_short_term_context: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
-    """Deterministic structured decision used for local demos and tests."""
+    """Deterministic structured decision fixture used by tests that patch the LLM call."""
     npc_id = npc_state.get("npc_id", NPC_ID)
     if npc_id == "ron":
         return mock_ron_decision(player_input, npc_state, quest_state)

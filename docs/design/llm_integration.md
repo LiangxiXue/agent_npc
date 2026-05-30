@@ -1,27 +1,20 @@
-# Optional LLM Integration
+# LLM-Required Runtime Integration
 
-项目默认运行在 `mock` 模式，保证无 API key 时也能测试、演示和评分。OpenAI-compatible 模式是实验增强路径。
-
-## Default Mode
-
-```powershell
-streamlit run app.py
-```
-
-默认 provider：
+面向玩家的主回合运行时要求使用 OpenAI-compatible LLM 配置。也就是说，本地应用、演示和真实对话流程需要：
 
 ```text
-AGENT_NPC_LLM_PROVIDER=mock
+AGENT_NPC_LLM_PROVIDER=openai_compatible
+AGENT_NPC_LLM_API_KEY=<configured API key>
 ```
 
-在该模式下，`src/agent/decision.py` 使用确定性 structured decisions，`src/agent/response.py` 使用模板 fallback，Memory Policy 使用 mock memory candidate generator 加程序 gate。规则不再负责编写长期记忆候选，只负责审核边界。
+如果某个运行时组件存在 deterministic substitute 与 LLM 分支，玩家可见的主流程必须走 LLM 分支。允许保持本地确定性的例外只有 local classification、task-state-machine validation、schema validation 和 business-rule enforcement。单元测试可以 patch OpenAI-compatible 调用以避免网络请求，但不应把主回合 workflow 配成 provider mock。
 
 ## OpenAI-Compatible Setup
 
-`.env.example` 中提供默认字段：
+`.env.example` 中应提供这些字段：
 
 ```text
-AGENT_NPC_LLM_PROVIDER=mock
+AGENT_NPC_LLM_PROVIDER=openai_compatible
 AGENT_NPC_LLM_API_KEY=
 AGENT_NPC_LLM_MODEL=gpt-4o-mini
 AGENT_NPC_LLM_BASE_URL=https://api.openai.com/v1
@@ -39,14 +32,13 @@ $env:AGENT_NPC_LLM_MODEL = "gpt-4o-mini"
 $env:AGENT_NPC_LLM_BASE_URL = "https://api.openai.com/v1"
 $env:AGENT_NPC_LLM_TIMEOUT = "60"
 $env:AGENT_NPC_LLM_RETRIES = "1"
-streamlit run app.py
 ```
 
 DeepSeek 等兼容服务只需替换 model 和 base URL。
 
 ## Four LLM Touchpoints
 
-真实 LLM 可参与四个位置：
+主运行时 LLM 参与四个位置：
 
 1. **Structured decision**：生成 intent、reasoning、social metadata、response keywords 和 tools。
 2. **Response polish**：工具执行后，根据最新状态和 canonical facts 润色最终 NPC 回复。
@@ -134,7 +126,7 @@ validate_decision()
 - `withhold` / `probe` / `redirect` 等意图偷偷解锁地点；
 - Sable 的 deceptive dialogue 变成 canonical ruins unlock。
 
-如果失败，系统回退到 mock decision，并在 trace 中记录 `llm_fallback` 或 `state_machine.blocked`。
+这些步骤是 deterministic validator，不是模型替身。LLM decision 失败不能回退到 deterministic model decision；运行时应返回受约束的错误路径。任务状态机或业务规则阻止动作时，trace 会记录 validation/blocking 信息，环境不会执行被拒绝的状态变更。
 
 ## Response Polishing
 
@@ -157,7 +149,7 @@ validate_decision()
 }
 ```
 
-如果回复违反重大事实，例如错误透露遗迹入口、虚构解锁地点或改变任务结果，系统回退到 deterministic template。
+如果回复违反重大事实，例如错误透露遗迹入口、虚构解锁地点或改变任务结果，系统会阻止或约束该回复，避免向玩家声称环境没有执行的结果。
 
 ## Memory Candidate And Review
 
@@ -184,4 +176,4 @@ python -c "from src.agent.llm_client import get_provider_status; print(get_provi
 python scripts/test_llm_api.py
 ```
 
-即使真实 API 失败，mock 模式、测试和基础演示仍应保持可运行。
+测试可通过 patch OpenAI-compatible 调用保持离线可运行。真实本地应用运行需要配置可用 API key；主回合 runtime 不再以 deterministic substitute 作为默认模型路径。

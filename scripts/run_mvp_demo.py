@@ -6,9 +6,7 @@ import sys
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
 
-os.environ["AGENT_NPC_LLM_PROVIDER"] = "mock"
-os.environ["AGENT_NPC_SKIP_ENV_FILE"] = "1"
-
+from src.agent.llm_client import get_provider_status  # noqa: E402
 from src.agent.workflow import run_agent_turn  # noqa: E402
 from src.storage import database  # noqa: E402
 
@@ -25,7 +23,18 @@ DEMO_TURNS = [
 ]
 
 
+def require_llm_runtime() -> None:
+    status = get_provider_status()
+    if status["provider"] != "openai_compatible" or not status["uses_api_key"]:
+        raise SystemExit(
+            "OpenAI-compatible LLM runtime is required. Set "
+            "AGENT_NPC_LLM_PROVIDER=openai_compatible and "
+            "AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY before running this demo."
+        )
+
+
 def main() -> None:
+    require_llm_runtime()
     database.reset_database()
 
     for index, (npc_id, player_input) in enumerate(DEMO_TURNS, start=1):

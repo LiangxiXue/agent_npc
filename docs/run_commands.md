@@ -117,7 +117,7 @@ python scripts/memory_worker.py --limit 5
 它会持续检查 `memory_jobs` 表里的 `pending` 任务，并执行：
 
 - Memory Policy
-- LLM/Mock 记忆候选生成
+- LLM 记忆候选生成
 - 程序 gate 审核
 - 去重
 - 写入 `memories`

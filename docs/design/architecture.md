@@ -11,7 +11,7 @@ This project uses a text-adventure NPC scene as a controlled testbed for an Agen
 | Streamlit debug UI | `app.py` | Inspect provider status, NPC state, retrieval, trace, tools, logs, and exports |
 | Player UI | `frontend/` | React/Vite pixel RPG experience for normal interaction |
 | Player API | `src/api/server.py` | FastAPI wrapper around the same workflow, plus preview/export/index/job endpoints |
-| CLI demo | `scripts/run_mvp_demo.py` | Stable four-NPC mock demonstration |
+| CLI demo | `scripts/run_mvp_demo.py` | Four-NPC scripted demonstration using the configured runtime |
 | Background memory CLI | `scripts/process_memory_jobs.py` | Processes one batch of queued long-term memory jobs |
 | Background memory worker | `scripts/memory_worker.py` | Continuously consumes queued long-term memory jobs |
 
@@ -40,8 +40,8 @@ The synchronous path is optimized for player latency. It records enough informat
 ```text
 memory_jobs pending row
 -> MemoryPolicyInput reconstruction
--> LLM/mock memory candidate generation
--> optional LLM review
+-> LLM memory candidate generation
+-> LLM review when memory LLM is enabled
 -> programmatic gate
 -> deduplication
 -> SQLite memory write
@@ -72,11 +72,11 @@ The FastAPI app also exposes `/api/process-memory-jobs` for explicit player UI/d
 | `src/agent/lore_retrieval.py` | Stable world/NPC lore retrieval |
 | `src/agent/decision.py` | Structured decision, social metadata, intent validation, universal task state machine |
 | `src/agent/turn_classifier.py` | Fast routing between simple rule path, ambiguous turns, sensitive requests, and social maneuvers |
-| `src/agent/response.py` | Final NPC response generation with optional LLM polish and deterministic fallback |
+| `src/agent/response.py` | Final NPC response generation with ActionResult constraints |
 | `src/agent/memory_jobs.py` | Queue and process background long-term memory work |
 | `src/agent/memory_policy.py` | Long-term memory write policy, LLM candidate orchestration, gate, dedup |
-| `src/agent/llm_memory_candidate.py` | OpenAI-compatible and mock memory candidate generator |
-| `src/agent/memory_candidate_review.py` | OpenAI-compatible reviewer with mock pass-through review |
+| `src/agent/llm_memory_candidate.py` | OpenAI-compatible memory candidate generator |
+| `src/agent/memory_candidate_review.py` | OpenAI-compatible memory candidate reviewer |
 | `src/agent/memory_candidate_gate.py` | Programmatic hard gate for evidence/type/state support |
 | `src/agent/embedding_client.py` | `mock_hash` and OpenAI-compatible embedding provider abstraction |
 | `src/agent/semantic_retrieval.py` | Memory embedding indexing and semantic retrieval |
@@ -101,7 +101,7 @@ SQLite is the source of truth for:
 - world events;
 - interaction logs.
 
-LLM calls can propose decision JSON, polish response text, generate memory candidates, or review memory candidates. They do not own canonical state snapshots, tool permissions, quest lifecycle, or final memory writes.
+LLM calls can propose decision JSON, polish response text, generate memory candidates, or review memory candidates. They do not own canonical state snapshots, tool permissions, quest lifecycle, or final memory writes. Player-facing runtime requires a configured OpenAI-compatible LLM; deterministic code is reserved for local classification, schema/business validation, and task-state-machine enforcement.
 
 ## Quest And Social Safety
 
@@ -152,5 +152,5 @@ The `decision` also carries route, classification, timing-adjacent metadata, res
 
 - Agent orchestration is still a custom Python workflow, not LangGraph.
 - Background memory jobs are queue-based but not yet run by a permanent worker.
-- Real LLM and real embedding providers are optional; tests and demos keep deterministic mock paths.
+- Player-facing LLM runtime requires a configured OpenAI-compatible provider; tests patch those calls to remain offline. Embedding providers still support local deterministic retrieval experiments.
 - FAISS is optional and falls back to SQLite cosine retrieval when unavailable.

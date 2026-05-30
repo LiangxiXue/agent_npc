@@ -4,8 +4,8 @@ from dataclasses import dataclass
 from time import perf_counter
 from typing import Any
 
-from src.agent.context import build_context_inputs
 from src.agent.decision import decide_next_action
+from src.agent.environment import NarrativeEnvironment
 from src.agent.memory_jobs import enqueue_memory_job
 from src.agent.response import generate_npc_response
 from src.storage import database
@@ -49,52 +49,55 @@ def run_agent_turn(
     timings: dict[str, float] = {}
     database.initialize_database()
 
+    environment = NarrativeEnvironment()
     context_started = perf_counter()
-    context_inputs = build_context_inputs(
+    observation = environment.observe(
         player_input=player_input,
         npc_id=npc_id,
         memory_retrieval_mode=memory_retrieval_mode,
     )
     timings["context_retrieval_ms"] = elapsed_ms(context_started)
-    recent_context = context_inputs["recent_context"]
-    retrieved_lore = context_inputs["retrieved_lore"]
-    retrieved_memories = context_inputs["retrieved_memories"]
-    state_snapshot = context_inputs["state_snapshot"]
-    npc_before = database.get_npc(npc_id)
-    player_before = database.get_player_state()
-    quest_before = database.get_primary_quest_for_npc(npc_id)
+    recent_context = observation.recent_context
+    retrieved_lore = observation.retrieved_lore
+    retrieved_memories = observation.retrieved_memories
+    npc_before = observation.npc_state
+    player_before = observation.player_state
+    quest_before = observation.quest_state
+    state_snapshot = build_state_snapshot(npc_before, player_before, quest_before)
 
     decision_started = perf_counter()
     decision = decide_next_action(
         player_input=player_input,
-        npc_state=npc_before,
-        player_state=player_before,
-        quest_state=quest_before,
-        retrieved_lore=retrieved_lore,
-        retrieved_long_term_memories=retrieved_memories,
+        npc_state=observation.npc_state,
+        player_state=observation.player_state,
+        quest_state=observation.quest_state,
+        retrieved_lore=observation.retrieved_lore,
+        retrieved_long_term_memories=observation.retrieved_memories,
         state_snapshot=state_snapshot,
-        recent_short_term_context=recent_context,
+        recent_short_term_context=observation.recent_context,
     )
     timings["decision_ms"] = elapsed_ms(decision_started)
     state_before = build_state_snapshot(npc_before, player_before, quest_before)
     decision["memory_retrieval_mode"] = memory_retrieval_mode
     decision["state_before"] = state_before
+
+    npc_action = environment.propose_action_from_decision(decision, observation)
+    npc_action = environment.validate(npc_action, observation)
+    decision = dict(npc_action.raw_decision)
+    decision["memory_retrieval_mode"] = memory_retrieval_mode
+    decision["state_before"] = state_before
+
     tools_started = perf_counter()
-    tool_executions = execute_tools(decision)
+    action_result = environment.execute(npc_action, observation)
     timings["tool_execution_ms"] = elapsed_ms(tools_started)
 
     npc_after = database.get_npc(npc_id)
     player_after = database.get_player_state()
     quest_after = database.get_primary_quest_for_npc(npc_id)
-    state_changes = collect_state_changes(
-        npc_before=npc_before,
-        npc_after=npc_after,
-        player_before=player_before,
-        player_after=player_after,
-        quest_before=quest_before,
-        quest_after=quest_after,
-    )
-    decision["state_after"] = build_state_snapshot(npc_after, player_after, quest_after)
+    tool_calls = action_result.executed_tools
+    state_changes = action_result.state_changes
+    decision["state_after"] = action_result.state_after
+    decision["environment"] = environment.trace_payload(observation, npc_action, action_result)
     decision["context_inputs"] = {
         "retrieved_lore": retrieved_lore,
         "retrieved_memories": retrieved_memories,
@@ -102,7 +105,6 @@ def run_agent_turn(
         "recent_context": recent_context,
     }
 
-    tool_calls = sqlite_tools.serialize_tool_executions(tool_executions)
     response_started = perf_counter()
     npc_response, response_generation = generate_npc_response(
         player_input=player_input,
@@ -116,6 +118,9 @@ def run_agent_turn(
         recent_context=recent_context,
         tool_calls=tool_calls,
         state_changes=state_changes,
+        observation=observation,
+        npc_action=npc_action,
+        action_result=action_result,
     )
     timings["response_ms"] = elapsed_ms(response_started)
     decision["response_generation"] = response_generation
@@ -259,27 +264,8 @@ def elapsed_ms(started: float) -> float:
 
 
 def execute_tools(decision: dict[str, Any]) -> list[sqlite_tools.ToolExecution]:
-    tool_executions = []
-    for tool in decision["tools"]:
-        name = tool["name"]
-        args = tool["args"]
-        if name == "add_memory":
-            tool_executions.append(sqlite_tools.add_memory(**args))
-        elif name == "update_trust":
-            tool_executions.append(sqlite_tools.update_trust(**args))
-        elif name == "update_affection":
-            tool_executions.append(sqlite_tools.update_affection(**args))
-        elif name == "give_item":
-            tool_executions.append(sqlite_tools.give_item(**args))
-        elif name == "update_quest_status":
-            tool_executions.append(sqlite_tools.update_quest_status(**args))
-        elif name == "unlock_location":
-            tool_executions.append(sqlite_tools.unlock_location(**args))
-        elif name == "record_world_event":
-            tool_executions.append(sqlite_tools.record_world_event(**args))
-        else:
-            raise ValueError(f"Unknown tool: {name}")
-    return tool_executions
+    # Compatibility wrapper for older tests/imports; runtime execution goes through NarrativeEnvironment.
+    return NarrativeEnvironment()._execute_tools(decision["tools"])
 
 
 def build_state_snapshot(
@@ -343,7 +329,21 @@ def build_workflow_steps(
                 f"stance: {decision.get('social_stance', {}).get('attitude', 'cautious')}."
             ),
         },
-        {"stage": "Tool Execution", "result": f"Executed {len(tool_calls)} tool calls."},
+        {"stage": "Observation", "result": "Environment observed input, context, lore, memory, and SQLite state."},
+        {
+            "stage": "NPC Action",
+            "result": f"Action intent: {decision.get('environment', {}).get('npc_action', {}).get('intent', decision['intent'])}.",
+        },
+        {
+            "stage": "Action Validation",
+            "result": (
+                "Accepted."
+                if decision.get("environment", {}).get("action_result", {}).get("accepted", True)
+                else f"Blocked: {decision.get('environment', {}).get('action_result', {}).get('blocked_reason', 'unknown')}"
+            ),
+        },
+        {"stage": "Environment Execution", "result": f"Executed {len(tool_calls)} environment-approved tool call(s)."},
+        {"stage": "Action Result", "result": f"Recorded {len(state_changes)} state change(s)."},
         {
             "stage": "Response Generation",
             "result": (

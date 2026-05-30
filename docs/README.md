@@ -9,7 +9,7 @@
 - `hybrid_rag_design.md`：Hybrid RAG 当前设计摘要。
 - `hybrid_rag_migration_plan.md`：从 typed retrieval 到 Hybrid RAG 的阶段记录；现在主要作为历史迁移记录。
 - `retrieval_layer.md`：可插拔 embedding provider、embedding cache、SQLite/FAISS backend 和 fallback 行为。
-- `llm_integration.md`：OpenAI-compatible LLM 接入方式、decision/response/memory 路径和失败回退策略。
+- `llm_integration.md`：OpenAI-compatible LLM 接入方式、decision/response/memory 路径和 LLM-required runtime 约束。
 - `multi_npc.md`：Lina/Ron/Mira/Sable 四 NPC、任务隔离、社交策略和当前行为范围。
 
 ## operations

@@ -174,7 +174,7 @@ python scripts/memory_worker.py --limit 5
 
 ```text
 LLM memory candidate generator
--> optional LLM memory review agent
+-> LLM memory review agent when memory LLM is enabled
 -> programmatic gate
 -> deduplication
 -> SQLite write

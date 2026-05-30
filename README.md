@@ -2,7 +2,7 @@
 
 这是一个以文字冒险 NPC 交互为验证场景的记忆驱动角色 Agent 原型。项目重点不是制作完整游戏，而是展示角色 Agent 如何在多轮交互中读取稳定世界设定、检索玩家相关记忆、读取当前状态、生成结构化决策、调用工具修改外部状态，并保存可解释的执行轨迹。
 
-当前实现已经从单 NPC MVP 扩展为四 NPC、多任务、带社交策略的 Agent 原型：Lina 保留钥匙/遗迹主线，Ron、Mira、Sable 分别验证守卫证据、遗迹研究、古物交易与误导式社交行为。配置 OpenAI-compatible LLM 后，系统会优先使用 LLM 参与结构化决策、最终回复润色和后台记忆处理；mock/模板路径保留为无 API key、测试、演示和失败时的稳定兜底。检索层支持 OpenAI-compatible embedding、Hybrid RAG 和本地 fallback。
+当前实现已经从单 NPC MVP 扩展为四 NPC、多任务、带社交策略的 Agent 原型：Lina 保留钥匙/遗迹主线，Ron、Mira、Sable 分别验证守卫证据、遗迹研究、古物交易与误导式社交行为。玩家可见的主回合 runtime 需要配置 OpenAI-compatible LLM；LLM 参与结构化决策、最终回复润色和后台记忆处理。测试通过 patch OpenAI-compatible 调用保持离线可运行；检索层支持 OpenAI-compatible embedding、Hybrid RAG 和本地 fallback。
 
 ## 当前项目状态
 
@@ -19,8 +19,9 @@
 - 记忆系统：短期交互进入 `recent_interactions`；长期重要事实进入类型化 `memories`，当前长期记忆类型为 `semantic`、`episodic`、`relational`、`procedural`，并带 `facets`、`scope`、`evidence_text`、`stability`、`future_usefulness` 元数据；检索支持 `off`、`legacy`、`typed`、`semantic`、`hybrid`。
 - 后台记忆任务：实时回合只 enqueue `memory_jobs`，长期记忆候选、审查、写入和 embedding 更新由单次脚本、API 或常驻 worker 处理，降低玩家端等待时间。
 - Provider-aware retrieval：embedding provider 支持 `mock_hash` 和 OpenAI-compatible；backend 支持 `sqlite_cosine` 和可选 `faiss`，不可用时自动 fallback。
-- LLM 优先路径：同一 OpenAI-compatible client 可参与结构化 decision、最终回复润色、记忆候选生成和记忆审查；未配置或失败时回退到稳定 mock/模板路径。
-- 可解释 trace：每轮记录检索、状态、decision、工具、状态变化、memory job 状态、timings 和 workflow steps。
+- LLM runtime 路径：同一 OpenAI-compatible client 可参与结构化 decision、最终回复润色、记忆候选生成和记忆审查；玩家可见主流程需要可用 API key，测试通过 patch 调用保持离线可运行。
+- Narrative Environment：`src/agent/environment.py` 将每轮上下文整理为 `Observation`，把 LLM decision 转成 `NPCAction`，再由程序规则校验并执行成 `ActionResult`。LLM 只能提出行动，世界事实以环境执行结果为准。
+- 可解释 trace：每轮记录检索、状态、Observation、decision、NPCAction、ActionResult、工具、状态变化、memory job 状态、timings 和 workflow steps。
 
 ### 当前工作流
 
@@ -31,9 +32,11 @@ Player Input
 -> Long-Term Memory Retrieval
 -> State Load
 -> Turn Classification
--> Structured Decision
--> Program-Owned Quest State Machine
--> Tool Execution
+-> LLM Structured Decision
+-> NarrativeEnvironment Observation / NPCAction
+-> Program-Owned Validation and Quest State Machine
+-> Environment Execution
+-> ActionResult
 -> Response Generation
 -> Background Memory Job Enqueue
 -> Short-Term Interaction Write
@@ -56,7 +59,7 @@ memory_jobs
 .venv/bin/python -m unittest discover -s tests -v
 ```
 
-当前验证结果：46 个测试全部通过。
+当前验证结果：64 个测试全部通过。
 
 玩家端构建命令：
 
@@ -221,12 +224,7 @@ streamlit run app.py
 3. 长期记忆候选生成；
 4. 长期记忆候选审查。
 
-没有配置 API key、显式设置 mock provider，或真实 LLM 调用失败时，系统会回退到 deterministic decision/mock memory candidate/模板回复，保证测试和无网络演示仍可运行：
-
-```powershell
-$env:AGENT_NPC_LLM_PROVIDER = "mock"
-streamlit run app.py
-```
+玩家可见的主回合 runtime 需要配置可用 API key。测试通过 patch OpenAI-compatible 调用保持离线可运行；本地规则分类、任务状态机、schema/business-rule 校验仍是程序确定性逻辑，不属于模型替身。
 
 SQLite 状态、任务状态机、工具权限、重大事实和最终记忆写入仍由程序控制。
 
@@ -284,7 +282,9 @@ Sable，我听说入口在酒馆后巷，我接受你说的先查换岗记录。
 
 - NPC、玩家、任务、地点和世界事件都写入 SQLite；
 - decision 是结构化对象，包含 intent、工具调用、社交策略和回复关键词；
-- 工具调用会真实改变数据库；
+- Environment 将 decision 转成 `NPCAction`，经过校验后才执行工具；
+- `ActionResult` 记录本轮是否 accepted、实际执行了哪些工具、状态前后变化和回复约束；
+- 工具调用会真实改变数据库，但最终事实以 `ActionResult` 为准，而不是以 LLM 自述为准；
 - 任务推进经过程序状态机，不允许 LLM 直接越权完成任务；
 - 长期记忆由后台 LLM candidate/review、programmatic gate 和 dedup 管理；
 - 检索到的 lore / memory 会进入后续 decision 和 response；
@@ -295,16 +295,21 @@ Sable，我听说入口在酒馆后巷，我接受你说的先查换岗记录。
 ## 当前边界
 
 - Agent 编排仍是自定义 Python workflow，没有迁移到 LangGraph。
-- 已配置真实 LLM 时，回复润色和可用的 LLM 子流程优先走 OpenAI-compatible provider；mock/模板路径用于未配置、测试、无网络演示或失败兜底。
+- 玩家可见 LLM runtime 需要 OpenAI-compatible provider 和可用 API key；测试通过 patch LLM 调用保持离线可运行。
+- 当前 Environment 层主要提供流程边界、校验、执行和 trace 事实来源；`Decision -> NPCAction` 仍是轻量结构化转换，尚未实现完整世界模拟。
 - 后台记忆任务支持通过脚本/API 单次处理，也支持 `scripts/memory_worker.py` 常驻消费。
 - FAISS 和真实 embedding 是可选增强，不是默认依赖。
 - 课程最终报告 PDF、PPT、录屏和最终截图仍需基于当前运行结果整理。
 
 ## 后续方向
 
-1. 引入 LangGraph 或显式节点编排，把当前 workflow 拆成更标准的 Agent graph。
-2. 增强后台 worker 的并发锁、重试策略、运行监控和服务化启动方式。
-3. 增强真实 LLM decision 的 schema 修复、失败案例记录和回归测试。
-4. 扩展多 NPC 信息传播、关系网络和间接记忆影响。
-5. 增加本地 embedding 模型、持久化 FAISS 索引或 Qdrant/Chroma backend。
-6. 完善课程交付材料：报告、PPT、截图、录屏、AI 使用说明和演示脚本。
+1. 做实 Environment 的空间和可见性模型：给 NPC、玩家、物品、事件和地点增加 location / visibility，让 Observation 不再只是按 `npc_id` 聚合上下文，而是反映 NPC 当前能看到、听到或通过信息网络知道的内容。
+2. 增加 NPC 私有知识和事件传播：世界事件不再全局可见，而是按酒馆传闻、守卫报告、学者记录、黑市网络等渠道传播给不同 NPC。
+3. 增加环境可行动作列表：由 Environment 根据当前状态生成 `available_actions`，LLM 只能从可用行动中选择，避免凭空生成工具或越权行动。
+4. 增加场景对象状态：例如 `tavern_backroom.locked`、`town_gate.guard_shift`、`ruins_entrance.discovered`、`sealed_door.symbols_observed`，让任务推进依赖对象状态而不只依赖 quest status。
+5. 增强 action prerequisites 和失败结果：为每类行动定义前置条件、失败原因和局部后果，例如不在 town_gate 不能检查 gate badge，没观察 inscription 不能完成 ancient_notes。
+6. 引入 LangGraph 或显式节点编排，把当前 workflow 拆成更标准的 Agent graph。
+7. 增强后台 worker 的并发锁、重试策略、运行监控和服务化启动方式。
+8. 增强真实 LLM decision 的 schema 修复、失败案例记录和回归测试。
+9. 增加本地 embedding 模型、持久化 FAISS 索引或 Qdrant/Chroma backend。
+10. 完善课程交付材料：报告、PPT、截图、录屏、AI 使用说明和演示脚本。

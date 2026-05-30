@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import asdict, is_dataclass
 from typing import Any
 
 from src.agent.llm_client import call_openai_compatible_json, get_llm_settings
@@ -19,55 +20,152 @@ def generate_npc_response(
     retrieved_lore: list[dict[str, Any]] | None = None,
     state_snapshot: dict[str, Any] | None = None,
     recent_context: list[dict[str, Any]] | None = None,
+    observation: Any | None = None,
+    npc_action: Any | None = None,
+    action_result: Any | None = None,
 ) -> tuple[str, dict[str, Any]]:
-    """Generate the NPC's final text from decision keywords, with deterministic fallback."""
+    """Generate the NPC's final text from decision keywords through the configured LLM."""
     settings = get_llm_settings()
-    if settings.provider == "openai_compatible" and settings.is_configured:
-        try:
-            payload = call_openai_compatible_json(
-                system_prompt=RESPONSE_SYSTEM_PROMPT,
-                user_payload={
-                    "player_input": player_input,
-                    "decision": {
-                        "intent": decision["intent"],
-                        "reasoning": decision["reasoning"],
-                        "social_intent": decision.get("social_intent", "cooperate"),
-                        "social_stance": decision.get("social_stance", {}),
-                        "response_style": decision["response_style"],
-                        "response_keywords": decision["response_keywords"],
-                    },
-                    "npc_state": npc_state,
-                    "hidden_alignment": npc_state.get("hidden_alignment", "neutral"),
-                    "player_state": player_state,
-                    "quest_state": quest_state,
-                    "state_snapshot": state_snapshot or {
-                        "npc": npc_state,
-                        "player": player_state,
-                        "quest": quest_state,
-                    },
-                    "canonical_world_facts": CANONICAL_WORLD_FACTS,
-                    "retrieved_lore": retrieved_lore or [],
-                    "retrieved_memories": retrieved_memories,
-                    "recent_context": recent_context or [],
-                    "tool_calls": tool_calls,
-                    "state_changes": state_changes,
-                    "expected_output_schema": RESPONSE_OUTPUT_SCHEMA,
+    if settings.provider != "openai_compatible" or not settings.is_configured:
+        raise RuntimeError("A configured LLM is required for response generation.")
+    try:
+        payload = call_openai_compatible_json(
+            system_prompt=RESPONSE_SYSTEM_PROMPT,
+            user_payload={
+                "player_input": player_input,
+                "decision": {
+                    "intent": decision["intent"],
+                    "reasoning": decision["reasoning"],
+                    "social_intent": decision.get("social_intent", "cooperate"),
+                    "social_stance": decision.get("social_stance", {}),
+                    "response_style": decision["response_style"],
+                    "response_keywords": decision["response_keywords"],
                 },
-                settings=settings,
-            )
-            response = validate_response_payload(payload)
-            return response, {"provider": settings.provider, "mode": "llm_polish"}
-        except Exception as exc:
-            return fallback_response(decision, npc_state, quest_state), {
-                "provider": settings.provider,
-                "mode": "fallback_template",
-                "reason": str(exc),
-            }
+                "npc_state": npc_state,
+                "hidden_alignment": npc_state.get("hidden_alignment", "neutral"),
+                "player_state": player_state,
+                "quest_state": quest_state,
+                "state_snapshot": state_snapshot or {
+                    "npc": npc_state,
+                    "player": player_state,
+                    "quest": quest_state,
+                },
+                "canonical_world_facts": CANONICAL_WORLD_FACTS,
+                "retrieved_lore": retrieved_lore or [],
+                "retrieved_memories": retrieved_memories,
+                "recent_context": recent_context or [],
+                "tool_calls": tool_calls,
+                "state_changes": state_changes,
+                "observation": serialize_optional_dataclass(observation),
+                "npc_action": serialize_optional_dataclass(npc_action),
+                "action_result": serialize_optional_dataclass(action_result),
+                "response_constraints": get_response_constraints(action_result),
+                "expected_output_schema": RESPONSE_OUTPUT_SCHEMA,
+            },
+            settings=settings,
+        )
+    except Exception as exc:
+        raise RuntimeError(f"LLM response generation failed: {exc}") from exc
+    try:
+        response = validate_response_payload(payload)
+    except Exception as exc:
+        return safe_constraint_response(decision, npc_state, action_result), {
+            "provider": settings.provider,
+            "mode": "constraint_guard",
+            "reason": str(exc),
+        }
+    if violates_action_result_constraints(response, action_result):
+        return safe_constraint_response(decision, npc_state, action_result), {
+            "provider": settings.provider,
+            "mode": "constraint_guard",
+            "reason": "LLM response violated ActionResult constraints.",
+        }
+    return response, {"provider": settings.provider, "mode": "llm_polish"}
 
-    return fallback_response(decision, npc_state, quest_state), {
-        "provider": settings.provider,
-        "mode": "fallback_template",
+
+def safe_constraint_response(
+    decision: dict[str, Any],
+    npc_state: dict[str, Any],
+    action_result: Any | None,
+) -> str:
+    name = npc_state.get("name", "NPC")
+    if action_result is not None and not action_result_accepted(action_result):
+        blocked_reason = getattr(action_result, "blocked_reason", "")
+        if isinstance(action_result, dict):
+            blocked_reason = action_result.get("blocked_reason", blocked_reason)
+        detail = f"原因是：{blocked_reason}" if blocked_reason else "还需要更多证据。"
+        return f"{name} 没有立刻接受这个说法：“现在还不能确认这件事，{detail}”"
+    if decision.get("intent") == "withhold_ruins_entrance":
+        return f"{name} 语气谨慎：“这件事我暂时不能说得更具体。”"
+    return f"{name} 认真听完你的话：“我明白了，但现在还不能确认会发生任何改变。”"
+
+
+def serialize_optional_dataclass(value: Any | None) -> Any | None:
+    if value is None:
+        return None
+    if is_dataclass(value):
+        return asdict(value)
+    return value
+
+
+def get_response_constraints(action_result: Any | None) -> list[str]:
+    if action_result is None:
+        return []
+    constraints = getattr(action_result, "response_constraints", None)
+    if constraints is None and isinstance(action_result, dict):
+        constraints = action_result.get("response_constraints")
+    if isinstance(constraints, list):
+        return constraints
+    return []
+
+
+def get_executed_tool_names(action_result: Any | None) -> set[str]:
+    if action_result is None:
+        return set()
+    executed_tools = getattr(action_result, "executed_tools", None)
+    if executed_tools is None and isinstance(action_result, dict):
+        executed_tools = action_result.get("executed_tools")
+    if not isinstance(executed_tools, list):
+        return set()
+    return {
+        str(tool.get("name"))
+        for tool in executed_tools
+        if isinstance(tool, dict) and tool.get("name")
     }
+
+
+def action_result_accepted(action_result: Any | None) -> bool:
+    if action_result is None:
+        return True
+    accepted = getattr(action_result, "accepted", None)
+    if accepted is None and isinstance(action_result, dict):
+        accepted = action_result.get("accepted")
+    return bool(accepted)
+
+
+def violates_action_result_constraints(response: str, action_result: Any | None) -> bool:
+    if action_result is None:
+        return False
+    executed_names = get_executed_tool_names(action_result)
+    unlock_claims = ["入口已经开放", "入口已开放", "可以直接过去", "已经解锁", "可以进入遗迹"]
+    reward_claims = ["给你", "收下", "折扣券", "奖励"]
+    completion_claims = ["任务完成", "已经完成", "完成了"]
+    trust_claims = ["更信任你", "信任你更多", "可信度"]
+    affection_claims = ["更喜欢你", "更亲近你", "好感"]
+    if "unlock_location" not in executed_names and any(term in response for term in unlock_claims):
+        return True
+    if "give_item" not in executed_names and any(term in response for term in reward_claims):
+        return True
+    if "update_quest_status" not in executed_names and any(term in response for term in completion_claims):
+        return True
+    if "update_trust" not in executed_names and any(term in response for term in trust_claims):
+        return True
+    if "update_affection" not in executed_names and any(term in response for term in affection_claims):
+        return True
+    if not action_result_accepted(action_result):
+        blocked_claims = unlock_claims + reward_claims + completion_claims + trust_claims + affection_claims
+        return any(term in response for term in blocked_claims)
+    return False
 
 
 def validate_response_payload(payload: dict[str, Any]) -> str:

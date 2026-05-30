@@ -12,7 +12,7 @@ class DisplayTranslationTest(unittest.TestCase):
         os.environ["AGENT_NPC_SKIP_ENV_FILE"] = "1"
         os.environ.pop("AGENT_NPC_LLM_API_KEY", None)
         os.environ.pop("OPENAI_API_KEY", None)
-        os.environ["AGENT_NPC_LLM_PROVIDER"] = "mock"
+        os.environ["AGENT_NPC_LLM_PROVIDER"] = "openai_compatible"
 
     def test_translation_is_disabled_without_openai_compatible_llm(self) -> None:
         result = display_translation.translate_debug_text(

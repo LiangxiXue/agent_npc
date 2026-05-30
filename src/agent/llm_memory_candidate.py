@@ -46,32 +46,23 @@ Rules:
 
 
 def memory_llm_enabled() -> bool:
-    if os.environ.get("AGENT_NPC_MEMORY_LLM_ENABLED", "1").strip() in {"0", "false", "False"}:
-        return False
     settings = get_llm_settings()
-    if settings.provider == "mock":
-        return True
-    if settings.provider != "openai_compatible" or not settings.api_key:
-        return False
-    return True
+    return not memory_llm_disabled_by_env() and settings.provider == "openai_compatible" and bool(settings.api_key)
+
+
+def memory_llm_disabled_by_env() -> bool:
+    return os.environ.get("AGENT_NPC_MEMORY_LLM_ENABLED", "1").strip() in {"0", "false", "False"}
 
 
 def generate_memory_candidates(
     policy_input: Any,
     rule_candidates: list[dict[str, Any]],
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
-    if not memory_llm_enabled():
-        return [], {"enabled": False, "stage": "candidate_generation", "reason": "Memory LLM disabled or not configured."}
+    if memory_llm_disabled_by_env():
+        return [], {"enabled": False, "stage": "candidate_generation", "reason": "Memory LLM disabled by environment."}
     settings = get_llm_settings()
-    if settings.provider == "mock":
-        candidates = generate_mock_memory_candidates(policy_input)
-        return candidates, {
-            "enabled": True,
-            "stage": "candidate_generation",
-            "status": "ok",
-            "mode": "mock_memory_candidate",
-            "candidate_count": len(candidates),
-        }
+    if settings.provider != "openai_compatible" or not settings.api_key:
+        raise RuntimeError("Memory LLM is enabled but not configured.")
 
     payload = {
         "player_input": policy_input.player_input,
@@ -99,18 +90,16 @@ def generate_memory_candidates(
         response = call_openai_compatible_json(
             system_prompt=MEMORY_CANDIDATE_SYSTEM_PROMPT,
             user_payload=payload,
+            settings=settings,
         )
     except Exception as exc:
-        return [], {
-            "enabled": True,
-            "stage": "candidate_generation",
-            "status": "error",
-            "reason": str(exc),
-        }
+        raise RuntimeError(f"Memory candidate LLM failed: {exc}") from exc
 
-    raw_candidates = response.get("candidates", [])
+    raw_candidates = response.get("candidates")
+    if not isinstance(raw_candidates, list):
+        raise ValueError("Memory candidate LLM response must include candidates as a list.")
     candidates = []
-    for candidate in raw_candidates if isinstance(raw_candidates, list) else []:
+    for candidate in raw_candidates:
         normalized = normalize_llm_candidate(candidate)
         if normalized is not None:
             candidates.append(normalized)

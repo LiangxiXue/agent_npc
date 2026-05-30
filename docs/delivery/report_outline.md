@@ -85,8 +85,9 @@ Background Memory Job
 
 ### 3.6 LLM 接入
 
-- mock 是稳定默认路径；
-- OpenAI-compatible LLM 可参与 decision、response polish、memory candidate、memory review；
+- 玩家可见主回合 runtime 需要 OpenAI-compatible LLM；
+- 测试通过 patch OpenAI-compatible 调用保持离线可运行；
+- LLM 可参与 decision、response polish、memory candidate、memory review；
 - 所有 LLM 输出经过 schema、business rule、task state machine 和 memory gate。
 
 ## 4. 实验案例
@@ -147,14 +148,14 @@ Background Memory Job
 .venv/bin/python -m unittest discover -s tests -v
 ```
 
-当前结果：46 个测试通过。
+当前结果：64 个测试通过。
 
 覆盖：
 
 - 四 NPC seed 和任务线；
 - 任务状态机；
 - 多 NPC 记忆隔离；
-- LLM fallback 和 validation；
+- LLM-required runtime、constraint guard 和 validation；
 - retrieval/lore/embedding fallback；
 - FastAPI endpoints；
 - display translation；
@@ -164,7 +165,7 @@ Background Memory Job
 
 - 自定义 workflow 尚未迁移到 LangGraph；
 - 后台 memory worker 已可常驻消费队列，但并发锁、失败重试和运行监控仍可增强；
-- 真实 LLM/embedding 是可选增强，不作为稳定评分路径；
+- 玩家可见主 runtime 需要真实 OpenAI-compatible LLM；embedding provider 仍可在 `mock_hash` 与真实 provider 之间切换，稳定评分路径可使用确定性 embedding；
 - 多 NPC 信息传播和复杂关系网络尚未实现；
 - 最终 PPT、录屏、截图和报告需要基于当前版本补齐。
 

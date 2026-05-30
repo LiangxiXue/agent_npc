@@ -24,7 +24,7 @@
 .venv/bin/python -m unittest discover -s tests -v
 ```
 
-当前结果：46 个测试通过。
+当前结果：64 个测试通过。
 
 ## Architecture After Migration
 

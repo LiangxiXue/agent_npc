@@ -4,7 +4,7 @@ from typing import Any
 
 from src.agent.llm_client import call_openai_compatible_json
 from src.agent.llm_client import get_llm_settings
-from src.agent.llm_memory_candidate import memory_llm_enabled
+from src.agent.llm_memory_candidate import memory_llm_disabled_by_env
 
 
 MEMORY_REVIEW_SYSTEM_PROMPT = """
@@ -51,20 +51,17 @@ def review_memory_candidates(
 ) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     if not candidates:
         return [], {"enabled": False, "stage": "candidate_review", "reason": "No candidates to review."}
-    if get_llm_settings().provider == "mock":
-        return pass_through_reviews(candidates), {
-            "enabled": True,
-            "stage": "candidate_review",
-            "status": "ok",
-            "mode": "mock_pass_through",
-            "review_count": len(candidates),
-        }
-    if not memory_llm_enabled():
+    if memory_llm_disabled_by_env():
         return pass_through_reviews(candidates), {
             "enabled": False,
             "stage": "candidate_review",
-            "reason": "Memory LLM disabled or not configured.",
+            "status": "ok",
+            "mode": "disabled_pass_through",
+            "review_count": len(candidates),
         }
+    settings = get_llm_settings()
+    if settings.provider != "openai_compatible" or not settings.api_key:
+        raise RuntimeError("Memory review LLM is enabled but not configured.")
 
     payload = {
         "player_input": policy_input.player_input,
@@ -94,16 +91,15 @@ def review_memory_candidates(
         response = call_openai_compatible_json(
             system_prompt=MEMORY_REVIEW_SYSTEM_PROMPT,
             user_payload=payload,
+            settings=settings,
         )
     except Exception as exc:
-        return pass_through_reviews(candidates), {
-            "enabled": True,
-            "stage": "candidate_review",
-            "status": "error",
-            "reason": str(exc),
-        }
+        raise RuntimeError(f"Memory review LLM failed: {exc}") from exc
 
-    reviews = normalize_reviews(response.get("reviews", []), candidates)
+    raw_reviews = response.get("reviews")
+    if not isinstance(raw_reviews, list):
+        raise ValueError("Memory review LLM response must include reviews as a list.")
+    reviews = normalize_reviews(raw_reviews, candidates)
     return reviews, {
         "enabled": True,
         "stage": "candidate_review",
@@ -136,7 +132,7 @@ def pass_through_reviews(candidates: list[dict[str, Any]]) -> list[dict[str, Any
 
 def normalize_reviews(raw_reviews: Any, candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
     if not isinstance(raw_reviews, list):
-        return pass_through_reviews(candidates)
+        raise ValueError("Memory review LLM response must include reviews as a list.")
     by_index: dict[int, dict[str, Any]] = {}
     for review in raw_reviews:
         if not isinstance(review, dict):

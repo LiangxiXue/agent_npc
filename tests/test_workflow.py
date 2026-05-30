@@ -13,19 +13,774 @@ from src.agent.workflow import run_agent_turn
 from src.storage import database
 
 
+def fake_response_json(*_: object, **__: object) -> dict[str, str]:
+    return {"npc_response": "我明白了，但现在还需要谨慎处理。"}
+
+
+def fake_decision_json(*_: object, **kwargs: object) -> dict[str, object]:
+    from src.agent.decision import mock_decide_next_action
+
+    payload = kwargs.get("user_payload", {})
+    if not isinstance(payload, dict):
+        payload = {}
+    return mock_decide_next_action(
+        str(payload.get("player_input", "")),
+        payload.get("npc_state", {}) if isinstance(payload.get("npc_state"), dict) else {},
+        payload.get("player_state", {}) if isinstance(payload.get("player_state"), dict) else {},
+        payload.get("quest_state", {}) if isinstance(payload.get("quest_state"), dict) else {},
+        payload.get("retrieved_long_term_memories", [])
+        if isinstance(payload.get("retrieved_long_term_memories"), list)
+        else [],
+        payload.get("recent_short_term_context", [])
+        if isinstance(payload.get("recent_short_term_context"), list)
+        else [],
+    )
+
+
+def fake_memory_candidate_json(*_: object, **kwargs: object) -> dict[str, list[dict[str, object]]]:
+    payload = kwargs.get("user_payload", {})
+    if not isinstance(payload, dict):
+        payload = {}
+    text = str(payload.get("player_input", "")).lower()
+    tool_calls = payload.get("tool_calls", [])
+    tool_names = [tool.get("name") for tool in tool_calls if isinstance(tool, dict)]
+    state_before = payload.get("state_before", {})
+    state_after = payload.get("state_after", {})
+    quest_before = state_before.get("quest", {}) if isinstance(state_before, dict) else {}
+    quest_after = state_after.get("quest", {}) if isinstance(state_after, dict) else {}
+    candidates: list[dict[str, object]] = []
+
+    if any(phrase in text for phrase in ["直接告诉", "直接说", "不要绕弯", "别绕弯", "direct hints"]):
+        candidates.append(
+            {
+                "should_write": True,
+                "memory_type": "procedural",
+                "content": "Player prefers direct hints instead of vague clues.",
+                "importance": 6,
+                "confidence": 0.9,
+                "tags": ["communication_style", "direct_hints"],
+                "facets": ["communication_style", "direct_hints"],
+                "scope": "player_global",
+                "evidence_text": payload.get("player_input", ""),
+                "stability": 0.85,
+                "future_usefulness": 0.9,
+                "reason": "The player explicitly stated a stable communication preference.",
+            }
+        )
+    if any(phrase in text for phrase in ["我是新手", "新手", "不太熟悉", "i am new", "i'm new"]):
+        candidates.append(
+            {
+                "should_write": True,
+                "memory_type": "semantic",
+                "content": "Player described themselves as new and may need extra context.",
+                "importance": 5,
+                "confidence": 0.85,
+                "tags": ["player_profile", "experience_level"],
+                "facets": ["player_profile", "experience_level"],
+                "scope": "player_global",
+                "evidence_text": payload.get("player_input", ""),
+                "stability": 0.75,
+                "future_usefulness": 0.8,
+                "reason": "The player explicitly described their experience level.",
+            }
+        )
+    if any(phrase in text for phrase in ["孤独", "无人会帮助", "lonely"]):
+        candidates.append(
+            {
+                "should_write": True,
+                "memory_type": "semantic",
+                "content": "Player described themselves as lonely and worried nobody would help them.",
+                "importance": 5,
+                "confidence": 0.85,
+                "tags": ["player_profile", "needs_support"],
+                "facets": ["player_profile", "needs_support"],
+                "scope": "player_global",
+                "evidence_text": payload.get("player_input", ""),
+                "stability": 0.55,
+                "future_usefulness": 0.65,
+                "reason": "The player explicitly described their emotional state.",
+            }
+        )
+    if quest_before.get("status") != "completed" and quest_after.get("status") == "completed":
+        quest_id = quest_after.get("quest_id", "quest")
+        candidates.append(
+            {
+                "should_write": True,
+                "memory_type": "episodic",
+                "content": f"Player completed the {quest_id} quest.",
+                "importance": 9,
+                "confidence": 1.0,
+                "tags": ["quest_completed", quest_id],
+                "facets": ["quest_completed", quest_id],
+                "scope": "npc_specific",
+                "evidence_text": str(quest_after),
+                "stability": 1.0,
+                "future_usefulness": 0.9,
+                "reason": "Quest status changed to completed.",
+            }
+        )
+    if "give_item" in tool_names and quest_after.get("quest_id") == "lost_key":
+        candidates.append(
+            {
+                "should_write": True,
+                "memory_type": "episodic",
+                "content": "Player returned Lina's lost key.",
+                "importance": 8,
+                "confidence": 1.0,
+                "tags": ["helped_npc", "lost_key", "lina"],
+                "facets": ["helped_npc", "lost_key", "lina"],
+                "scope": "npc_specific",
+                "evidence_text": "Player returned Lina's lost key.",
+                "stability": 1.0,
+                "future_usefulness": 0.85,
+                "reason": "Tool execution indicates the key was returned.",
+            }
+        )
+    if any(name in tool_names for name in ["update_trust", "update_affection"]) and not any(
+        phrase in text for phrase in ["孤独", "无人会帮助", "lonely"]
+    ):
+        candidates.append(
+            {
+                "should_write": True,
+                "memory_type": "relational",
+                "content": "上次那件事之后，Player helped Lina and earned more trust.",
+                "importance": 6,
+                "confidence": 0.85,
+                "tags": ["relationship", "trust"],
+                "facets": ["relationship", "trust"],
+                "scope": "npc_specific",
+                "evidence_text": "update_trust",
+                "stability": 0.7,
+                "future_usefulness": 0.75,
+                "reason": "Relationship state changed through tool execution.",
+            }
+        )
+    if "unlock_location" in tool_names:
+        candidates.append(
+            {
+                "should_write": True,
+                "memory_type": "episodic",
+                "content": "Lina revealed the underground ruins entrance to the player.",
+                "importance": 7,
+                "confidence": 1.0,
+                "tags": ["sensitive_location", "ruins", "player_knowledge"],
+                "facets": ["sensitive_location", "ruins", "player_knowledge"],
+                "scope": "npc_specific",
+                "evidence_text": "unlock_location",
+                "stability": 1.0,
+                "future_usefulness": 0.8,
+                "reason": "A sensitive location was unlocked.",
+            }
+        )
+    return {"candidates": candidates}
+
+
+def fake_memory_review_json(*_: object, **kwargs: object) -> dict[str, list[dict[str, object]]]:
+    payload = kwargs.get("user_payload", {})
+    candidates = payload.get("candidates", []) if isinstance(payload, dict) else []
+    reviews = []
+    for index, candidate in enumerate(candidates if isinstance(candidates, list) else []):
+        if not isinstance(candidate, dict):
+            continue
+        reviews.append(
+            {
+                "candidate_index": index,
+                "verdict": "approve",
+                "approved_memory_type": candidate.get("memory_type"),
+                "approved_content": candidate.get("content"),
+                "approved_importance": candidate.get("importance"),
+                "approved_confidence": candidate.get("confidence"),
+                "approved_tags": candidate.get("tags", []),
+                "approved_facets": candidate.get("facets", candidate.get("tags", [])),
+                "approved_scope": candidate.get("scope", "npc_specific"),
+                "approved_evidence_text": candidate.get("evidence_text", ""),
+                "approved_stability": candidate.get("stability", 0.5),
+                "approved_future_usefulness": candidate.get("future_usefulness", 0.5),
+                "reason": "Approved by patched memory review LLM.",
+                "risk": "low",
+            }
+        )
+    return {"reviews": reviews}
+
+
+def reset_test_database() -> None:
+    test_db_path = Path(__file__).resolve().parents[1] / "data" / "test_agent_state.db"
+    os.environ["AGENT_NPC_DB_PATH"] = str(test_db_path)
+    os.environ["AGENT_NPC_SKIP_ENV_FILE"] = "1"
+    database.reset_database()
+    os.environ["AGENT_NPC_EMBEDDING_PROVIDER"] = "mock_hash"
+    os.environ["AGENT_NPC_RETRIEVAL_BACKEND"] = "sqlite_cosine"
+
+
+class EnvironmentDataModelTest(unittest.TestCase):
+    def test_environment_dataclasses_have_required_shape(self) -> None:
+        from dataclasses import asdict
+        from src.agent.environment import ActionResult, NPCAction, Observation
+
+        observation = Observation(
+            npc_id="lina",
+            player_input="我想打听地下遗迹入口。",
+            npc_state={"npc_id": "lina"},
+            player_state={"inventory": []},
+            quest_state={"quest_id": "lost_key", "status": "not_started"},
+            recent_context=[],
+            retrieved_lore=[],
+            retrieved_memories=[],
+            visible_world_events=[],
+            memory_retrieval_mode="hybrid",
+        )
+        action = NPCAction(
+            action_type="dialogue",
+            intent="withhold_ruins_entrance",
+            target="player",
+            subject="underground_ruins_entrance",
+            reason="Trust is too low.",
+            response_style="cautious",
+            response_keywords=["信任不足", "暂不透露"],
+            social_intent="withhold",
+            social_stance={"target": "player", "attitude": "cautious", "intensity": 0.7, "reason": "Trust gate."},
+            proposed_effects=[],
+            raw_decision={"intent": "withhold_ruins_entrance", "tools": []},
+        )
+        result = ActionResult(
+            accepted=True,
+            blocked_reason="",
+            executed_tools=[],
+            state_before={},
+            state_after={},
+            state_changes=[],
+            events=[],
+            response_constraints=["Do not claim the ruins entrance is unlocked."],
+        )
+
+        self.assertEqual(asdict(observation)["npc_id"], "lina")
+        self.assertEqual(asdict(action)["intent"], "withhold_ruins_entrance")
+        self.assertTrue(asdict(result)["accepted"])
+
+
+class NarrativeEnvironmentObservationTest(unittest.TestCase):
+    def setUp(self) -> None:
+        reset_test_database()
+        os.environ["AGENT_NPC_LLM_PROVIDER"] = "openai_compatible"
+        os.environ["AGENT_NPC_LLM_API_KEY"] = "test-key"
+
+    def test_observe_and_propose_action_from_decision(self) -> None:
+        from src.agent.environment import NarrativeEnvironment
+
+        database.record_world_event("A quiet rumor moves through Grayhaven.")
+        environment = NarrativeEnvironment()
+        observation = environment.observe(
+            player_input="我想打听地下遗迹入口。",
+            npc_id="lina",
+            memory_retrieval_mode="hybrid",
+        )
+        decision = {
+            "intent": "withhold_ruins_entrance",
+            "reasoning": "Trust is too low.",
+            "memory_policy": "Do not write progress memory.",
+            "response_style": "cautious",
+            "response_keywords": ["信任不足"],
+            "tools": [],
+            "social_intent": "conceal",
+            "social_stance": {"target": "ruins_access", "attitude": "cautious", "intensity": 0.7, "reason": "Trust gate."},
+        }
+
+        action = environment.propose_action_from_decision(decision, observation)
+
+        self.assertEqual(observation.npc_id, "lina")
+        self.assertEqual(observation.memory_retrieval_mode, "hybrid")
+        self.assertTrue(observation.visible_world_events)
+        self.assertEqual(action.intent, "withhold_ruins_entrance")
+        self.assertEqual(action.proposed_effects, [])
+        self.assertEqual(action.raw_decision["tools"], [])
+
+        validated = environment.validate(action, observation)
+        result = environment.execute(validated, observation)
+        trace = environment.trace_payload(observation, validated, result)
+
+        self.assertIn("observation_summary", trace)
+        self.assertIn("npc_action", trace)
+        self.assertIn("action_result", trace)
+        self.assertEqual(trace["npc_action"]["intent"], "withhold_ruins_entrance")
+        self.assertTrue(trace["action_result"]["accepted"])
+
+
+class NarrativeEnvironmentExecutionTest(unittest.TestCase):
+    def setUp(self) -> None:
+        reset_test_database()
+        os.environ["AGENT_NPC_LLM_PROVIDER"] = "openai_compatible"
+        os.environ["AGENT_NPC_LLM_API_KEY"] = "test-key"
+
+    def test_execute_completes_lost_key_through_environment(self) -> None:
+        from src.agent.environment import NarrativeEnvironment
+        from src.storage import database
+
+        database.update_quest_status("lost_key", "in_progress")
+        environment = NarrativeEnvironment()
+        observation = environment.observe("我把你丢失的钥匙找回来了。", "lina", "hybrid")
+        decision = {
+            "intent": "complete_lost_key_quest",
+            "reasoning": "Player returned the key with evidence.",
+            "memory_policy": "Record quest completion.",
+            "response_style": "grateful",
+            "response_keywords": ["钥匙", "谢谢", "折扣券"],
+            "tools": [
+                {"name": "update_quest_status", "args": {"quest_id": "lost_key", "status": "completed"}},
+                {"name": "update_trust", "args": {"npc_id": "lina", "delta": 2}},
+                {"name": "give_item", "args": {"item": "tavern_discount_coupon"}},
+                {"name": "record_world_event", "args": {"content": "Lina recovered her lost key."}},
+            ],
+            "social_intent": "cooperate",
+            "social_stance": {"target": "player", "attitude": "support", "intensity": 0.8, "reason": "The player helped."},
+        }
+        action = environment.propose_action_from_decision(decision, observation)
+        result = environment.execute(action, observation)
+
+        self.assertTrue(result.accepted)
+        self.assertEqual(result.blocked_reason, "")
+        self.assertIn("tavern_discount_coupon", result.state_after["player"]["inventory"])
+        self.assertEqual(result.state_after["quest"]["status"], "completed")
+        self.assertTrue(any(tool["name"] == "record_world_event" for tool in result.executed_tools))
+
+    def test_validate_blocks_invalid_completion_before_execution(self) -> None:
+        from src.agent.environment import NarrativeEnvironment
+        from src.storage import database
+
+        environment = NarrativeEnvironment()
+        observation = environment.observe("我把你丢失的钥匙找回来了。", "lina", "hybrid")
+        decision = {
+            "intent": "complete_lost_key_quest",
+            "reasoning": "Player claims the key is returned.",
+            "memory_policy": "Record quest completion.",
+            "response_style": "grateful",
+            "response_keywords": ["钥匙", "谢谢", "折扣券"],
+            "tools": [
+                {"name": "update_quest_status", "args": {"quest_id": "lost_key", "status": "completed"}},
+                {"name": "give_item", "args": {"item": "tavern_discount_coupon"}},
+            ],
+            "social_intent": "cooperate",
+            "social_stance": {"target": "player", "attitude": "support", "intensity": 0.8, "reason": "The player helped."},
+        }
+        action = environment.propose_action_from_decision(decision, observation)
+
+        validated = environment.validate(action, observation)
+        result = environment.execute(validated, observation)
+
+        self.assertFalse(result.accepted)
+        self.assertEqual(validated.intent, "probe_for_evidence")
+        self.assertEqual(result.executed_tools, [])
+        self.assertNotIn("tavern_discount_coupon", database.get_player_state()["inventory"])
+        self.assertEqual(database.get_quest("lost_key")["status"], "not_started")
+
+    def test_invalid_action_returns_environment_rejection(self) -> None:
+        from src.agent.environment import NarrativeEnvironment
+        from src.storage import database
+
+        environment = NarrativeEnvironment()
+        observation = environment.observe("入口在哪里？", "lina", "hybrid")
+        decision = {
+            "intent": "withhold_ruins_entrance",
+            "reasoning": "Invalid proposal tries to unlock while withholding.",
+            "memory_policy": "Do not write progress memory.",
+            "response_style": "cautious",
+            "response_keywords": ["信任不足"],
+            "tools": [
+                {"name": "unlock_location", "args": {"location": "underground_ruins_entrance"}},
+            ],
+            "social_intent": "conceal",
+            "social_stance": {"target": "ruins_access", "attitude": "cautious", "intensity": 0.7, "reason": "Trust gate."},
+        }
+        action = environment.propose_action_from_decision(decision, observation)
+
+        result = environment.execute(action, observation)
+
+        self.assertFalse(result.accepted)
+        self.assertIn("must not call unlock_location", result.blocked_reason)
+        self.assertEqual(result.executed_tools, [])
+        self.assertNotIn("underground_ruins_entrance", database.get_player_state()["unlocked_locations"])
+
+    def test_execute_validates_before_running_tools(self) -> None:
+        from src.agent.environment import NarrativeEnvironment
+        from src.storage import database
+
+        environment = NarrativeEnvironment()
+        observation = environment.observe("我把你丢失的钥匙找回来了。", "lina", "hybrid")
+        decision = {
+            "intent": "complete_lost_key_quest",
+            "reasoning": "Player claims the key is returned.",
+            "memory_policy": "Record quest completion.",
+            "response_style": "grateful",
+            "response_keywords": ["钥匙", "谢谢", "折扣券"],
+            "tools": [
+                {"name": "update_quest_status", "args": {"quest_id": "lost_key", "status": "completed"}},
+                {"name": "give_item", "args": {"item": "tavern_discount_coupon"}},
+            ],
+            "social_intent": "cooperate",
+            "social_stance": {"target": "player", "attitude": "support", "intensity": 0.8, "reason": "The player helped."},
+        }
+        action = environment.propose_action_from_decision(decision, observation)
+
+        result = environment.execute(action, observation)
+
+        self.assertFalse(result.accepted)
+        self.assertEqual(result.executed_tools, [])
+        self.assertNotIn("tavern_discount_coupon", database.get_player_state()["inventory"])
+        self.assertEqual(database.get_quest("lost_key")["status"], "not_started")
+
+
+class WorkflowEnvironmentTraceTest(unittest.TestCase):
+    def setUp(self) -> None:
+        reset_test_database()
+        os.environ["AGENT_NPC_LLM_PROVIDER"] = "openai_compatible"
+        os.environ["AGENT_NPC_LLM_API_KEY"] = "test-key"
+
+    def test_run_agent_turn_records_environment_trace(self) -> None:
+        llm_decision = {
+            "intent": "withhold_ruins_entrance",
+            "reasoning": "Trust is too low to reveal the entrance.",
+            "memory_policy": "Do not write quest progress.",
+            "response_style": "cautious",
+            "response_keywords": ["信任不足", "暂不透露"],
+            "tools": [],
+            "social_intent": "conceal",
+            "social_stance": {
+                "target": "ruins_access",
+                "attitude": "cautious",
+                "intensity": 0.7,
+                "reason": "Trust gate.",
+            },
+        }
+        llm_response = {"npc_response": "我还不能把入口告诉你。"}
+        with patch("src.agent.decision.call_openai_compatible_json", return_value=llm_decision), patch(
+            "src.agent.response.call_openai_compatible_json", return_value=llm_response
+        ):
+            run = run_agent_turn("我想打听地下遗迹入口。", npc_id="lina", memory_retrieval_mode="hybrid")
+
+        environment_trace = run.decision["environment"]
+        self.assertEqual(environment_trace["npc_action"]["intent"], "withhold_ruins_entrance")
+        self.assertTrue(environment_trace["action_result"]["accepted"])
+        self.assertEqual(environment_trace["action_result"]["executed_tools"], [])
+        self.assertEqual(run.tool_calls, [])
+        stages = [step["stage"] for step in run.workflow_steps]
+        self.assertIn("Observation", stages)
+        self.assertIn("NPC Action", stages)
+        self.assertIn("Action Validation", stages)
+        self.assertIn("Environment Execution", stages)
+        self.assertIn("Action Result", stages)
+
+
+class ResponseConstraintTest(unittest.TestCase):
+    def setUp(self) -> None:
+        reset_test_database()
+        os.environ["AGENT_NPC_LLM_PROVIDER"] = "openai_compatible"
+        os.environ["AGENT_NPC_LLM_API_KEY"] = "test-key"
+
+    def test_response_rejects_claimed_unlock_without_action_result_effect(self) -> None:
+        from src.agent.environment import ActionResult
+        from src.agent.response import generate_npc_response
+
+        decision = {
+            "intent": "withhold_ruins_entrance",
+            "reasoning": "Trust is too low.",
+            "response_style": "cautious",
+            "response_keywords": ["信任不足"],
+            "social_intent": "conceal",
+            "social_stance": {},
+        }
+        action_result = ActionResult(
+            accepted=True,
+            blocked_reason="",
+            executed_tools=[],
+            state_before={},
+            state_after={},
+            state_changes=[],
+            events=[],
+            response_constraints=["Do not claim the underground ruins entrance is unlocked or available."],
+        )
+        with patch(
+            "src.agent.response.call_openai_compatible_json",
+            return_value={"npc_response": "入口已经开放了，你可以直接过去。"},
+        ):
+            response, metadata = generate_npc_response(
+                player_input="入口在哪里？",
+                decision=decision,
+                npc_state={"npc_id": "lina", "name": "Lina", "hidden_alignment": "neutral"},
+                player_state={"inventory": [], "unlocked_locations": []},
+                quest_state={"quest_id": "lost_key", "status": "not_started"},
+                retrieved_memories=[],
+                tool_calls=[],
+                state_changes=[],
+                action_result=action_result,
+            )
+
+        self.assertNotIn("入口已经开放", response)
+        self.assertEqual(metadata["mode"], "constraint_guard")
+
+    def test_constraint_guard_obeys_blocked_action_result(self) -> None:
+        from src.agent.environment import ActionResult
+        from src.agent.response import generate_npc_response
+
+        decision = {
+            "intent": "complete_lost_key_quest",
+            "reasoning": "Environment blocked this completion.",
+            "response_style": "grateful",
+            "response_keywords": ["证据不足"],
+            "social_intent": "probe",
+            "social_stance": {},
+        }
+        action_result = ActionResult(
+            accepted=False,
+            blocked_reason="Quest cannot complete before it starts.",
+            executed_tools=[],
+            state_before={},
+            state_after={},
+            state_changes=[],
+            events=[],
+            response_constraints=[
+                "Do not claim quest completion, location unlocks, item rewards, trust changes, or affection changes."
+            ],
+        )
+
+        with patch(
+            "src.agent.response.call_openai_compatible_json",
+            return_value={"npc_response": "Lina 接过钥匙，看来我可以更信任你一些了，任务状态也已经变为 completed。"},
+        ):
+            response, metadata = generate_npc_response(
+                player_input="我把钥匙找回来了。",
+                decision=decision,
+                npc_state={"npc_id": "lina", "name": "Lina", "trust": 20, "hidden_alignment": "neutral"},
+                player_state={"inventory": [], "unlocked_locations": []},
+                quest_state={"quest_id": "lost_key", "status": "not_started"},
+                retrieved_memories=[],
+                tool_calls=[],
+                state_changes=[],
+                action_result=action_result,
+            )
+
+        self.assertNotIn("更信任", response)
+        self.assertNotIn("已经变为", response)
+        self.assertIn("还不能确认", response)
+        self.assertEqual(metadata["mode"], "constraint_guard")
+
+    def test_relationship_constraint_distinguishes_trust_and_affection(self) -> None:
+        from src.agent.environment import ActionResult
+        from src.agent.response import violates_action_result_constraints
+
+        trust_only_result = ActionResult(
+            accepted=True,
+            blocked_reason="",
+            executed_tools=[
+                {
+                    "name": "update_trust",
+                    "arguments": {"npc_id": "lina", "delta": 2},
+                    "result": {"field": "trust", "before": 20, "after": 22},
+                }
+            ],
+            state_before={},
+            state_after={},
+            state_changes=[],
+            events=[],
+            response_constraints=[],
+        )
+
+        self.assertFalse(violates_action_result_constraints("Lina 更信任你了。", trust_only_result))
+        self.assertTrue(violates_action_result_constraints("Lina 更喜欢你了。", trust_only_result))
+
+
+class LLMRequiredRuntimeTest(unittest.TestCase):
+    def setUp(self) -> None:
+        reset_test_database()
+
+    def test_player_turn_requires_configured_llm(self) -> None:
+        os.environ["AGENT_NPC_LLM_PROVIDER"] = "openai_compatible"
+        os.environ.pop("AGENT_NPC_LLM_API_KEY", None)
+        os.environ.pop("OPENAI_API_KEY", None)
+
+        with self.assertRaisesRegex(RuntimeError, "configured LLM is required"):
+            run_agent_turn("我把你丢失的钥匙找回来了。", npc_id="lina")
+
+    def test_player_turn_does_not_fallback_to_deterministic_decision_on_llm_error(self) -> None:
+        os.environ["AGENT_NPC_LLM_PROVIDER"] = "openai_compatible"
+        os.environ["AGENT_NPC_LLM_API_KEY"] = "test-key"
+
+        with patch("src.agent.decision.call_openai_compatible_json", side_effect=RuntimeError("network failed")):
+            with self.assertRaisesRegex(RuntimeError, "LLM decision failed"):
+                run_agent_turn("我把你丢失的钥匙找回来了。", npc_id="lina")
+
+
+class MemoryLLMRequiredTest(unittest.TestCase):
+    def setUp(self) -> None:
+        reset_test_database()
+
+    def test_memory_candidate_generation_requires_llm_when_enabled(self) -> None:
+        from src.agent.llm_memory_candidate import generate_memory_candidates
+
+        os.environ["AGENT_NPC_LLM_PROVIDER"] = "openai_compatible"
+        os.environ.pop("AGENT_NPC_LLM_API_KEY", None)
+        os.environ.pop("OPENAI_API_KEY", None)
+        os.environ["AGENT_NPC_MEMORY_LLM_ENABLED"] = "1"
+
+        policy_input = MemoryPolicyInput(
+            npc_id="lina",
+            player_input="我把钥匙找回来了。",
+            npc_response="谢谢你。",
+            retrieved_long_term_memories=[],
+            recent_short_term_context=[],
+            npc_before={},
+            npc_after={},
+            player_before={},
+            player_after={},
+            quest_before={},
+            quest_after={},
+            tool_calls=[],
+            state_changes=[],
+        )
+
+        with self.assertRaisesRegex(RuntimeError, "Memory LLM is enabled but not configured"):
+            generate_memory_candidates(policy_input=policy_input, rule_candidates=[])
+
+    def test_memory_review_failure_does_not_pass_through_when_enabled(self) -> None:
+        from src.agent.memory_candidate_review import review_memory_candidates
+
+        os.environ["AGENT_NPC_LLM_PROVIDER"] = "openai_compatible"
+        os.environ["AGENT_NPC_LLM_API_KEY"] = "test-key"
+        os.environ["AGENT_NPC_MEMORY_LLM_ENABLED"] = "1"
+        policy_input = MemoryPolicyInput(
+            npc_id="lina",
+            player_input="以后直接说重点。",
+            npc_response="我明白了。",
+            retrieved_long_term_memories=[],
+            recent_short_term_context=[],
+            npc_before={},
+            npc_after={},
+            player_before={},
+            player_after={},
+            quest_before={},
+            quest_after={},
+            tool_calls=[],
+            state_changes=[],
+        )
+        candidates = [
+            {
+                "memory_type": "procedural",
+                "content": "Player prefers direct hints.",
+                "importance": 6,
+                "confidence": 0.9,
+                "tags": ["communication_style"],
+                "facets": ["communication_style"],
+                "scope": "player_global",
+                "evidence_text": "以后直接说重点。",
+                "stability": 0.8,
+                "future_usefulness": 0.9,
+            }
+        ]
+
+        with patch("src.agent.memory_candidate_review.call_openai_compatible_json", side_effect=RuntimeError("review down")):
+            with self.assertRaisesRegex(RuntimeError, "Memory review LLM failed"):
+                review_memory_candidates(policy_input, candidates)
+
+    def test_malformed_memory_review_does_not_pass_through_when_enabled(self) -> None:
+        from src.agent.memory_candidate_review import review_memory_candidates
+
+        os.environ["AGENT_NPC_LLM_PROVIDER"] = "openai_compatible"
+        os.environ["AGENT_NPC_LLM_API_KEY"] = "test-key"
+        os.environ["AGENT_NPC_MEMORY_LLM_ENABLED"] = "1"
+        policy_input = MemoryPolicyInput(
+            npc_id="lina",
+            player_input="以后直接说重点。",
+            npc_response="我明白了。",
+            retrieved_long_term_memories=[],
+            recent_short_term_context=[],
+            npc_before={},
+            npc_after={},
+            player_before={},
+            player_after={},
+            quest_before={},
+            quest_after={},
+            tool_calls=[],
+            state_changes=[],
+        )
+        candidates = [
+            {
+                "memory_type": "procedural",
+                "content": "Player prefers direct hints.",
+                "importance": 6,
+                "confidence": 0.9,
+                "tags": ["communication_style"],
+                "facets": ["communication_style"],
+                "scope": "player_global",
+                "evidence_text": "以后直接说重点。",
+                "stability": 0.8,
+                "future_usefulness": 0.9,
+            }
+        ]
+
+        with patch("src.agent.memory_candidate_review.call_openai_compatible_json", return_value={"reviews": None}):
+            with self.assertRaisesRegex(ValueError, "Memory review LLM response must include reviews"):
+                review_memory_candidates(policy_input, candidates)
+
+    def test_memory_candidate_failure_marks_background_job_failed(self) -> None:
+        os.environ["AGENT_NPC_LLM_PROVIDER"] = "openai_compatible"
+        os.environ["AGENT_NPC_LLM_API_KEY"] = "test-key"
+        os.environ["AGENT_NPC_MEMORY_LLM_ENABLED"] = "1"
+
+        with (
+            patch("src.agent.decision.call_openai_compatible_json", side_effect=fake_decision_json),
+            patch("src.agent.response.call_openai_compatible_json", side_effect=fake_response_json),
+        ):
+            run_agent_turn("你好，Lina。", npc_id="lina")
+
+        with patch("src.agent.llm_memory_candidate.call_openai_compatible_json", side_effect=RuntimeError("candidate down")):
+            processed = process_pending_memory_jobs(limit=10)
+
+        self.assertEqual(processed[0]["status"], "failed")
+        self.assertIn("Memory candidate LLM failed", processed[0]["error"])
+
+    def test_mock_provider_fails_main_turn_instead_of_using_mock_runtime(self) -> None:
+        os.environ["AGENT_NPC_LLM_PROVIDER"] = "mock"
+        os.environ.pop("AGENT_NPC_LLM_API_KEY", None)
+        os.environ["AGENT_NPC_MEMORY_LLM_ENABLED"] = "1"
+
+        with self.assertRaisesRegex(RuntimeError, "configured LLM is required"):
+            run_agent_turn("你好，Lina。", npc_id="lina")
+
+
 class AgentWorkflowTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         test_db_path = Path(__file__).resolve().parents[1] / "data" / "test_agent_state.db"
         os.environ["AGENT_NPC_DB_PATH"] = str(test_db_path)
-        os.environ["AGENT_NPC_LLM_PROVIDER"] = "mock"
+        os.environ["AGENT_NPC_LLM_PROVIDER"] = "openai_compatible"
+        os.environ["AGENT_NPC_LLM_API_KEY"] = "test-key"
         os.environ["AGENT_NPC_SKIP_ENV_FILE"] = "1"
 
     def setUp(self) -> None:
         database.reset_database()
-        os.environ["AGENT_NPC_LLM_PROVIDER"] = "mock"
+        os.environ["AGENT_NPC_LLM_PROVIDER"] = "openai_compatible"
+        os.environ["AGENT_NPC_LLM_API_KEY"] = "test-key"
+        os.environ["AGENT_NPC_MEMORY_LLM_ENABLED"] = "1"
         os.environ["AGENT_NPC_EMBEDDING_PROVIDER"] = "mock_hash"
         os.environ["AGENT_NPC_RETRIEVAL_BACKEND"] = "sqlite_cosine"
+        self.response_patcher = patch("src.agent.response.call_openai_compatible_json", side_effect=fake_response_json)
+        self.decision_patcher = patch("src.agent.decision.call_openai_compatible_json", side_effect=fake_decision_json)
+        self.memory_candidate_patcher = patch(
+            "src.agent.llm_memory_candidate.call_openai_compatible_json",
+            side_effect=fake_memory_candidate_json,
+        )
+        self.memory_review_patcher = patch(
+            "src.agent.memory_candidate_review.call_openai_compatible_json",
+            side_effect=fake_memory_review_json,
+        )
+        self.response_patcher.start()
+        self.decision_patcher.start()
+        self.memory_candidate_patcher.start()
+        self.memory_review_patcher.start()
+
+    def tearDown(self) -> None:
+        self.memory_review_patcher.stop()
+        self.memory_candidate_patcher.stop()
+        self.decision_patcher.stop()
+        self.response_patcher.stop()
 
     def test_low_trust_ruins_question_is_withheld(self) -> None:
         run = run_agent_turn("我想打听一下地下遗迹的入口。")
@@ -42,7 +797,7 @@ class AgentWorkflowTest(unittest.TestCase):
         tool_names = [tool["name"] for tool in run.tool_calls]
 
         self.assertEqual(run.decision["intent"], "complete_lost_key_quest")
-        self.assertEqual(run.decision["decision_route"], "rule_fast_path")
+        self.assertEqual(run.decision["decision_route"], "llm_assisted")
         self.assertEqual(database.get_npc("lina")["trust"], 40)
         self.assertEqual(database.get_npc("lina")["affection"], 38)
         self.assertEqual(database.get_quest("lost_key")["status"], "completed")
@@ -245,7 +1000,7 @@ class AgentWorkflowTest(unittest.TestCase):
         self.assertIn("social_stance", run.decision)
         self.assertIn("response_generation", run.decision)
         self.assertIsInstance(run.decision["tools"], list)
-        self.assertEqual(run.decision["response_generation"]["mode"], "fallback_template")
+        self.assertEqual(run.decision["response_generation"]["mode"], "llm_polish")
         self.assertFalse(run.memory_writes)
         self.assertEqual(run.memory_job_status["status"], "pending")
 
@@ -376,10 +1131,10 @@ class AgentWorkflowTest(unittest.TestCase):
                 state_changes=[],
             )
 
-        self.assertIn("酒馆后巷", response)
-        self.assertEqual(metadata["mode"], "fallback_template")
+        self.assertIn("还不能确认", response)
+        self.assertEqual(metadata["mode"], "constraint_guard")
 
-    def test_openai_compatible_without_key_stays_runnable(self) -> None:
+    def test_structured_decision_requires_key_for_classified_turn(self) -> None:
         os.environ["AGENT_NPC_LLM_PROVIDER"] = "openai_compatible"
         os.environ.pop("AGENT_NPC_LLM_API_KEY", None)
         os.environ.pop("OPENAI_API_KEY", None)
@@ -387,17 +1142,16 @@ class AgentWorkflowTest(unittest.TestCase):
         npc_state = database.get_npc("lina")
         player_state = database.get_player_state()
         quest_state = database.get_quest("lost_key")
-        decision = decide_next_action(
-            player_input="我想打听一下地下遗迹的入口。",
-            npc_state=npc_state,
-            player_state=player_state,
-            quest_state=quest_state,
-            retrieved_long_term_memories=[],
-            recent_short_term_context=[],
-        )
-
         self.assertFalse(get_provider_status()["configured"])
-        self.assertEqual(decision["intent"], "withhold_ruins_entrance")
+        with self.assertRaisesRegex(RuntimeError, "configured LLM is required"):
+            decide_next_action(
+                player_input="我想打听一下地下遗迹的入口。",
+                npc_state=npc_state,
+                player_state=player_state,
+                quest_state=quest_state,
+                retrieved_long_term_memories=[],
+                recent_short_term_context=[],
+            )
 
     def test_task_state_machine_blocks_invalid_llm_completion(self) -> None:
         os.environ["AGENT_NPC_LLM_PROVIDER"] = "openai_compatible"
