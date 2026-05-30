@@ -10,8 +10,11 @@
 - 四 NPC 独立任务和记忆；
 - lore / memory / state / recent context 分层；
 - Hybrid RAG 检索；
+- 主观信念、情绪、目标、跨轮计划；
 - 社交策略 metadata；
+- `NPCAction` 中的 goal / plan step / social stance；
 - 程序拥有的任务状态机；
+- 环境执行后的 reflection；
 - 结构化决策和工具调用；
 - 后台 memory jobs；
 - 可解释执行轨迹。
@@ -36,6 +39,10 @@ streamlit run app.py
 
 - intent: `withhold_ruins_entrance`;
 - social intent: `conceal`;
+- trace 中出现 Belief Update / Goal Selection / Plan Step；
+- active goal 是 `protect_underground_ruins_entrance`;
+- plan step 是 `ask_motive`;
+- `NPCAction` 是角色动作意图，不是直接数据库工具；
 - no `unlock_location`;
 - `underground_ruins_entrance` 未解锁。
 
@@ -97,9 +104,21 @@ Sable，你知道遗迹入口或者古物线索吗？
 观察：
 
 - `social_intent` 包含 `redirect` / `deceive`;
+- active goal 可表现为提取遗迹或古物线索；
 - 记录可疑世界事件；
 - 不调用 `unlock_location`；
 - Sable 的欺骗只影响对话和可疑事件，不改写 canonical ruins access。
+
+### 6. Character-agent 对比说明
+
+同样问“地下遗迹入口在哪里？”时，展示 trace 中的差异：
+
+- Lina：保护入口、测试信任、谨慎/试探；
+- Ron：要求证据、公共安全优先；
+- Mira：关注一手观察和研究价值；
+- Sable：寻找可利用线索，语气可能友好但策略更具操控性。
+
+强调：这些 belief / goal / plan / reflection 是开发者 trace 与内部状态，不应该以字段名或 JSON 形式出现在 NPC 台词里。
 
 ## 方案 B：React 玩家端
 
@@ -146,6 +165,8 @@ python scripts/run_mvp_demo.py
 
 - intent；
 - social intent / stance；
+- belief stance / active goal / plan step；
+- reflection；
 - workflow steps；
 - tool calls；
 - memory policy；

@@ -44,6 +44,19 @@ def main() -> None:
         print(f"{run.npc_state['name']}: {run.npc_response}")
         print(f"Intent: {run.decision['intent']}")
         print(f"Social: {run.decision.get('social_intent')} / {run.decision.get('social_stance')}")
+        mind = run.decision.get("mind", {})
+        if mind:
+            print("Character Mind:")
+            print(f"- Belief stance: {mind.get('belief', {}).get('stance')}")
+            print(f"- Active goal: {mind.get('active_goal', {}).get('goal_id')}")
+            print(f"- Plan step: {mind.get('active_plan', {}).get('current_step')}")
+            print(f"- Mind social strategy: {mind.get('social_strategy')}")
+        reflection = run.decision.get("reflection", {})
+        if reflection:
+            print("Reflection:")
+            print(f"- {reflection.get('content')}")
+            for plan_update in reflection.get("plan_updates", []):
+                print(f"- Plan update: {plan_update}")
         print("Workflow:")
         for step in run.workflow_steps:
             print(f"- {step['stage']}: {step['result']}")

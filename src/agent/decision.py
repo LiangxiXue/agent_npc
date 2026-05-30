@@ -116,6 +116,7 @@ def decide_next_action(
     retrieved_lore: list[dict[str, Any]] | None = None,
     state_snapshot: dict[str, Any] | None = None,
     recent_short_term_context: list[dict[str, Any]] | None = None,
+    mind_context: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Return a structured decision from the configured LLM with local rule validation."""
     classification = classify_turn(
@@ -146,6 +147,7 @@ def decide_next_action(
                     "confidence": classification.confidence,
                     "reason": classification.reason,
                 },
+                "mind_context": mind_context or {},
                 "recent_short_term_context": recent_short_term_context or [],
                 "expected_output_schema": DECISION_OUTPUT_SCHEMA,
                 "allowed_intents": sorted(ALLOWED_INTENTS),

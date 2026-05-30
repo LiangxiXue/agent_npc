@@ -7,6 +7,7 @@ from typing import Any
 from src.agent.decision import decide_next_action
 from src.agent.environment import NarrativeEnvironment
 from src.agent.memory_jobs import enqueue_memory_job
+from src.agent.npc_mind import NPCMind, ReflectionEngine
 from src.agent.response import generate_npc_response
 from src.storage import database
 from src.tools import sqlite_tools
@@ -64,6 +65,10 @@ def run_agent_turn(
     player_before = observation.player_state
     quest_before = observation.quest_state
     state_snapshot = build_state_snapshot(npc_before, player_before, quest_before)
+    mind_started = perf_counter()
+    mind_update = NPCMind().evaluate(observation)
+    mind_context = mind_update.trace
+    timings["mind_ms"] = elapsed_ms(mind_started)
 
     decision_started = perf_counter()
     decision = decide_next_action(
@@ -75,11 +80,13 @@ def run_agent_turn(
         retrieved_long_term_memories=observation.retrieved_memories,
         state_snapshot=state_snapshot,
         recent_short_term_context=observation.recent_context,
+        mind_context=mind_context,
     )
     timings["decision_ms"] = elapsed_ms(decision_started)
     state_before = build_state_snapshot(npc_before, player_before, quest_before)
     decision["memory_retrieval_mode"] = memory_retrieval_mode
     decision["state_before"] = state_before
+    decision["mind_context"] = mind_context
 
     npc_action = environment.propose_action_from_decision(decision, observation)
     npc_action = environment.validate(npc_action, observation)
@@ -90,6 +97,14 @@ def run_agent_turn(
     tools_started = perf_counter()
     action_result = environment.execute(npc_action, observation)
     timings["tool_execution_ms"] = elapsed_ms(tools_started)
+    reflection_started = perf_counter()
+    reflection = ReflectionEngine().reflect(
+        observation=observation,
+        npc_action=npc_action,
+        action_result=action_result,
+        mind_state=mind_update.mind_state,
+    )
+    timings["reflection_ms"] = elapsed_ms(reflection_started)
 
     npc_after = database.get_npc(npc_id)
     player_after = database.get_player_state()
@@ -98,6 +113,14 @@ def run_agent_turn(
     state_changes = action_result.state_changes
     decision["state_after"] = action_result.state_after
     decision["environment"] = environment.trace_payload(observation, npc_action, action_result)
+    decision["mind"] = mind_context
+    decision["reflection"] = {
+        "npc_id": reflection.npc_id,
+        "content": reflection.content,
+        "belief_updates": reflection.belief_updates,
+        "plan_updates": reflection.plan_updates,
+        "emotion_updates": reflection.emotion_updates,
+    }
     decision["context_inputs"] = {
         "retrieved_lore": retrieved_lore,
         "retrieved_memories": retrieved_memories,
@@ -121,6 +144,8 @@ def run_agent_turn(
         observation=observation,
         npc_action=npc_action,
         action_result=action_result,
+        mind_context=mind_context,
+        reflection=decision["reflection"],
     )
     timings["response_ms"] = elapsed_ms(response_started)
     decision["response_generation"] = response_generation
@@ -319,6 +344,27 @@ def build_workflow_steps(
         },
         {"stage": "State Load", "result": "Loaded NPC, player, and quest state from SQLite."},
         {
+            "stage": "Belief Update",
+            "result": (
+                "Updated subjective belief: "
+                f"{decision.get('mind', {}).get('belief', {}).get('stance', 'neutral')}."
+            ),
+        },
+        {
+            "stage": "Goal Selection",
+            "result": (
+                "Active goal: "
+                f"{decision.get('mind', {}).get('active_goal', {}).get('goal_id', 'none')}."
+            ),
+        },
+        {
+            "stage": "Plan Step",
+            "result": (
+                "Current step: "
+                f"{decision.get('mind', {}).get('active_plan', {}).get('current_step', 'none')}."
+            ),
+        },
+        {
             "stage": "Structured Decision",
             "result": f"Intent: {decision['intent']}; route: {decision.get('decision_route', 'unknown')}.",
         },
@@ -344,6 +390,13 @@ def build_workflow_steps(
         },
         {"stage": "Environment Execution", "result": f"Executed {len(tool_calls)} environment-approved tool call(s)."},
         {"stage": "Action Result", "result": f"Recorded {len(state_changes)} state change(s)."},
+        {
+            "stage": "Reflection",
+            "result": (
+                "Plan update: "
+                f"{decision.get('reflection', {}).get('plan_updates', [{}])[0].get('status', 'none')}."
+            ),
+        },
         {
             "stage": "Response Generation",
             "result": (

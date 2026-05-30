@@ -4,6 +4,8 @@
 
 Verify that the project behaves like an Agent system with stateful actions, retrieval, tool execution, memory jobs, and explainable traces, not a plain chatbot.
 
+The current target is a narrative character agent: trace should show subjective belief, emotion, active goal, plan step, social strategy, environment execution, reflection, and response constraints.
+
 ## Automated Tests
 
 Run:
@@ -15,7 +17,7 @@ Run:
 Current result:
 
 ```text
-46 tests passed
+Run the command above for the current count. The suite includes API, display translation, LLM client, workflow, environment, and NPC mind tests.
 ```
 
 Current test files:
@@ -23,6 +25,8 @@ Current test files:
 ```text
 tests/test_api.py
 tests/test_display_translation.py
+tests/test_llm_client.py
+tests/test_npc_mind.py
 tests/test_workflow.py
 ```
 
@@ -40,8 +44,22 @@ Expected:
 
 - intent: `withhold_ruins_entrance`;
 - `social_intent`: `conceal`;
+- NPCMind belief stance: suspicious;
+- active goal: `protect_underground_ruins_entrance`;
+- active plan: `lina_test_player_trust`, step `ask_motive`;
+- NPCAction includes goal id, plan step, and a concrete action type such as `probe_intent`;
 - no location unlock;
 - trust remains 20.
+
+### Character-Agent Mind Layer
+
+Expected:
+
+- `NPCMind` can serialize nested belief, emotion, goal, plan, and trace state;
+- the same ruins request activates different goals for Lina and Sable;
+- Lina can continue a remembered trust-test plan from plan memory facets;
+- reflection memory is internal and future-facing, not spoken as player-facing "I remembered this" text;
+- ordinary short-term chat does not automatically become long-term memory.
 
 ### Lina Quest Completion And Later Unlock
 
@@ -78,6 +96,7 @@ Expected:
 - one NPC cannot mutate another NPC's quest;
 - unsupported LLM intents/tools are rejected;
 - blocked transitions become `probe_for_evidence` with `state_machine.blocked` in trace.
+- `ActionValidator` is the boundary that sanitizes invalid actions before environment execution.
 
 ### Background Memory Jobs
 
@@ -129,6 +148,7 @@ Verify:
 - state panel shows selected NPC and primary quest;
 - retrieval preview exposes lore/memory scores;
 - trace shows social intent, tools, state changes, timings, memory job status;
+- trace shows Belief Update, Goal Selection, Plan Step, Action Result, and Reflection stages;
 - trace export writes `data/agent_trace_export.json`.
 
 React player UI:

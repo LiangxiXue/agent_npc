@@ -4,8 +4,8 @@ from copy import deepcopy
 from dataclasses import asdict, dataclass
 from typing import Any
 
+from src.agent.action_validator import ActionValidator, infer_subject, proposed_effects_from_tools
 from src.agent.context import build_context_inputs
-from src.agent.decision import apply_task_state_machine, validate_decision
 from src.storage import database
 from src.tools import sqlite_tools
 
@@ -37,6 +37,9 @@ class NPCAction:
     social_stance: dict[str, Any]
     proposed_effects: list[dict[str, Any]]
     raw_decision: dict[str, Any]
+    goal_id: str = ""
+    plan_step: str = ""
+    speech_goal: str = ""
 
 
 @dataclass(frozen=True)
@@ -83,40 +86,28 @@ class NarrativeEnvironment:
     ) -> NPCAction:
         normalized_decision = deepcopy(decision)
         tools = normalized_decision.get("tools", [])
-        proposed_effects = [
-            {
-                "effect_type": tool.get("name", "unknown"),
-                "args": deepcopy(tool.get("args", {})),
-            }
-            for tool in tools
-        ]
+        mind_context = normalized_decision.get("mind_context", {})
+        active_goal = mind_context.get("active_goal", {}) if isinstance(mind_context, dict) else {}
+        active_plan = mind_context.get("active_plan", {}) if isinstance(mind_context, dict) else {}
         return NPCAction(
-            action_type="dialogue",
+            action_type=str(normalized_decision.get("action_type") or infer_action_type(normalized_decision, active_plan)),
             intent=str(normalized_decision["intent"]),
             target="player",
-            subject=self._infer_subject(normalized_decision),
+            subject=infer_subject(normalized_decision),
             reason=str(normalized_decision.get("reasoning", "")),
             response_style=str(normalized_decision["response_style"]),
             response_keywords=list(normalized_decision["response_keywords"]),
             social_intent=str(normalized_decision.get("social_intent", "cooperate")),
             social_stance=deepcopy(normalized_decision.get("social_stance", {})),
-            proposed_effects=proposed_effects,
+            proposed_effects=proposed_effects_from_tools(tools),
             raw_decision=normalized_decision,
+            goal_id=str(active_goal.get("goal_id", "")),
+            plan_step=str(active_plan.get("current_step", "")),
+            speech_goal=str(normalized_decision.get("speech_goal") or infer_speech_goal(normalized_decision, active_plan)),
         )
 
     def _infer_subject(self, decision: dict[str, Any]) -> str:
-        intent = str(decision.get("intent", "general_conversation"))
-        if "ruins" in intent:
-            return "underground_ruins_entrance"
-        if "lost_key" in intent:
-            return "lost_key"
-        if "gate_badge" in intent:
-            return "gate_badge"
-        if "ancient_notes" in intent:
-            return "ancient_notes"
-        if "relic_tip" in intent:
-            return "relic_tip"
-        return "conversation"
+        return infer_subject(decision)
 
     def trace_payload(
         self,
@@ -139,16 +130,7 @@ class NarrativeEnvironment:
         }
 
     def validate(self, action: NPCAction, observation: Observation) -> NPCAction:
-        try:
-            validated_decision = apply_task_state_machine(
-                validate_decision(deepcopy(action.raw_decision)),
-                player_input=observation.player_input,
-                npc_state=observation.npc_state,
-                quest_state=observation.quest_state,
-            )
-        except ValueError as exc:
-            validated_decision = self._rejected_decision(action.raw_decision, str(exc))
-        return self.propose_action_from_decision(validated_decision, observation)
+        return ActionValidator().validate(action, observation)
 
     def execute(self, action: NPCAction, observation: Observation) -> ActionResult:
         action = self.validate(action, observation)
@@ -196,7 +178,7 @@ class NarrativeEnvironment:
             state_before=state_before,
             state_after=state_after,
             state_changes=state_changes,
-            events=[tool for tool in executed_tools if tool["name"] == "record_world_event"],
+            events=build_action_events(executed_tools, observation),
             response_constraints=self._response_constraints(executed_tools, accepted=True),
         )
 
@@ -229,32 +211,6 @@ class NarrativeEnvironment:
             return str(state_machine.get("reason", "Action blocked by task state machine."))
         return ""
 
-    def _rejected_decision(
-        self,
-        original: dict[str, Any],
-        reason: str,
-    ) -> dict[str, Any]:
-        return {
-            "intent": "probe_for_evidence",
-            "reasoning": f"Environment validation rejected the proposed action: {reason}",
-            "memory_policy": "Do not write task progress memory because the environment rejected the action.",
-            "response_style": "cautious_state_guard",
-            "response_keywords": ["动作被环境拒绝", "需要更多证据", "不能改变状态"],
-            "tools": [],
-            "social_intent": "probe",
-            "social_stance": {
-                "target": "player",
-                "attitude": "cautious",
-                "intensity": 0.65,
-                "reason": "The proposed action failed environment validation.",
-            },
-            "state_machine": {
-                "blocked": True,
-                "original_intent": original.get("intent"),
-                "reason": reason,
-            },
-        }
-
     def _response_constraints(
         self,
         executed_tools: list[dict[str, Any]],
@@ -271,6 +227,64 @@ class NarrativeEnvironment:
         if "give_item" not in tool_names:
             constraints.append("Do not claim the player received an item reward.")
         return constraints
+
+
+def build_action_events(
+    executed_tools: list[dict[str, Any]],
+    observation: Observation,
+) -> list[dict[str, Any]]:
+    events = []
+    for tool in executed_tools:
+        if tool["name"] != "record_world_event":
+            continue
+        result = tool.get("result", {})
+        events.append(
+            {
+                "event_type": "world_event",
+                "actor_id": observation.npc_id,
+                "target_id": "player",
+                "content": str(result.get("content", "")),
+                "visibility": "public",
+                "payload": {
+                    "tool_name": tool["name"],
+                    "tool_arguments": deepcopy(tool.get("arguments", {})),
+                    "tool_result": deepcopy(result),
+                },
+            }
+        )
+    return events
+
+
+def infer_action_type(decision: dict[str, Any], active_plan: dict[str, Any]) -> str:
+    intent = str(decision.get("intent", "general_conversation"))
+    current_step = str(active_plan.get("current_step", ""))
+    if intent == "withhold_ruins_entrance" and current_step == "ask_motive":
+        return "probe_intent"
+    if intent == "withhold_ruins_entrance":
+        return "withhold_information"
+    if intent == "probe_for_evidence":
+        return "request_evidence"
+    if intent.startswith("complete_"):
+        return "accept_returned_item"
+    if intent == "reveal_ruins_entrance":
+        return "share_partial_information"
+    if intent.startswith("start_relic_tip"):
+        return "redirect_topic"
+    return "dialogue"
+
+
+def infer_speech_goal(decision: dict[str, Any], active_plan: dict[str, Any]) -> str:
+    intent = str(decision.get("intent", "general_conversation"))
+    current_step = str(active_plan.get("current_step", ""))
+    if intent == "withhold_ruins_entrance" and current_step == "ask_motive":
+        return "Ask why the player wants the ruins entrance without revealing it."
+    if intent == "withhold_ruins_entrance":
+        return "Withhold the sensitive entrance while keeping the conversation in character."
+    if intent == "probe_for_evidence":
+        return "Ask for concrete evidence before accepting the player's claim."
+    if intent == "reveal_ruins_entrance":
+        return "Share only environment-approved ruins access information."
+    return "Respond in character without inventing world-state changes."
 
 
 def build_environment_state_snapshot(

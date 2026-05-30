@@ -23,6 +23,8 @@ def generate_npc_response(
     observation: Any | None = None,
     npc_action: Any | None = None,
     action_result: Any | None = None,
+    mind_context: dict[str, Any] | None = None,
+    reflection: dict[str, Any] | None = None,
 ) -> tuple[str, dict[str, Any]]:
     """Generate the NPC's final text from decision keywords through the configured LLM."""
     settings = get_llm_settings()
@@ -59,6 +61,8 @@ def generate_npc_response(
                 "observation": serialize_optional_dataclass(observation),
                 "npc_action": serialize_optional_dataclass(npc_action),
                 "action_result": serialize_optional_dataclass(action_result),
+                "mind_context": mind_context or {},
+                "reflection": reflection or {},
                 "response_constraints": get_response_constraints(action_result),
                 "expected_output_schema": RESPONSE_OUTPUT_SCHEMA,
             },
@@ -73,6 +77,12 @@ def generate_npc_response(
             "provider": settings.provider,
             "mode": "constraint_guard",
             "reason": str(exc),
+        }
+    if violates_internal_mind_leak(response):
+        return safe_constraint_response(decision, npc_state, action_result), {
+            "provider": settings.provider,
+            "mode": "constraint_guard",
+            "reason": "LLM response exposed private mind identifiers.",
         }
     if violates_action_result_constraints(response, action_result):
         return safe_constraint_response(decision, npc_state, action_result), {
@@ -166,6 +176,25 @@ def violates_action_result_constraints(response: str, action_result: Any | None)
         blocked_claims = unlock_claims + reward_claims + completion_claims + trust_claims + affection_claims
         return any(term in response for term in blocked_claims)
     return False
+
+
+def violates_internal_mind_leak(response: str) -> bool:
+    leak_terms = [
+        "belief_id",
+        "goal_id",
+        "plan_id",
+        "mind_state",
+        "active_goal",
+        "active_plan",
+        "ActionResult",
+        "NPCAction",
+        "workflow",
+        "trace",
+        "JSON",
+        "database",
+        "数据库字段",
+    ]
+    return any(term in response for term in leak_terms)
 
 
 def validate_response_payload(payload: dict[str, Any]) -> str:
