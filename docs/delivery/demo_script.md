@@ -187,3 +187,64 @@ data/agent_trace_export.json
 ```
 
 该文件用于报告附录、截图核验或 PPT 备份。Streamlit 页面显示 interaction log 时也会自动刷新同一路径。
+
+## 方案 D：主动 NPC Agent 演示
+
+目标：证明 NPC 不只是在玩家输入后回复，而是能响应世界事件并主动产生意图、计划、消息和 trace。
+
+### 1. 启动 API
+
+```powershell
+python -m uvicorn src.api.server:app --host 127.0.0.1 --port 8000
+```
+
+### 2. 运行三场景脚本
+
+真实 LLM：
+
+```powershell
+$env:AGENT_NPC_LLM_PROVIDER = "openai_compatible"
+$env:AGENT_NPC_LLM_API_KEY = "<key>"
+python scripts/run_autonomous_llm_demo.py
+```
+
+无 LLM smoke：
+
+```powershell
+python scripts/run_autonomous_llm_demo.py --mock
+```
+
+### 3. 展示 Lina 主动试探
+
+观察输出：
+
+- `trigger_event_id`;
+- `available_actions` 包含 `offer_minor_task`;
+- `unavailable_actions` 中 `reveal_partial_lore` 的原因是 trust below 60;
+- `llm_decision.goal = test_player_trust`;
+- `validation.status = allowed`;
+- `state_diff` 显示低风险任务进入 `in_progress`;
+- `proactive_message` 已入 mailbox。
+
+打开：
+
+```text
+http://127.0.0.1:8000/api/trace/autonomous/{tick_log_id}?format=html
+```
+
+### 4. 展示 Ron 证据门控
+
+观察：
+
+- 输入事件是 `badge_evidence_verified`;
+- `grant_conditional_access` 只有证据满足时可选;
+- 环境侧更新 gate badge 任务状态;
+- 没有解锁遗迹入口。
+
+### 5. 展示 Sable 安全误导
+
+观察：
+
+- Sable 的 available actions 是 `mislead_player` / `redirect_to_false_clue` / `ask_leading_question` / `probe_player_secret`;
+- 每个 action 的 `forbidden_effects` 包含 `unlock_location`、`complete_quest`、`modify_other_npc_trust`、`grant_gate_access`、`rewrite_lore_fact`;
+- 如果 LLM 试图选 `unlock_location`，trace 会显示 `rejected_by_available_actions`，不会改世界事实。

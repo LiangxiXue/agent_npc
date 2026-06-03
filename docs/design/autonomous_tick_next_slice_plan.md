@@ -313,3 +313,19 @@ trace 最低字段：
 6. tests：visibility、Lina/Ron/Sable、自主 trace。
 
 完成后再考虑把 LLM action proposal 接入 `available_actions`。
+
+## Implemented Demo-Grade Slice
+
+当前实现已经从最小 deterministic slice 升级为展示级 `llm_constrained` autonomous NPC runtime：
+
+- `world_events` 扩展为结构化事件，保留 legacy fallback；
+- `npc_event_inbox` 支持 `public`、`location`、`private`、`npc_only` 派发；
+- `NarrativeEnvironment.observe()` 读取 NPC 可见事件，而不是全局最近事件；
+- `ActionCatalog` 提供 `available_actions` 和 `unavailable_actions`，并解释 failed preconditions；
+- `run_autonomous_tick()` 调用 LLM 生成 belief、emotion、goal、plan step、selected action、proactive message、memory candidate、reflection；
+- LLM selected action 先经过 available-action 检查、one-command guard、arg schema check，再进入 `ActionValidator` 和 `NarrativeEnvironment.execute()`；
+- `npc_plans`、`npc_cooldowns`、`npc_runtime_state`、`proactive_messages` 和 `autonomous_tick_logs` 已接入；
+- FastAPI 已提供 `POST /api/world/events`、`POST /api/npcs/{npc_id}/tick`、`GET /api/npcs/messages`、`POST /api/npcs/messages/{message_id}/delivered`、`GET /api/npcs/{npc_id}/plan`、`GET /api/npcs/{npc_id}/inbox`、`GET /api/npcs/{npc_id}/runtime`、`GET /api/trace/autonomous/{tick_log_id}`；
+- `scripts/run_autonomous_llm_demo.py` 支持真实 LLM demo 和 `--mock` smoke。
+
+仍然不做：GOAP、行为树、大型 scheduler、复杂地图系统、完整 gossip network、物体系统或后台 autonomous worker。

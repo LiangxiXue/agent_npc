@@ -423,22 +423,35 @@ def decision_from_selected_action(selected_action: dict[str, Any], llm_decision:
     action_type = str(selected_action.get("action_type", ""))
     intent = "general_conversation"
     social_intent = "cooperate"
+    tools: list[dict[str, Any]] = []
     if action_type in {"offer_minor_task", "ask_clarifying_question", "refuse_restricted_info", "reveal_partial_lore"}:
         intent = "withhold_ruins_entrance"
         social_intent = "probe" if action_type != "refuse_restricted_info" else "conceal"
+        if action_type == "offer_minor_task":
+            intent = "start_lost_key_quest"
+            tools = [{"name": "update_quest_status", "args": {"quest_id": "lost_key", "status": "in_progress"}}]
     elif action_type in {"mislead_player", "redirect_to_false_clue", "ask_leading_question", "probe_player_secret"}:
         intent = "redirect_ruins_inquiry"
         social_intent = "deceive"
+        tools = [
+            {
+                "name": "record_world_event",
+                "args": {"content": f"Sable pursued a deceptive autonomous action: {action_type}."},
+            }
+        ]
     elif action_type in {"verify_badge", "block_gate_access", "grant_conditional_access", "warn_player", "request_evidence"}:
         intent = "probe_for_evidence"
         social_intent = "probe"
+        if action_type == "grant_conditional_access":
+            intent = "start_gate_badge_quest"
+            tools = [{"name": "update_quest_status", "args": {"quest_id": "gate_badge", "status": "in_progress"}}]
     return {
         "intent": intent,
         "reasoning": str(llm_decision.get("reflection_summary") or llm_decision.get("belief_update") or action_type),
         "memory_policy": "Autonomous tick memory handled by autonomous trace.",
         "response_style": "autonomous_proactive",
         "response_keywords": [action_type, str(llm_decision.get("goal", ""))],
-        "tools": [],
+        "tools": tools,
         "social_intent": social_intent,
         "social_stance": {
             "target": "player",

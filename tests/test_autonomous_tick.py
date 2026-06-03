@@ -82,6 +82,7 @@ class AutonomousTickTest(unittest.TestCase):
         self.assertEqual(result.proposed_action["action_type"], "offer_minor_task")
         self.assertEqual(result.validation["status"], "allowed")
         self.assertTrue(result.action_result["accepted"])
+        self.assertEqual(database.get_quest("lost_key")["status"], "in_progress")
         self.assertEqual(result.proactive_message["content"], llm_decision["proactive_message"])
         self.assertEqual(database.get_proactive_messages("lina")[0]["content"], llm_decision["proactive_message"])
         self.assertTrue(database.get_npc_event_inbox("lina", include_seen=True)[0]["seen"])

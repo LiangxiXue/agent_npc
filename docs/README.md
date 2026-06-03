@@ -12,6 +12,7 @@
 - `llm_integration.md`：OpenAI-compatible LLM 接入方式、decision/response/memory 路径和 LLM-required runtime 约束。
 - `multi_npc.md`：Lina/Ron/Mira/Sable 四 NPC、任务隔离、社交策略和当前行为范围。
 - `autonomous_tick_next_slice_plan.md`：外部仓库学习后的主动 NPC 回合最小垂直切片设计。
+- `../demo_autonomous_tick.md`：展示级 LLM-constrained autonomous NPC runtime 的 API、脚本和 trace 演示流程。
 
 ## operations
 
@@ -31,3 +32,4 @@
 
 - `project_proposal.md`：原项目选题计划。它是需求和范围参考，不代表当前实现逐字状态；当前状态以根目录 `README.md` 和 `docs/design/` 为准。
 - `external_agent_repo_learning_report.md`：Player2NPC、PlayerEngine、Player2 SDK、CobbleBrain 等参考仓库的代码级学习报告。
+- `external_pattern_library_for_agent_npc.md`：从参考仓库额外提炼的 cooldown、queue、plan blocker、knowledge leak test 等机制库。

@@ -4,7 +4,7 @@
 
 Verify that the project behaves like an Agent system with stateful actions, retrieval, tool execution, memory jobs, and explainable traces, not a plain chatbot.
 
-The current target is a narrative character agent: trace should show subjective belief, emotion, active goal, plan step, social strategy, environment execution, reflection, and response constraints.
+The current target is a narrative character agent with both player-driven turns and autonomous NPC ticks. Trace should show subjective belief, emotion, active goal, plan step, social strategy, environment execution, reflection, response constraints, visible world events, ActionCatalog available/unavailable actions, LLM-selected autonomous actions, validation, mailbox output, and cooldown/plan blockers.
 
 ## Automated Tests
 
@@ -24,11 +24,35 @@ Current test files:
 
 ```text
 tests/test_api.py
+tests/test_action_catalog.py
+tests/test_autonomous_storage.py
+tests/test_autonomous_tick.py
 tests/test_display_translation.py
+tests/test_event_visibility.py
 tests/test_llm_client.py
 tests/test_npc_mind.py
 tests/test_workflow.py
 ```
+
+## Autonomous NPC Runtime Coverage
+
+Expected:
+
+- structured `world_events` save/load and legacy fallback;
+- additive migration for legacy `world_events(content, created_at)`;
+- `public`, `location`, `private`, and `npc_only` visibility dispatch;
+- NPC inbox seen behavior;
+- invisible private events do not enter unrelated NPC observations;
+- ActionCatalog returns available actions and unavailable action reasons;
+- Ron cannot grant gate access without badge evidence;
+- Sable action specs forbid unlock, completion, other-NPC trust mutation, gate grant, and lore rewrite effects;
+- LLM-constrained tick logs LLM decision, proposed action, validation, action result, memory candidate, reflection, and timeline;
+- unavailable LLM action proposals are rejected before validator;
+- invalid action args are recorded in trace;
+- one-command-at-a-time guard rejects compound proposals;
+- proactive messages are queued and can be marked delivered;
+- plan blocker, cooldown, budget, memory-only, paused, disabled, and no-op tick paths are covered;
+- autonomous trace JSON and HTML endpoints are available.
 
 ## Covered Behaviors
 
@@ -167,6 +191,28 @@ Verify:
 - dialogue updates state and task panels;
 - developer trace panel remains inspectable.
 - worker changes pending memory jobs into `written` or `indexed`.
+
+## Autonomous Demo
+
+Run:
+
+```powershell
+python scripts/run_autonomous_llm_demo.py --mock
+```
+
+For a real LLM run:
+
+```powershell
+$env:AGENT_NPC_LLM_PROVIDER = "openai_compatible"
+$env:AGENT_NPC_LLM_API_KEY = "<key>"
+python scripts/run_autonomous_llm_demo.py
+```
+
+Expected cases:
+
+- `lina_early_ruins`: Lina sees an early ruins-access event, selects `offer_minor_task`, starts the low-risk trust-test flow, queues a proactive message, and logs excluded `reveal_partial_lore`.
+- `ron_badge_verified`: Ron sees verified badge evidence, can select `grant_conditional_access`, and advances the procedural gate-badge flow through the environment.
+- `sable_deception_constrained`: Sable can redirect/mislead, but forbidden world-authority effects remain blocked by available actions and validator boundaries.
 
 ## Memory Evaluation
 
