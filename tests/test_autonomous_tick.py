@@ -186,6 +186,96 @@ class AutonomousTickTest(unittest.TestCase):
         self.assertEqual(no_op.outcome, "no_op")
         self.assertEqual(no_op.validation["reason"], "no_unseen_inbox_item")
 
+    def test_plan_blocker_cooldown_budget_and_runtime_lifecycle(self) -> None:
+        from src.agent.autonomous_tick import run_autonomous_tick
+
+        create_and_dispatch_event("player_claimed_badge", "Player claims badge access without evidence.", "ron")
+        with patch(
+            "src.agent.autonomous_tick.call_openai_compatible_json",
+            return_value={
+                "goal": "grant_gate_access",
+                "plan_step": "verify_badge",
+                "selected_action": {
+                    "action_type": "grant_conditional_access",
+                    "args": {"quest_id": "gate_badge", "message_intent": "grant access"},
+                },
+                "proactive_message": "You can pass now.",
+                "memory_candidate": "",
+                "reflection_summary": "Ron needs verified badge evidence.",
+            },
+        ):
+            blocked = run_autonomous_tick("ron", mode="llm_constrained")
+
+        self.assertEqual(blocked.validation["status"], "rejected_by_available_actions")
+        self.assertEqual(database.get_npc_plan("ron")["status"], "blocked")
+        self.assertIn("badge evidence", database.get_npc_plan("ron")["blocker"])
+
+        first_event = create_and_dispatch_event("player_asked_ruins_too_early", "Player asked Lina again.", "lina")
+        with patch(
+            "src.agent.autonomous_tick.call_openai_compatible_json",
+            return_value={
+                "goal": "test_player_trust",
+                "plan_step": "offer_minor_task",
+                "selected_action": {
+                    "action_type": "offer_minor_task",
+                    "args": {"quest_id": "trust_test_lina", "message_intent": "prove intent"},
+                },
+                "proactive_message": "先帮我确认钥匙线索。",
+                "memory_candidate": "",
+                "reflection_summary": "Lina should test trust.",
+            },
+        ):
+            first = run_autonomous_tick("lina", mode="llm_constrained", trigger_event_id=int(first_event["id"]))
+        second_event = create_and_dispatch_event("player_asked_ruins_too_early", "Player repeated the ruins request.", "lina")
+        with patch(
+            "src.agent.autonomous_tick.call_openai_compatible_json",
+            return_value={
+                "goal": "test_player_trust",
+                "plan_step": "offer_minor_task",
+                "selected_action": {
+                    "action_type": "offer_minor_task",
+                    "args": {"quest_id": "trust_test_lina", "message_intent": "prove intent"},
+                },
+                "proactive_message": "再说一次，先帮我确认钥匙线索。",
+                "memory_candidate": "",
+                "reflection_summary": "Lina should test trust.",
+            },
+        ):
+            second = run_autonomous_tick("lina", mode="llm_constrained", trigger_event_id=int(second_event["id"]))
+
+        self.assertEqual(first.outcome, "proactive_message")
+        self.assertEqual(second.validation["status"], "skipped_by_cooldown")
+        self.assertEqual(len(database.get_proactive_messages("lina", delivered=False)), 1)
+        self.assertIsNotNone(database.get_npc_cooldown("lina", "lina:player_asked_ruins_too_early:offer_minor_task"))
+
+        database.upsert_npc_runtime_state("mira", lifecycle_status="paused", tick_enabled=True)
+        create_and_dispatch_event("new_ruins_clue", "A clue reaches paused Mira.", "mira")
+        with patch(
+            "src.agent.autonomous_tick.call_openai_compatible_json",
+            return_value={
+                "goal": "archive_research_signal",
+                "plan_step": "archive_memory",
+                "selected_action": {
+                    "action_type": "archive_memory",
+                    "args": {"memory_candidate": "Mira noticed a clue while paused."},
+                },
+                "proactive_message": "I should speak now.",
+                "memory_candidate": "Mira noticed a clue while paused.",
+                "reflection_summary": "Paused Mira should only remember this.",
+            },
+        ):
+            paused = run_autonomous_tick("mira", mode="llm_constrained")
+        self.assertEqual(paused.outcome, "memory_only")
+        self.assertIsNone(paused.proactive_message)
+        self.assertEqual(paused.action_result["executed_tools"], [])
+
+        database.upsert_npc_runtime_state("sable", lifecycle_status="disabled", tick_enabled=False)
+        create_and_dispatch_event("player_interested_in_ruins", "Sable is disabled and should not consume this.", "sable")
+        disabled = run_autonomous_tick("sable", mode="llm_constrained")
+        self.assertEqual(disabled.outcome, "no_op")
+        self.assertEqual(disabled.validation["reason"], "npc_disabled")
+        self.assertFalse(database.get_npc_event_inbox("sable")[0]["seen"])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1561,6 +1561,15 @@ def mark_proactive_message_delivered(message_id: int) -> dict[str, Any] | None:
     return get_proactive_message(message_id)
 
 
+def update_proactive_message_tick_log(message_id: int, tick_log_id: int) -> dict[str, Any] | None:
+    with connect() as connection:
+        connection.execute(
+            "UPDATE proactive_messages SET tick_log_id = ? WHERE id = ?",
+            (tick_log_id, message_id),
+        )
+    return get_proactive_message(message_id)
+
+
 def upsert_npc_plan(
     npc_id: str,
     goal: str,

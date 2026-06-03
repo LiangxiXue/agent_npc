@@ -1,11 +1,13 @@
 from __future__ import annotations
 
 from dataclasses import asdict
+from html import escape
 from time import perf_counter
 from typing import Any, Literal
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 
 from src.agent.display_translation import TRANSLATION_CACHE_PATH, translate_debug_text
@@ -16,6 +18,7 @@ from src.agent.llm_client import get_provider_status
 from src.agent.memory_jobs import process_pending_memory_jobs
 from src.agent.semantic_retrieval import ensure_embeddings_for_memories
 from src.agent.trace_export import build_trace_export_payload, write_trace_export
+from src.agent.autonomous_tick import run_autonomous_tick
 from src.agent.workflow import run_agent_turn
 from src.storage import database
 
@@ -74,6 +77,12 @@ class WorldEventRequest(BaseModel):
     location_id: str | None = Field(default=None, max_length=120)
     visibility: Literal["public", "location", "private", "npc_only"] = Field(default="public")
     payload: dict[str, Any] = Field(default_factory=dict)
+
+
+class AutonomousTickRequest(BaseModel):
+    trigger_event_id: int | None = Field(default=None)
+    mode: Literal["llm_constrained", "deterministic_fallback"] = Field(default="llm_constrained")
+    retrieval_mode: RetrievalMode = Field(default="hybrid")
 
 
 app = FastAPI(title="Agent NPC Player API", version="0.1.0")
@@ -233,6 +242,51 @@ def npc_runtime(npc_id: str) -> dict[str, Any]:
     }
 
 
+@app.post("/api/npcs/{npc_id}/tick")
+def npc_tick(npc_id: str, request: AutonomousTickRequest) -> dict[str, Any]:
+    selected_npc_id = ensure_npc_id(npc_id)
+    result = run_autonomous_tick(
+        selected_npc_id,
+        mode=request.mode,
+        trigger_event_id=request.trigger_event_id,
+        memory_retrieval_mode=request.retrieval_mode,
+    )
+    return {
+        "result": asdict(result),
+        "state": build_client_state(selected_npc_id, limit=10),
+    }
+
+
+@app.get("/api/npcs/messages")
+def npc_messages(
+    npc_id: str | None = Query(default=None),
+    delivered: bool = Query(default=False),
+    limit: int = Query(default=20, ge=1, le=100),
+) -> dict[str, Any]:
+    if npc_id is not None:
+        ensure_npc_id(npc_id)
+    return {
+        "messages": database.get_proactive_messages(npc_id=npc_id, delivered=delivered, limit=limit),
+    }
+
+
+@app.post("/api/npcs/messages/{message_id}/delivered")
+def mark_message_delivered(message_id: int) -> dict[str, Any]:
+    message = database.mark_proactive_message_delivered(message_id)
+    if message is None:
+        raise HTTPException(status_code=404, detail=f"Proactive message not found: {message_id}")
+    return {"message": message}
+
+
+@app.get("/api/npcs/{npc_id}/plan")
+def npc_plan(npc_id: str) -> dict[str, Any]:
+    selected_npc_id = ensure_npc_id(npc_id)
+    return {
+        "npc_id": selected_npc_id,
+        "plan": database.get_npc_plan(selected_npc_id),
+    }
+
+
 @app.get("/api/trace")
 def trace(limit: int = Query(default=10, ge=1, le=100)) -> dict[str, Any]:
     path = write_trace_export(limit=limit)
@@ -240,6 +294,20 @@ def trace(limit: int = Query(default=10, ge=1, le=100)) -> dict[str, Any]:
         "path": str(path),
         "payload": build_trace_export_payload(limit=limit),
     }
+
+
+@app.get("/api/trace/autonomous/{tick_log_id}", response_model=None)
+def autonomous_trace(
+    tick_log_id: int,
+    format: Literal["json", "html"] = Query(default="json"),
+):
+    tick_log = database.get_autonomous_tick_log(tick_log_id)
+    if tick_log is None:
+        raise HTTPException(status_code=404, detail=f"Autonomous tick log not found: {tick_log_id}")
+    payload = build_autonomous_trace_payload(tick_log)
+    if format == "html":
+        return HTMLResponse(render_autonomous_trace_html(payload))
+    return {"trace": payload}
 
 
 @app.post("/api/translate-debug")
@@ -291,6 +359,63 @@ def get_display_translation_status() -> dict[str, Any]:
         "mode": "display-only",
         "cache_path": str(TRANSLATION_CACHE_PATH),
     }
+
+
+def build_autonomous_trace_payload(tick_log: dict[str, Any]) -> dict[str, Any]:
+    message = None
+    if tick_log.get("proactive_message_id"):
+        message = database.get_proactive_message(int(tick_log["proactive_message_id"]))
+    return {
+        "id": tick_log["id"],
+        "npc_id": tick_log["npc_id"],
+        "trigger_event_id": tick_log["trigger_event_id"],
+        "mode": tick_log["mode"],
+        "observation": tick_log["observation"],
+        "retrieved_memories": tick_log["retrieved_memories"],
+        "available_actions": tick_log["available_actions"],
+        "unavailable_actions": tick_log["unavailable_actions"],
+        "llm_decision": tick_log["llm_decision"],
+        "proposed_action": tick_log["proposed_action"],
+        "validation": tick_log["validation"],
+        "action_result": tick_log["action_result"],
+        "plan_update": tick_log["plan_update"],
+        "memory_candidate": tick_log["memory_candidate"],
+        "reflection": tick_log["reflection"],
+        "proactive_message": message,
+        "created_at": tick_log["created_at"],
+    }
+
+
+def render_autonomous_trace_html(payload: dict[str, Any]) -> str:
+    def block(title: str, value: Any) -> str:
+        return (
+            f"<section><h2>{escape(title)}</h2>"
+            f"<pre>{escape(database.json_dumps(value))}</pre></section>"
+        )
+
+    title = f"Autonomous Trace #{payload['id']} - {payload['npc_id']}"
+    return "\n".join(
+        [
+            "<!doctype html>",
+            "<html><head><meta charset='utf-8'>",
+            f"<title>{escape(title)}</title>",
+            "<style>body{font-family:Arial,sans-serif;margin:24px;line-height:1.4}"
+            "section{border:1px solid #ddd;margin:12px 0;padding:12px;border-radius:6px}"
+            "pre{white-space:pre-wrap;background:#f7f7f7;padding:10px}</style>",
+            "</head><body>",
+            f"<h1>{escape(title)}</h1>",
+            block("Observation", payload["observation"]),
+            block("Retrieved Memories", payload["retrieved_memories"]),
+            block("Available Actions", payload["available_actions"]),
+            block("Unavailable Actions", payload["unavailable_actions"]),
+            block("LLM Decision", payload["llm_decision"]),
+            block("Validation", payload["validation"]),
+            block("Action Result", payload["action_result"]),
+            block("Plan Update", payload["plan_update"]),
+            block("Proactive Message", payload["proactive_message"]),
+            "</body></html>",
+        ]
+    )
 
 
 def add_run_translations(run: dict[str, Any]) -> dict[str, Any]:

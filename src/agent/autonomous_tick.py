@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from src.agent.action_catalog import (
@@ -52,45 +52,20 @@ def run_autonomous_tick(
 ) -> AutonomousTickResult:
     database.initialize_database()
     timeline = [timeline_event("tick_started", {"npc_id": npc_id, "mode": mode})]
+    runtime = database.get_npc_runtime_state(npc_id)
+    if runtime["lifecycle_status"] == "disabled" or not runtime["tick_enabled"]:
+        return log_no_op_tick(
+            npc_id=npc_id,
+            mode=mode,
+            validation={"status": "no_op", "reason": "npc_disabled"},
+            timeline=timeline,
+        )
     trigger_item = select_trigger_item(npc_id, trigger_event_id)
     if trigger_item is None:
-        validation = {"status": "no_op", "reason": "no_unseen_inbox_item"}
-        action_result = empty_action_result("no_unseen_inbox_item")
-        tick_log = database.log_autonomous_tick(
-            npc_id=npc_id,
-            trigger_event_id=None,
-            mode=mode,
-            observation={"timeline": timeline},
-            retrieved_memories=[],
-            available_actions=[],
-            unavailable_actions=[],
-            llm_decision={},
-            proposed_action={},
-            validation=validation,
-            action_result=action_result,
-            plan_update={},
-            memory_candidate={},
-            reflection={},
-            proactive_message_id=None,
-        )
-        return AutonomousTickResult(
+        return log_no_op_tick(
             npc_id=npc_id,
             mode=mode,
-            outcome="no_op",
-            trigger_event=None,
-            observation={"timeline": timeline},
-            retrieved_memories=[],
-            available_actions=[],
-            unavailable_actions=[],
-            llm_decision={},
-            proposed_action={},
-            validation=validation,
-            action_result=action_result,
-            plan_update={},
-            memory_candidate={},
-            reflection={},
-            proactive_message=None,
-            tick_log_id=int(tick_log["id"]),
+            validation={"status": "no_op", "reason": "no_unseen_inbox_item"},
             timeline=timeline,
         )
 
@@ -130,16 +105,32 @@ def run_autonomous_tick(
     timeline.append(timeline_event("llm_decision_received", {"goal": llm_decision.get("goal", "")}))
     proposed_action = normalize_selected_action(llm_decision.get("selected_action"))
     validation = validate_selected_action(proposed_action, available_actions)
+    validation = enrich_validation_with_unavailable_reason(validation, proposed_action, unavailable_actions)
+    if validation["status"] == "allowed":
+        cooldown_validation = validate_cooldown(npc_id, trigger_event, proposed_action)
+        if cooldown_validation:
+            validation = cooldown_validation
+    if validation["status"] == "allowed" and has_pending_proactive_message(npc_id) and wants_proactive_message(llm_decision):
+        validation = {
+            "status": "skipped_by_budget",
+            "reason": "npc already has an undelivered proactive message",
+        }
     timeline.append(timeline_event("action_validated", {"status": validation["status"]}))
 
     action_result = empty_action_result(validation["status"])
-    if validation["status"] == "allowed":
+    if validation["status"] == "allowed" and runtime["lifecycle_status"] == "active":
         action_result = execute_selected_action(
             selected_action=proposed_action,
             llm_decision=llm_decision,
             observation=observation,
             environment=environment,
         )
+    elif runtime["lifecycle_status"] == "paused":
+        validation = {
+            "status": "paused_memory_only",
+            "reason": "npc_paused",
+        }
+        action_result = empty_action_result("npc_paused")
     memory_candidate = normalize_memory_candidate(llm_decision.get("memory_candidate"))
     reflection = {
         "summary": str(llm_decision.get("reflection_summary", "")),
@@ -152,12 +143,29 @@ def run_autonomous_tick(
         "status": "active" if validation["status"] == "allowed" else "blocked",
         "blocker": "" if validation["status"] == "allowed" else validation.get("reason", validation["status"]),
     }
+    persisted_plan = database.upsert_npc_plan(
+        npc_id=npc_id,
+        goal=plan_update["goal"],
+        steps=[{"step": plan_update["current_step"], "status": plan_update["status"]}],
+        current_step=plan_update["current_step"],
+        status=plan_update["status"],
+        blocker=plan_update["blocker"],
+        source_event_id=int(trigger_event["id"]),
+    )
+    plan_update.update(
+        {
+            "id": persisted_plan["id"],
+            "source_event_id": persisted_plan["source_event_id"],
+        }
+    )
     proactive_message = create_tick_message(
         npc_id=npc_id,
         trigger_event_id=int(trigger_event["id"]),
         llm_decision=llm_decision,
         validation=validation,
     )
+    if validation["status"] == "allowed" and proactive_message:
+        set_action_cooldown(npc_id, trigger_event, proposed_action)
     outcome = determine_outcome(validation, proactive_message, memory_candidate)
     timeline.append(timeline_event("tick_finished", {"outcome": outcome}))
     observation_payload = {
@@ -184,6 +192,8 @@ def run_autonomous_tick(
         reflection=reflection,
         proactive_message_id=proactive_message["id"] if proactive_message else None,
     )
+    if proactive_message:
+        proactive_message = database.update_proactive_message_tick_log(proactive_message["id"], int(tick_log["id"]))
     database.mark_npc_event_seen(int(trigger_item["id"]))
     return AutonomousTickResult(
         npc_id=npc_id,
@@ -202,6 +212,54 @@ def run_autonomous_tick(
         memory_candidate=memory_candidate,
         reflection=reflection,
         proactive_message=proactive_message,
+        tick_log_id=int(tick_log["id"]),
+        timeline=timeline,
+    )
+
+
+def log_no_op_tick(
+    npc_id: str,
+    mode: str,
+    validation: dict[str, Any],
+    timeline: list[dict[str, Any]],
+) -> AutonomousTickResult:
+    action_result = empty_action_result(validation["reason"])
+    timeline.append(timeline_event("tick_finished", {"outcome": "no_op"}))
+    observation = {"timeline": timeline}
+    tick_log = database.log_autonomous_tick(
+        npc_id=npc_id,
+        trigger_event_id=None,
+        mode=mode,
+        observation=observation,
+        retrieved_memories=[],
+        available_actions=[],
+        unavailable_actions=[],
+        llm_decision={},
+        proposed_action={},
+        validation=validation,
+        action_result=action_result,
+        plan_update={},
+        memory_candidate={},
+        reflection={},
+        proactive_message_id=None,
+    )
+    return AutonomousTickResult(
+        npc_id=npc_id,
+        mode=mode,
+        outcome="no_op",
+        trigger_event=None,
+        observation=observation,
+        retrieved_memories=[],
+        available_actions=[],
+        unavailable_actions=[],
+        llm_decision={},
+        proposed_action={},
+        validation=validation,
+        action_result=action_result,
+        plan_update={},
+        memory_candidate={},
+        reflection={},
+        proactive_message=None,
         tick_log_id=int(tick_log["id"]),
         timeline=timeline,
     )
@@ -320,6 +378,23 @@ def validate_selected_action(
     return {"status": "allowed", "reason": "selected action is available and args match schema"}
 
 
+def enrich_validation_with_unavailable_reason(
+    validation: dict[str, Any],
+    proposed_action: dict[str, Any],
+    unavailable_actions: list[dict[str, Any]],
+) -> dict[str, Any]:
+    if validation["status"] != "rejected_by_available_actions":
+        return validation
+    action_type = proposed_action.get("action_type")
+    for action in unavailable_actions:
+        if action.get("action_type") == action_type:
+            enriched = dict(validation)
+            enriched["reason"] = str(action.get("reason") or validation["reason"])
+            enriched["failed_preconditions"] = action.get("failed_preconditions", [])
+            return enriched
+    return validation
+
+
 def validate_action_args(args: dict[str, Any], schema: dict[str, Any]) -> dict[str, Any] | None:
     for field, expected_type in schema.items():
         if field not in args:
@@ -396,6 +471,54 @@ def create_tick_message(
     )
 
 
+def has_pending_proactive_message(npc_id: str) -> bool:
+    return bool(database.get_proactive_messages(npc_id=npc_id, delivered=False, limit=1))
+
+
+def wants_proactive_message(llm_decision: dict[str, Any]) -> bool:
+    return bool(str(llm_decision.get("proactive_message", "")).strip())
+
+
+def validate_cooldown(
+    npc_id: str,
+    trigger_event: dict[str, Any],
+    proposed_action: dict[str, Any],
+) -> dict[str, Any] | None:
+    cooldown_key = build_cooldown_key(npc_id, trigger_event, proposed_action)
+    cooldown = database.get_npc_cooldown(npc_id, cooldown_key)
+    if not cooldown:
+        return None
+    if str(cooldown["until_turn_or_timestamp"]) > datetime.now(timezone.utc).isoformat():
+        return {
+            "status": "skipped_by_cooldown",
+            "reason": cooldown["reason"],
+            "cooldown_key": cooldown_key,
+            "until_turn_or_timestamp": cooldown["until_turn_or_timestamp"],
+        }
+    return None
+
+
+def set_action_cooldown(
+    npc_id: str,
+    trigger_event: dict[str, Any],
+    proposed_action: dict[str, Any],
+) -> dict[str, Any]:
+    return database.set_npc_cooldown(
+        npc_id=npc_id,
+        cooldown_key=build_cooldown_key(npc_id, trigger_event, proposed_action),
+        until_turn_or_timestamp=(datetime.now(timezone.utc) + timedelta(hours=1)).isoformat(),
+        reason=f"cooldown for {trigger_event.get('event_type')} -> {proposed_action.get('action_type')}",
+    )
+
+
+def build_cooldown_key(
+    npc_id: str,
+    trigger_event: dict[str, Any],
+    proposed_action: dict[str, Any],
+) -> str:
+    return f"{npc_id}:{trigger_event.get('event_type', 'event')}:{proposed_action.get('action_type', 'action')}"
+
+
 def safe_rejection_message(npc_id: str) -> str:
     npc = database.get_npc(npc_id)
     return f"{npc.get('name', npc_id)} 暂时只留下含糊的提醒，没有改变任何世界状态。"
@@ -406,6 +529,12 @@ def determine_outcome(
     proactive_message: dict[str, Any] | None,
     memory_candidate: dict[str, Any],
 ) -> str:
+    if validation["status"] == "paused_memory_only":
+        return "memory_only"
+    if validation["status"] == "skipped_by_cooldown":
+        return "no_op"
+    if validation["status"] == "skipped_by_budget":
+        return "no_op"
     if validation["status"] == "rejected_by_available_actions":
         return "safe_message" if proactive_message else "blocked"
     if validation["status"] != "allowed":

@@ -260,6 +260,101 @@ class PlayerApiTest(unittest.TestCase):
         self.assertEqual(runtime.json()["runtime"]["lifecycle_status"], "active")
         self.assertEqual(database.get_autonomous_tick_log(1), None)
 
+    def test_autonomous_tick_api_writes_mailbox_and_plan(self) -> None:
+        event_response = self.client.post(
+            "/api/world/events",
+            json={
+                "event_type": "player_asked_ruins_too_early",
+                "content": "Player asked about the ruins entrance before earning trust.",
+                "source_type": "player",
+                "source_id": "player",
+                "location_id": "tavern",
+                "visibility": "npc_only",
+                "payload": {"target_npc_ids": ["lina"]},
+            },
+        )
+        llm_decision = {
+            "belief_update": "The player is seeking restricted ruins knowledge too early.",
+            "emotion": "cautious",
+            "goal": "test_player_trust",
+            "plan_step": "offer_minor_task",
+            "selected_action": {
+                "action_type": "offer_minor_task",
+                "args": {"quest_id": "trust_test_lina", "message_intent": "prove benign intent"},
+            },
+            "proactive_message": "你若真不是为古物而来，先帮我确认那把钥匙的去向。",
+            "memory_candidate": "The player asked about ruins too early.",
+            "reflection_summary": "Lina should test trust first.",
+        }
+
+        with patch("src.agent.autonomous_tick.call_openai_compatible_json", return_value=llm_decision):
+            tick = self.client.post(
+                "/api/npcs/lina/tick",
+                json={"trigger_event_id": event_response.json()["event"]["id"], "mode": "llm_constrained"},
+            )
+        messages = self.client.get("/api/npcs/messages?npc_id=lina")
+        message_id = messages.json()["messages"][0]["id"]
+        delivered = self.client.post(f"/api/npcs/messages/{message_id}/delivered")
+        plan = self.client.get("/api/npcs/lina/plan")
+
+        self.assertEqual(tick.status_code, 200)
+        self.assertEqual(tick.json()["result"]["outcome"], "proactive_message")
+        self.assertEqual(messages.status_code, 200)
+        self.assertEqual(messages.json()["messages"][0]["content"], llm_decision["proactive_message"])
+        self.assertEqual(messages.json()["messages"][0]["tick_log_id"], tick.json()["result"]["tick_log_id"])
+        self.assertEqual(delivered.status_code, 200)
+        self.assertTrue(delivered.json()["message"]["delivered"])
+        self.assertEqual(self.client.get("/api/npcs/messages?npc_id=lina").json()["messages"], [])
+        self.assertEqual(plan.status_code, 200)
+        self.assertEqual(plan.json()["plan"]["goal"], "test_player_trust")
+
+    def test_autonomous_trace_endpoint_returns_json_and_html_view(self) -> None:
+        event_response = self.client.post(
+            "/api/world/events",
+            json={
+                "event_type": "player_interested_in_ruins",
+                "content": "Player is interested in ruins access around Sable.",
+                "source_type": "player",
+                "visibility": "npc_only",
+                "payload": {"target_npc_ids": ["sable"]},
+            },
+        )
+        with patch(
+            "src.agent.autonomous_tick.call_openai_compatible_json",
+            return_value={
+                "belief_update": "The player may be useful for ruins leverage.",
+                "emotion": "charming",
+                "goal": "exploit_player_interest",
+                "plan_step": "redirect_to_false_clue",
+                "selected_action": {
+                    "action_type": "redirect_to_false_clue",
+                    "args": {"message_intent": "redirect", "redirect_target": "old patrol ledger"},
+                },
+                "proactive_message": "旧巡逻登记册也许比酒馆传闻更可靠。",
+                "memory_candidate": "Sable noticed the player's ruins interest.",
+                "reflection_summary": "Sable should misdirect without changing world facts.",
+            },
+        ):
+            tick = self.client.post(
+                "/api/npcs/sable/tick",
+                json={"trigger_event_id": event_response.json()["event"]["id"], "mode": "llm_constrained"},
+            )
+        tick_log_id = tick.json()["result"]["tick_log_id"]
+
+        trace_json = self.client.get(f"/api/trace/autonomous/{tick_log_id}")
+        trace_html = self.client.get(f"/api/trace/autonomous/{tick_log_id}?format=html")
+
+        self.assertEqual(trace_json.status_code, 200)
+        payload = trace_json.json()["trace"]
+        self.assertEqual(payload["npc_id"], "sable")
+        self.assertEqual(payload["llm_decision"]["goal"], "exploit_player_interest")
+        self.assertTrue(payload["available_actions"])
+        self.assertIn("observation", payload)
+        self.assertIn("timeline", payload["observation"])
+        self.assertEqual(trace_html.status_code, 200)
+        self.assertIn("text/html", trace_html.headers["content-type"])
+        self.assertIn("exploit_player_interest", trace_html.text)
+
 
 if __name__ == "__main__":
     unittest.main()
