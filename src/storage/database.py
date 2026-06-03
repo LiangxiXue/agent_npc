@@ -1392,13 +1392,17 @@ def create_world_event(
 
 
 def record_world_event(content: str) -> dict[str, Any]:
-    return create_world_event(
+    event = create_world_event(
         event_type="legacy",
         content=content,
         source_type="legacy",
         visibility="public",
         payload={},
     )
+    from src.agent.event_visibility import dispatch_world_event_to_inbox
+
+    dispatch_world_event_to_inbox(event)
+    return event
 
 
 def get_world_event(event_id: int) -> dict[str, Any] | None:

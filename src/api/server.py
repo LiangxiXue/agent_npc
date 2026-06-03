@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 
 from src.agent.display_translation import TRANSLATION_CACHE_PATH, translate_debug_text
 from src.agent.embedding_client import get_embedding_settings
+from src.agent.event_visibility import dispatch_world_event_to_inbox
 from src.agent.lore_retrieval import ensure_lore_embeddings, retrieve_lore
 from src.agent.llm_client import get_provider_status
 from src.agent.memory_jobs import process_pending_memory_jobs
@@ -63,6 +64,16 @@ class MemoryJobRequest(BaseModel):
 class TranslationRequest(BaseModel):
     source: str = Field(default="player_ui")
     text: str = Field(min_length=1, max_length=4000)
+
+
+class WorldEventRequest(BaseModel):
+    event_type: str = Field(min_length=1, max_length=120)
+    content: str = Field(min_length=1, max_length=4000)
+    source_type: str = Field(min_length=1, max_length=80)
+    source_id: str | None = Field(default=None, max_length=120)
+    location_id: str | None = Field(default=None, max_length=120)
+    visibility: Literal["public", "location", "private", "npc_only"] = Field(default="public")
+    payload: dict[str, Any] = Field(default_factory=dict)
 
 
 app = FastAPI(title="Agent NPC Player API", version="0.1.0")
@@ -178,6 +189,47 @@ def process_memory_jobs(request: MemoryJobRequest) -> dict[str, Any]:
             for job in jobs
         ],
         "memory_jobs": database.get_memory_job_counts(),
+    }
+
+
+@app.post("/api/world/events")
+def create_world_event(request: WorldEventRequest) -> dict[str, Any]:
+    database.initialize_database()
+    event = database.create_world_event(
+        event_type=request.event_type,
+        content=request.content,
+        source_type=request.source_type,
+        source_id=request.source_id,
+        location_id=request.location_id,
+        visibility=request.visibility,
+        payload=request.payload,
+    )
+    inbox_items = dispatch_world_event_to_inbox(event)
+    return {
+        "event": event,
+        "inbox_items": inbox_items,
+    }
+
+
+@app.get("/api/npcs/{npc_id}/inbox")
+def npc_inbox(
+    npc_id: str,
+    include_seen: bool = Query(default=False),
+    limit: int = Query(default=20, ge=1, le=100),
+) -> dict[str, Any]:
+    selected_npc_id = ensure_npc_id(npc_id)
+    return {
+        "npc_id": selected_npc_id,
+        "items": database.get_npc_event_inbox(selected_npc_id, include_seen=include_seen, limit=limit),
+    }
+
+
+@app.get("/api/npcs/{npc_id}/runtime")
+def npc_runtime(npc_id: str) -> dict[str, Any]:
+    selected_npc_id = ensure_npc_id(npc_id)
+    return {
+        "npc_id": selected_npc_id,
+        "runtime": database.get_npc_runtime_state(selected_npc_id),
     }
 
 

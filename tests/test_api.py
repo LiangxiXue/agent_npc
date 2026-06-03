@@ -231,6 +231,35 @@ class PlayerApiTest(unittest.TestCase):
         self.assertEqual(trace.status_code, 200)
         self.assertIn("payload", trace.json())
 
+    def test_world_event_api_dispatches_inbox_without_running_npc_tick(self) -> None:
+        response = self.client.post(
+            "/api/world/events",
+            json={
+                "event_type": "player_asked_ruins_too_early",
+                "content": "Player asked about the ruins entrance before earning trust.",
+                "source_type": "player",
+                "source_id": "player",
+                "location_id": "tavern",
+                "visibility": "location",
+                "payload": {"target_npc_ids": ["lina"]},
+            },
+        )
+        lina_inbox = self.client.get("/api/npcs/lina/inbox")
+        ron_inbox = self.client.get("/api/npcs/ron/inbox")
+        runtime = self.client.get("/api/npcs/lina/runtime")
+
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(payload["event"]["event_type"], "player_asked_ruins_too_early")
+        self.assertEqual([item["npc_id"] for item in payload["inbox_items"]], ["lina"])
+        self.assertEqual(lina_inbox.status_code, 200)
+        self.assertEqual(lina_inbox.json()["items"][0]["event"]["content"], payload["event"]["content"])
+        self.assertEqual(ron_inbox.status_code, 200)
+        self.assertEqual(ron_inbox.json()["items"], [])
+        self.assertEqual(runtime.status_code, 200)
+        self.assertEqual(runtime.json()["runtime"]["lifecycle_status"], "active")
+        self.assertEqual(database.get_autonomous_tick_log(1), None)
+
 
 if __name__ == "__main__":
     unittest.main()

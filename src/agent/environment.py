@@ -6,6 +6,7 @@ from typing import Any
 
 from src.agent.action_validator import ActionValidator, infer_subject, proposed_effects_from_tools
 from src.agent.context import build_context_inputs
+from src.agent.event_visibility import get_visible_world_events
 from src.storage import database
 from src.tools import sqlite_tools
 
@@ -75,7 +76,7 @@ class NarrativeEnvironment:
             recent_context=context_inputs["recent_context"],
             retrieved_lore=context_inputs["retrieved_lore"],
             retrieved_memories=context_inputs["retrieved_memories"],
-            visible_world_events=database.get_world_events(limit=10),
+            visible_world_events=get_visible_world_events(npc_id, limit=10),
             memory_retrieval_mode=memory_retrieval_mode,
         )
 
