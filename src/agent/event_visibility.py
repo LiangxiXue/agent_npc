@@ -80,7 +80,10 @@ def get_visible_world_events(npc_id: str, limit: int = 10) -> list[dict[str, Any
 
 
 def get_npc_location(npc_id: str) -> str:
-    return NPC_HOME_LOCATIONS.get(npc_id, "unknown")
+    try:
+        return str(database.get_npc_location_state(npc_id)["location_id"])
+    except KeyError:
+        return NPC_HOME_LOCATIONS.get(npc_id, "unknown")
 
 
 def as_string_list(value: Any) -> list[str]:

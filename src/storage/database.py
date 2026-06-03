@@ -336,6 +336,56 @@ def ensure_schema_migrations(connection: sqlite3.Connection) -> None:
         )
         """
     )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS world_arc_state (
+            arc_id TEXT PRIMARY KEY,
+            phase TEXT NOT NULL,
+            tension INTEGER NOT NULL DEFAULT 0,
+            advantage TEXT NOT NULL DEFAULT 'none',
+            outcome TEXT NOT NULL DEFAULT '',
+            metadata_json TEXT NOT NULL DEFAULT '{}',
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS scene_objects (
+            object_id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            location_id TEXT NOT NULL,
+            description TEXT NOT NULL,
+            state_json TEXT NOT NULL DEFAULT '{}',
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS npc_locations (
+            npc_id TEXT PRIMARY KEY,
+            location_id TEXT NOT NULL,
+            activity TEXT NOT NULL DEFAULT '',
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (npc_id) REFERENCES npcs (npc_id)
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS npc_routines (
+            npc_id TEXT PRIMARY KEY,
+            routine_type TEXT NOT NULL,
+            location_id TEXT NOT NULL,
+            event_type TEXT NOT NULL,
+            event_content TEXT NOT NULL,
+            enabled INTEGER NOT NULL DEFAULT 1,
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (npc_id) REFERENCES npcs (npc_id)
+        )
+        """
+    )
 
 
 def reset_database(db_path: str | Path | None = None) -> None:
@@ -350,6 +400,10 @@ def reset_database(db_path: str | Path | None = None) -> None:
             DROP TABLE IF EXISTS npc_plans;
             DROP TABLE IF EXISTS npc_cooldowns;
             DROP TABLE IF EXISTS npc_runtime_state;
+            DROP TABLE IF EXISTS npc_routines;
+            DROP TABLE IF EXISTS npc_locations;
+            DROP TABLE IF EXISTS scene_objects;
+            DROP TABLE IF EXISTS world_arc_state;
             DROP TABLE IF EXISTS world_events;
             DROP TABLE IF EXISTS recent_interactions;
             DROP TABLE IF EXISTS lore_embeddings;
@@ -436,7 +490,86 @@ def seed_initial_data(connection: sqlite3.Connection) -> None:
         """,
         [("lina",), ("ron",), ("mira",), ("sable",)],
     )
+    seed_living_world_data(connection)
     seed_lore_documents(connection)
+
+
+def seed_living_world_data(connection: sqlite3.Connection) -> None:
+    connection.execute(
+        """
+        INSERT OR IGNORE INTO world_arc_state
+            (arc_id, phase, tension, advantage, outcome, metadata_json)
+        VALUES
+            (?, ?, ?, ?, ?, ?)
+        """,
+        ("ruins_chapter_1", "rumor", 0, "none", "", json_dumps({"title": "Ruins Chapter 1"})),
+    )
+    connection.executemany(
+        """
+        INSERT OR IGNORE INTO scene_objects
+            (object_id, name, location_id, description, state_json)
+        VALUES
+            (?, ?, ?, ?, ?)
+        """,
+        [
+            (
+                "tavern_back_alley",
+                "Tavern Back Alley",
+                "tavern",
+                "The narrow back alley behind Lina's tavern, rumored to connect to older foundations.",
+                json_dumps({"observed": False, "evidence": [], "last_player_action": ""}),
+            ),
+            (
+                "guard_ledger",
+                "Guard Ledger",
+                "guard_post",
+                "Ron's patrol ledger with badge and gate shift records.",
+                json_dumps({"observed": False, "evidence": [], "last_player_action": ""}),
+            ),
+            (
+                "mira_field_notes",
+                "Mira Field Notes",
+                "archive",
+                "Mira's research notes for inscriptions and sealed doors.",
+                json_dumps({"observed": False, "evidence": [], "last_player_action": ""}),
+            ),
+            (
+                "sable_rumor_stall",
+                "Sable Rumor Stall",
+                "market",
+                "Sable's market stall where relic rumors and misleading tips circulate.",
+                json_dumps({"observed": False, "evidence": [], "last_player_action": ""}),
+            ),
+        ],
+    )
+    connection.executemany(
+        """
+        INSERT OR IGNORE INTO npc_locations
+            (npc_id, location_id, activity)
+        VALUES
+            (?, ?, ?)
+        """,
+        [
+            ("lina", "tavern", "managing tavern ledgers"),
+            ("ron", "guard_post", "checking patrol records"),
+            ("mira", "archive", "cataloging ruins notes"),
+            ("sable", "market", "trading relic rumors"),
+        ],
+    )
+    connection.executemany(
+        """
+        INSERT OR IGNORE INTO npc_routines
+            (npc_id, routine_type, location_id, event_type, event_content, enabled)
+        VALUES
+            (?, ?, ?, ?, ?, 1)
+        """,
+        [
+            ("lina", "tavern_work", "tavern", "npc_routine_activity", "Lina checks tavern ledgers and watches back-alley traffic."),
+            ("ron", "patrol", "guard_post", "npc_routine_activity", "Ron reviews the guard ledger before the next patrol."),
+            ("mira", "research", "archive", "npc_routine_activity", "Mira compares field notes against old ruins markings."),
+            ("sable", "rumor_trade", "market", "npc_routine_activity", "Sable trades relic rumors at the market stall."),
+        ],
+    )
 
 
 def seed_lore_documents(connection: sqlite3.Connection) -> None:
@@ -591,6 +724,118 @@ def get_player_state() -> dict[str, Any]:
         "inventory": items,
         "unlocked_locations": locations,
     }
+
+
+def get_world_arc_state(arc_id: str = "ruins_chapter_1") -> dict[str, Any]:
+    with connect() as connection:
+        row = connection.execute("SELECT * FROM world_arc_state WHERE arc_id = ?", (arc_id,)).fetchone()
+    arc = row_to_dict(row)
+    if arc is None:
+        raise KeyError(f"World arc not found: {arc_id}")
+    arc["metadata"] = json_loads(arc.get("metadata_json"), {})
+    return arc
+
+
+def update_world_arc_state(
+    arc_id: str = "ruins_chapter_1",
+    phase: str | None = None,
+    tension: int | None = None,
+    advantage: str | None = None,
+    outcome: str | None = None,
+    metadata: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    current = get_world_arc_state(arc_id)
+    with connect() as connection:
+        connection.execute(
+            """
+            UPDATE world_arc_state
+            SET
+                phase = ?,
+                tension = ?,
+                advantage = ?,
+                outcome = ?,
+                metadata_json = ?,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE arc_id = ?
+            """,
+            (
+                phase if phase is not None else current["phase"],
+                int(tension if tension is not None else current["tension"]),
+                advantage if advantage is not None else current["advantage"],
+                outcome if outcome is not None else current["outcome"],
+                json_dumps(metadata if metadata is not None else current["metadata"]),
+                arc_id,
+            ),
+        )
+    return get_world_arc_state(arc_id)
+
+
+def get_scene_object(object_id: str) -> dict[str, Any]:
+    with connect() as connection:
+        row = connection.execute("SELECT * FROM scene_objects WHERE object_id = ?", (object_id,)).fetchone()
+    scene_object = parse_scene_object(row)
+    if scene_object is None:
+        raise KeyError(f"Scene object not found: {object_id}")
+    return scene_object
+
+
+def list_scene_objects() -> list[dict[str, Any]]:
+    with connect() as connection:
+        rows = connection.execute("SELECT * FROM scene_objects ORDER BY object_id").fetchall()
+    return [item for row in rows if (item := parse_scene_object(row)) is not None]
+
+
+def update_scene_object_state(object_id: str, state: dict[str, Any]) -> dict[str, Any]:
+    get_scene_object(object_id)
+    with connect() as connection:
+        connection.execute(
+            """
+            UPDATE scene_objects
+            SET state_json = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE object_id = ?
+            """,
+            (json_dumps(state), object_id),
+        )
+    return get_scene_object(object_id)
+
+
+def parse_scene_object(row: sqlite3.Row | None) -> dict[str, Any] | None:
+    scene_object = row_to_dict(row)
+    if scene_object is None:
+        return None
+    scene_object["state"] = json_loads(scene_object.get("state_json"), {})
+    return scene_object
+
+
+def get_npc_location_state(npc_id: str) -> dict[str, Any]:
+    with connect() as connection:
+        row = connection.execute("SELECT * FROM npc_locations WHERE npc_id = ?", (npc_id,)).fetchone()
+    location = row_to_dict(row)
+    if location is None:
+        raise KeyError(f"NPC location not found: {npc_id}")
+    return location
+
+
+def list_npc_locations() -> list[dict[str, Any]]:
+    with connect() as connection:
+        rows = connection.execute("SELECT * FROM npc_locations ORDER BY npc_id").fetchall()
+    return [dict(row) for row in rows]
+
+
+def list_npc_routines(enabled_only: bool = False) -> list[dict[str, Any]]:
+    where_clause = "WHERE enabled = 1" if enabled_only else ""
+    with connect() as connection:
+        rows = connection.execute(
+            f"""
+            SELECT * FROM npc_routines
+            {where_clause}
+            ORDER BY npc_id
+            """
+        ).fetchall()
+    routines = [dict(row) for row in rows]
+    for routine in routines:
+        routine["enabled"] = bool(routine["enabled"])
+    return routines
 
 
 def get_quest(quest_id: str = "lost_key") -> dict[str, Any]:

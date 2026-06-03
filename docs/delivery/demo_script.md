@@ -248,3 +248,44 @@ http://127.0.0.1:8000/api/trace/autonomous/{tick_log_id}?format=html
 - Sable 的 available actions 是 `mislead_player` / `redirect_to_false_clue` / `ask_leading_question` / `probe_player_secret`;
 - 每个 action 的 `forbidden_effects` 包含 `unlock_location`、`complete_quest`、`modify_other_npc_trust`、`grant_gate_access`、`rewrite_lore_fact`;
 - 如果 LLM 试图选 `unlock_location`，trace 会显示 `rejected_by_available_actions`，不会改世界事实。
+
+## 方案 E：遗迹主线活世界 Demo
+
+目标：展示同一条遗迹主线如何把玩家动作、世界事件、NPC 日常、主动 tick、LLM 受约束剧情导演和可变结局连起来。
+
+### 1. 运行 deterministic smoke
+
+```powershell
+python scripts/run_living_world_demo.py --mock
+```
+
+观察输出：
+
+- `player_actions` 显示玩家调查酒馆后巷、提交守卫记录、提交 Mira 田野笔记、在 Sable 摊位传播传闻、等待 NPC 日常推进；
+- `npc_ticks` 显示 Lina、Ron、Mira、Sable 各自选择不同 action；
+- `final_arc.arc_outcome` 在 `guardian_advantage`、`research_advantage`、`sable_advantage`、`chaotic_lockdown` 之一；
+- `proactive_messages` 展示 NPC 主动消息；
+- `player_state.unlocked_locations` 不应包含 `underground_ruins_entrance`，除非未来显式设计允许解锁。
+
+### 2. 讲解链路
+
+```text
+player action
+-> scene object state
+-> world event
+-> npc_event_inbox
+-> autonomous tick
+-> available_actions
+-> constrained LLM decision
+-> environment validation
+-> arc director
+-> proactive message / trace
+```
+
+### 3. 展示重点
+
+- 程序拥有事实和状态：场景对象、任务、地点、主线阶段由数据库和校验器控制；
+- LLM 拥有受约束自由度：它可以选择 NPC 策略和结局倾向，但不能直接解锁地点或完成任务；
+- Sable 可以制造 `sable_advantage` 倾向，但仍不能调用 `unlock_location`；
+- Ron 可以升级风险或巡逻，但不会凭空完成其他 NPC 的任务；
+- Mira 可以推动 `research_advantage`，但必须基于具体观察和笔记。

@@ -215,6 +215,44 @@ CREATE TABLE IF NOT EXISTS npc_runtime_state (
     FOREIGN KEY (npc_id) REFERENCES npcs (npc_id)
 );
 
+CREATE TABLE IF NOT EXISTS world_arc_state (
+    arc_id TEXT PRIMARY KEY,
+    phase TEXT NOT NULL,
+    tension INTEGER NOT NULL DEFAULT 0,
+    advantage TEXT NOT NULL DEFAULT 'none',
+    outcome TEXT NOT NULL DEFAULT '',
+    metadata_json TEXT NOT NULL DEFAULT '{}',
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS scene_objects (
+    object_id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    location_id TEXT NOT NULL,
+    description TEXT NOT NULL,
+    state_json TEXT NOT NULL DEFAULT '{}',
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS npc_locations (
+    npc_id TEXT PRIMARY KEY,
+    location_id TEXT NOT NULL,
+    activity TEXT NOT NULL DEFAULT '',
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (npc_id) REFERENCES npcs (npc_id)
+);
+
+CREATE TABLE IF NOT EXISTS npc_routines (
+    npc_id TEXT PRIMARY KEY,
+    routine_type TEXT NOT NULL,
+    location_id TEXT NOT NULL,
+    event_type TEXT NOT NULL,
+    event_content TEXT NOT NULL,
+    enabled INTEGER NOT NULL DEFAULT 1,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (npc_id) REFERENCES npcs (npc_id)
+);
+
 CREATE TABLE IF NOT EXISTS interaction_logs (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     npc_id TEXT NOT NULL,

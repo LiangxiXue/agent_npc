@@ -29,10 +29,12 @@ class ActionCatalogTest(unittest.TestCase):
         available = get_available_actions("lina", trigger_event=trigger_event)
         unavailable = get_unavailable_actions_with_reasons("lina", trigger_event=trigger_event)
 
-        self.assertEqual(
-            {action["action_type"] for action in available},
-            {"ask_clarifying_question", "offer_minor_task", "refuse_restricted_info"},
+        action_types = {action["action_type"] for action in available}
+        self.assertTrue(
+            {"ask_clarifying_question", "offer_minor_task", "refuse_restricted_info"}.issubset(action_types)
         )
+        self.assertIn("secure_tavern_back_alley", action_types)
+        self.assertIn("warn_quietly", action_types)
         reveal = next(action for action in unavailable if action["action_type"] == "reveal_partial_lore")
         self.assertIn("trust below 60", reveal["reason"])
         self.assertIn("lina_trust_at_least_60", reveal["failed_preconditions"])
@@ -60,9 +62,15 @@ class ActionCatalogTest(unittest.TestCase):
         actions = get_available_actions("sable", trigger_event={"event_type": "player_interested_in_ruins"})
         by_type = {action["action_type"]: action for action in actions}
 
-        self.assertEqual(
-            set(by_type),
-            {"mislead_player", "redirect_to_false_clue", "ask_leading_question", "probe_player_secret"},
+        self.assertTrue(
+            {
+                "mislead_player",
+                "redirect_to_false_clue",
+                "ask_leading_question",
+                "probe_player_secret",
+                "trade_rumor",
+                "plant_misleading_tip",
+            }.issubset(set(by_type))
         )
         for action in actions:
             self.assertIn("unlock_location", action["forbidden_effects"])

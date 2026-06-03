@@ -9,6 +9,7 @@ from src.agent.action_catalog import (
     get_unavailable_actions_with_reasons,
     serialize_actions_for_llm_prompt,
 )
+from src.agent.arc_director import run_arc_director
 from src.agent.environment import NarrativeEnvironment
 from src.agent.llm_client import call_openai_compatible_json
 from src.storage import database
@@ -82,6 +83,8 @@ def run_autonomous_tick(
         npc_id=npc_id,
         mode=memory_retrieval_mode,
     )
+    scene_objects = database.list_scene_objects()
+    npc_location = database.get_npc_location_state(npc_id)
     available_actions = get_available_actions(npc_id, trigger_event=trigger_event, observation=observation)
     unavailable_actions = get_unavailable_actions_with_reasons(
         npc_id,
@@ -168,11 +171,16 @@ def run_autonomous_tick(
         set_action_cooldown(npc_id, trigger_event, proposed_action)
     outcome = determine_outcome(validation, proactive_message, memory_candidate)
     timeline.append(timeline_event("tick_finished", {"outcome": outcome}))
+    arc_director = run_arc_director(use_llm=False)
     observation_payload = {
         "npc_id": observation.npc_id,
         "trigger_event": trigger_event,
         "visible_events": observation.visible_world_events,
         "quest_state": observation.quest_state,
+        "arc_state": database.get_world_arc_state("ruins_chapter_1"),
+        "scene_objects": scene_objects,
+        "npc_location": npc_location,
+        "arc_director": arc_director,
         "timeline": timeline,
     }
     tick_log = database.log_autonomous_tick(
@@ -295,6 +303,9 @@ def call_autonomous_llm(
         "quest_state": observation.quest_state,
         "trigger_event": trigger_event,
         "visible_events": observation.visible_world_events,
+        "arc_state": database.get_world_arc_state("ruins_chapter_1"),
+        "scene_objects": database.list_scene_objects(),
+        "npc_location": database.get_npc_location_state(npc_id),
         "retrieved_memories": retrieved_memories,
         "active_plan": database.get_npc_plan(npc_id) or {},
         "available_actions": serialize_actions_for_llm_prompt(available_actions),
@@ -424,13 +435,34 @@ def decision_from_selected_action(selected_action: dict[str, Any], llm_decision:
     intent = "general_conversation"
     social_intent = "cooperate"
     tools: list[dict[str, Any]] = []
-    if action_type in {"offer_minor_task", "ask_clarifying_question", "refuse_restricted_info", "reveal_partial_lore"}:
+    if action_type in {
+        "offer_minor_task",
+        "ask_clarifying_question",
+        "refuse_restricted_info",
+        "reveal_partial_lore",
+        "secure_tavern_back_alley",
+        "warn_quietly",
+    }:
         intent = "withhold_ruins_entrance"
         social_intent = "probe" if action_type != "refuse_restricted_info" else "conceal"
         if action_type == "offer_minor_task":
             intent = "start_lost_key_quest"
             tools = [{"name": "update_quest_status", "args": {"quest_id": "lost_key", "status": "in_progress"}}]
-    elif action_type in {"mislead_player", "redirect_to_false_clue", "ask_leading_question", "probe_player_secret"}:
+        elif action_type == "secure_tavern_back_alley":
+            tools = [
+                {
+                    "name": "record_world_event",
+                    "args": {"content": "Lina quietly secured the tavern back alley after ruins attention."},
+                }
+            ]
+    elif action_type in {
+        "mislead_player",
+        "redirect_to_false_clue",
+        "ask_leading_question",
+        "probe_player_secret",
+        "trade_rumor",
+        "plant_misleading_tip",
+    }:
         intent = "redirect_ruins_inquiry"
         social_intent = "deceive"
         tools = [
@@ -439,12 +471,30 @@ def decision_from_selected_action(selected_action: dict[str, Any], llm_decision:
                 "args": {"content": f"Sable pursued a deceptive autonomous action: {action_type}."},
             }
         ]
-    elif action_type in {"verify_badge", "block_gate_access", "grant_conditional_access", "warn_player", "request_evidence"}:
+    elif action_type in {
+        "verify_badge",
+        "block_gate_access",
+        "grant_conditional_access",
+        "warn_player",
+        "request_evidence",
+        "patrol_sensitive_route",
+        "escalate_lockdown",
+    }:
         intent = "probe_for_evidence"
         social_intent = "probe"
         if action_type == "grant_conditional_access":
             intent = "start_gate_badge_quest"
             tools = [{"name": "update_quest_status", "args": {"quest_id": "gate_badge", "status": "in_progress"}}]
+        elif action_type in {"patrol_sensitive_route", "escalate_lockdown"}:
+            tools = [
+                {
+                    "name": "record_world_event",
+                    "args": {"content": f"Ron took a procedural safety action: {action_type}."},
+                }
+            ]
+    elif action_type in {"request_field_notes", "preserve_research_record", "inspect_clue", "connect_evidence", "archive_memory", "suggest_next_investigation"}:
+        intent = "start_ancient_notes_quest"
+        social_intent = "cooperate"
     return {
         "intent": intent,
         "reasoning": str(llm_decision.get("reflection_summary") or llm_decision.get("belief_update") or action_type),

@@ -16,6 +16,7 @@ from src.agent.event_visibility import dispatch_world_event_to_inbox
 from src.agent.lore_retrieval import ensure_lore_embeddings, retrieve_lore
 from src.agent.llm_client import get_provider_status
 from src.agent.memory_jobs import process_pending_memory_jobs
+from src.agent.player_actions import run_player_action
 from src.agent.semantic_retrieval import ensure_embeddings_for_memories
 from src.agent.trace_export import build_trace_export_payload, write_trace_export
 from src.agent.autonomous_tick import run_autonomous_tick
@@ -82,6 +83,13 @@ class WorldEventRequest(BaseModel):
 class AutonomousTickRequest(BaseModel):
     trigger_event_id: int | None = Field(default=None)
     mode: Literal["llm_constrained", "deterministic_fallback"] = Field(default="llm_constrained")
+    retrieval_mode: RetrievalMode = Field(default="hybrid")
+
+
+class PlayerActionRequest(BaseModel):
+    action_type: Literal["investigate_scene", "submit_evidence", "share_rumor", "wait"]
+    target_id: str = Field(default="", max_length=120)
+    content: str = Field(default="", max_length=4000)
     retrieval_mode: RetrievalMode = Field(default="hybrid")
 
 
@@ -220,6 +228,31 @@ def create_world_event(request: WorldEventRequest) -> dict[str, Any]:
     }
 
 
+@app.post("/api/player/actions")
+def player_action(request: PlayerActionRequest) -> dict[str, Any]:
+    database.initialize_database()
+    try:
+        result = run_player_action(
+            action_type=request.action_type,
+            target_id=request.target_id,
+            content=request.content,
+        )
+    except KeyError as exc:
+        raise HTTPException(status_code=400, detail=f"Unknown scene object: {request.target_id}") from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    action_result = result["action_result"]
+    if not isinstance(action_result, dict):
+        action_result = asdict(action_result)
+    return {
+        "action_result": action_result,
+        "created_events": result["created_events"],
+        "inbox_items": result["inbox_items"],
+        "arc_state": result["arc_state"],
+        "state": build_client_state("lina", limit=10),
+    }
+
+
 @app.get("/api/npcs/{npc_id}/inbox")
 def npc_inbox(
     npc_id: str,
@@ -338,6 +371,10 @@ def build_client_state(npc_id: str, limit: int = 10) -> dict[str, Any]:
             log for log in logs if log["npc_id"] == npc_id
         ],
         "world_events": database.get_world_events(limit=12),
+        "world_arc": database.get_world_arc_state("ruins_chapter_1"),
+        "scene_objects": database.list_scene_objects(),
+        "npc_locations": database.list_npc_locations(),
+        "npc_routines": database.list_npc_routines(),
         "runtime": {
             "llm": get_provider_status(),
             "embedding": get_embedding_settings(),
