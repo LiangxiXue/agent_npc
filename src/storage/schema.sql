@@ -123,7 +123,96 @@ CREATE TABLE IF NOT EXISTS recent_interactions (
 CREATE TABLE IF NOT EXISTS world_events (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     content TEXT NOT NULL,
+    event_type TEXT NOT NULL DEFAULT 'legacy',
+    source_type TEXT NOT NULL DEFAULT 'legacy',
+    source_id TEXT,
+    location_id TEXT,
+    visibility TEXT NOT NULL DEFAULT 'public',
+    payload_json TEXT NOT NULL DEFAULT '{}',
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS npc_event_inbox (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    npc_id TEXT NOT NULL,
+    event_id INTEGER NOT NULL,
+    seen INTEGER NOT NULL DEFAULT 0,
+    relevance_score REAL NOT NULL DEFAULT 0.0,
+    reason TEXT NOT NULL DEFAULT '',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (npc_id) REFERENCES npcs (npc_id),
+    FOREIGN KEY (event_id) REFERENCES world_events (id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS autonomous_tick_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    npc_id TEXT NOT NULL,
+    trigger_event_id INTEGER,
+    mode TEXT NOT NULL,
+    observation_json TEXT NOT NULL DEFAULT '{}',
+    retrieved_memories_json TEXT NOT NULL DEFAULT '[]',
+    available_actions_json TEXT NOT NULL DEFAULT '[]',
+    unavailable_actions_json TEXT NOT NULL DEFAULT '[]',
+    llm_decision_json TEXT NOT NULL DEFAULT '{}',
+    proposed_action_json TEXT NOT NULL DEFAULT '{}',
+    validation_json TEXT NOT NULL DEFAULT '{}',
+    action_result_json TEXT NOT NULL DEFAULT '{}',
+    plan_update_json TEXT NOT NULL DEFAULT '{}',
+    memory_candidate_json TEXT NOT NULL DEFAULT '{}',
+    reflection_json TEXT NOT NULL DEFAULT '{}',
+    proactive_message_id INTEGER,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (npc_id) REFERENCES npcs (npc_id),
+    FOREIGN KEY (trigger_event_id) REFERENCES world_events (id)
+);
+
+CREATE TABLE IF NOT EXISTS proactive_messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    npc_id TEXT NOT NULL,
+    content TEXT NOT NULL,
+    trigger_event_id INTEGER,
+    tick_log_id INTEGER,
+    priority INTEGER NOT NULL DEFAULT 5,
+    delivered INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expires_at TEXT,
+    FOREIGN KEY (npc_id) REFERENCES npcs (npc_id),
+    FOREIGN KEY (trigger_event_id) REFERENCES world_events (id),
+    FOREIGN KEY (tick_log_id) REFERENCES autonomous_tick_logs (id)
+);
+
+CREATE TABLE IF NOT EXISTS npc_plans (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    npc_id TEXT NOT NULL UNIQUE,
+    goal TEXT NOT NULL,
+    steps_json TEXT NOT NULL DEFAULT '[]',
+    current_step TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'active',
+    blocker TEXT NOT NULL DEFAULT '',
+    source_event_id INTEGER,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (npc_id) REFERENCES npcs (npc_id),
+    FOREIGN KEY (source_event_id) REFERENCES world_events (id)
+);
+
+CREATE TABLE IF NOT EXISTS npc_cooldowns (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    npc_id TEXT NOT NULL,
+    cooldown_key TEXT NOT NULL,
+    until_turn_or_timestamp TEXT NOT NULL,
+    reason TEXT NOT NULL DEFAULT '',
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (npc_id, cooldown_key),
+    FOREIGN KEY (npc_id) REFERENCES npcs (npc_id)
+);
+
+CREATE TABLE IF NOT EXISTS npc_runtime_state (
+    npc_id TEXT PRIMARY KEY,
+    lifecycle_status TEXT NOT NULL DEFAULT 'active',
+    tick_enabled INTEGER NOT NULL DEFAULT 1,
+    last_tick_at TEXT,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (npc_id) REFERENCES npcs (npc_id)
 );
 
 CREATE TABLE IF NOT EXISTS interaction_logs (

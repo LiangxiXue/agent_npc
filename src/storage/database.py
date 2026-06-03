@@ -219,6 +219,124 @@ def ensure_schema_migrations(connection: sqlite3.Connection) -> None:
         if column not in log_columns:
             connection.execute(statement)
 
+    world_event_columns = {
+        row["name"]
+        for row in connection.execute("PRAGMA table_info(world_events)").fetchall()
+    }
+    world_event_migrations = {
+        "event_type": "ALTER TABLE world_events ADD COLUMN event_type TEXT NOT NULL DEFAULT 'legacy'",
+        "source_type": "ALTER TABLE world_events ADD COLUMN source_type TEXT NOT NULL DEFAULT 'legacy'",
+        "source_id": "ALTER TABLE world_events ADD COLUMN source_id TEXT",
+        "location_id": "ALTER TABLE world_events ADD COLUMN location_id TEXT",
+        "visibility": "ALTER TABLE world_events ADD COLUMN visibility TEXT NOT NULL DEFAULT 'public'",
+        "payload_json": "ALTER TABLE world_events ADD COLUMN payload_json TEXT NOT NULL DEFAULT '{}'",
+    }
+    for column, statement in world_event_migrations.items():
+        if column not in world_event_columns:
+            connection.execute(statement)
+
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS npc_event_inbox (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            npc_id TEXT NOT NULL,
+            event_id INTEGER NOT NULL,
+            seen INTEGER NOT NULL DEFAULT 0,
+            relevance_score REAL NOT NULL DEFAULT 0.0,
+            reason TEXT NOT NULL DEFAULT '',
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (npc_id) REFERENCES npcs (npc_id),
+            FOREIGN KEY (event_id) REFERENCES world_events (id) ON DELETE CASCADE
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS autonomous_tick_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            npc_id TEXT NOT NULL,
+            trigger_event_id INTEGER,
+            mode TEXT NOT NULL,
+            observation_json TEXT NOT NULL DEFAULT '{}',
+            retrieved_memories_json TEXT NOT NULL DEFAULT '[]',
+            available_actions_json TEXT NOT NULL DEFAULT '[]',
+            unavailable_actions_json TEXT NOT NULL DEFAULT '[]',
+            llm_decision_json TEXT NOT NULL DEFAULT '{}',
+            proposed_action_json TEXT NOT NULL DEFAULT '{}',
+            validation_json TEXT NOT NULL DEFAULT '{}',
+            action_result_json TEXT NOT NULL DEFAULT '{}',
+            plan_update_json TEXT NOT NULL DEFAULT '{}',
+            memory_candidate_json TEXT NOT NULL DEFAULT '{}',
+            reflection_json TEXT NOT NULL DEFAULT '{}',
+            proactive_message_id INTEGER,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (npc_id) REFERENCES npcs (npc_id),
+            FOREIGN KEY (trigger_event_id) REFERENCES world_events (id)
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS proactive_messages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            npc_id TEXT NOT NULL,
+            content TEXT NOT NULL,
+            trigger_event_id INTEGER,
+            tick_log_id INTEGER,
+            priority INTEGER NOT NULL DEFAULT 5,
+            delivered INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            expires_at TEXT,
+            FOREIGN KEY (npc_id) REFERENCES npcs (npc_id),
+            FOREIGN KEY (trigger_event_id) REFERENCES world_events (id),
+            FOREIGN KEY (tick_log_id) REFERENCES autonomous_tick_logs (id)
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS npc_plans (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            npc_id TEXT NOT NULL UNIQUE,
+            goal TEXT NOT NULL,
+            steps_json TEXT NOT NULL DEFAULT '[]',
+            current_step TEXT NOT NULL DEFAULT '',
+            status TEXT NOT NULL DEFAULT 'active',
+            blocker TEXT NOT NULL DEFAULT '',
+            source_event_id INTEGER,
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (npc_id) REFERENCES npcs (npc_id),
+            FOREIGN KEY (source_event_id) REFERENCES world_events (id)
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS npc_cooldowns (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            npc_id TEXT NOT NULL,
+            cooldown_key TEXT NOT NULL,
+            until_turn_or_timestamp TEXT NOT NULL,
+            reason TEXT NOT NULL DEFAULT '',
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE (npc_id, cooldown_key),
+            FOREIGN KEY (npc_id) REFERENCES npcs (npc_id)
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS npc_runtime_state (
+            npc_id TEXT PRIMARY KEY,
+            lifecycle_status TEXT NOT NULL DEFAULT 'active',
+            tick_enabled INTEGER NOT NULL DEFAULT 1,
+            last_tick_at TEXT,
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (npc_id) REFERENCES npcs (npc_id)
+        )
+        """
+    )
+
 
 def reset_database(db_path: str | Path | None = None) -> None:
     """Clear all demo tables and recreate the MVP seed data."""
@@ -226,6 +344,12 @@ def reset_database(db_path: str | Path | None = None) -> None:
         connection.executescript(
             """
             DROP TABLE IF EXISTS interaction_logs;
+            DROP TABLE IF EXISTS proactive_messages;
+            DROP TABLE IF EXISTS autonomous_tick_logs;
+            DROP TABLE IF EXISTS npc_event_inbox;
+            DROP TABLE IF EXISTS npc_plans;
+            DROP TABLE IF EXISTS npc_cooldowns;
+            DROP TABLE IF EXISTS npc_runtime_state;
             DROP TABLE IF EXISTS world_events;
             DROP TABLE IF EXISTS recent_interactions;
             DROP TABLE IF EXISTS lore_embeddings;
@@ -302,6 +426,15 @@ def seed_initial_data(connection: sqlite3.Connection) -> None:
             ("research_truth", "mira"),
             ("exploit_ruins", "sable"),
         ],
+    )
+    connection.executemany(
+        """
+        INSERT OR IGNORE INTO npc_runtime_state
+            (npc_id, lifecycle_status, tick_enabled)
+        VALUES
+            (?, 'active', 1)
+        """,
+        [("lina",), ("ron",), ("mira",), ("sable",)],
     )
     seed_lore_documents(connection)
 
@@ -389,6 +522,34 @@ def row_to_dict(row: sqlite3.Row | None) -> dict[str, Any] | None:
     if row is None:
         return None
     return dict(row)
+
+
+def json_dumps(value: Any) -> str:
+    return json.dumps(value, ensure_ascii=False)
+
+
+def json_loads(value: str | None, fallback: Any) -> Any:
+    if value is None or value == "":
+        return fallback
+    try:
+        return json.loads(value)
+    except json.JSONDecodeError:
+        return fallback
+
+
+def serialize_bool(value: bool) -> int:
+    return 1 if value else 0
+
+
+def parse_world_event(row: sqlite3.Row | dict[str, Any] | None) -> dict[str, Any] | None:
+    event = row_to_dict(row) if isinstance(row, sqlite3.Row) else dict(row) if row else None
+    if event is None:
+        return None
+    event["event_type"] = event.get("event_type") or "legacy"
+    event["source_type"] = event.get("source_type") or "legacy"
+    event["visibility"] = event.get("visibility") or "public"
+    event["payload"] = json_loads(event.get("payload_json"), {})
+    return event
 
 
 def get_npc(npc_id: str = "lina") -> dict[str, Any]:
@@ -1194,11 +1355,56 @@ def unlock_location(location: str) -> dict[str, Any]:
     return {"field": "unlocked_locations", "before": before, "after": after}
 
 
-def record_world_event(content: str) -> dict[str, Any]:
+def create_world_event(
+    event_type: str,
+    content: str,
+    source_type: str,
+    source_id: str | None = None,
+    location_id: str | None = None,
+    visibility: str = "public",
+    payload: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    if visibility not in {"public", "location", "private", "npc_only"}:
+        raise ValueError(f"Unsupported world event visibility: {visibility}")
     with connect() as connection:
-        cursor = connection.execute("INSERT INTO world_events (content) VALUES (?)", (content,))
+        cursor = connection.execute(
+            """
+            INSERT INTO world_events
+                (event_type, content, source_type, source_id, location_id, visibility, payload_json)
+            VALUES
+                (?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                event_type,
+                content,
+                source_type,
+                source_id,
+                location_id,
+                visibility,
+                json_dumps(payload or {}),
+            ),
+        )
         event_id = cursor.lastrowid
-    return {"id": event_id, "content": content}
+    event = get_world_event(int(event_id))
+    if event is None:
+        raise RuntimeError(f"World event was inserted but cannot be loaded: {event_id}")
+    return event
+
+
+def record_world_event(content: str) -> dict[str, Any]:
+    return create_world_event(
+        event_type="legacy",
+        content=content,
+        source_type="legacy",
+        visibility="public",
+        payload={},
+    )
+
+
+def get_world_event(event_id: int) -> dict[str, Any] | None:
+    with connect() as connection:
+        row = connection.execute("SELECT * FROM world_events WHERE id = ?", (event_id,)).fetchone()
+    return parse_world_event(row)
 
 
 def get_world_events(limit: int = 10) -> list[dict[str, Any]]:
@@ -1211,7 +1417,350 @@ def get_world_events(limit: int = 10) -> list[dict[str, Any]]:
             """,
             (limit,),
         ).fetchall()
-    return [dict(row) for row in rows]
+    return [event for row in rows if (event := parse_world_event(row)) is not None]
+
+
+def add_npc_event_inbox_item(
+    npc_id: str,
+    event_id: int,
+    relevance_score: float,
+    reason: str,
+) -> dict[str, Any]:
+    with connect() as connection:
+        cursor = connection.execute(
+            """
+            INSERT INTO npc_event_inbox
+                (npc_id, event_id, relevance_score, reason)
+            VALUES
+                (?, ?, ?, ?)
+            """,
+            (npc_id, event_id, relevance_score, reason),
+        )
+        inbox_id = int(cursor.lastrowid)
+    item = get_npc_event_inbox_item(inbox_id)
+    if item is None:
+        raise RuntimeError(f"Inbox item was inserted but cannot be loaded: {inbox_id}")
+    return item
+
+
+def get_npc_event_inbox_item(inbox_id: int) -> dict[str, Any] | None:
+    with connect() as connection:
+        row = connection.execute("SELECT * FROM npc_event_inbox WHERE id = ?", (inbox_id,)).fetchone()
+    return parse_inbox_item(row)
+
+
+def get_npc_event_inbox(
+    npc_id: str,
+    include_seen: bool = False,
+    limit: int = 20,
+) -> list[dict[str, Any]]:
+    seen_clause = "" if include_seen else "AND seen = 0"
+    with connect() as connection:
+        rows = connection.execute(
+            f"""
+            SELECT * FROM npc_event_inbox
+            WHERE npc_id = ?
+            {seen_clause}
+            ORDER BY seen ASC, relevance_score DESC, id ASC
+            LIMIT ?
+            """,
+            (npc_id, limit),
+        ).fetchall()
+    return [item for row in rows if (item := parse_inbox_item(row)) is not None]
+
+
+def parse_inbox_item(row: sqlite3.Row | None) -> dict[str, Any] | None:
+    item = row_to_dict(row)
+    if item is None:
+        return None
+    item["seen"] = bool(item["seen"])
+    item["event"] = get_world_event(int(item["event_id"]))
+    return item
+
+
+def mark_npc_event_seen(inbox_id: int) -> dict[str, Any] | None:
+    with connect() as connection:
+        connection.execute("UPDATE npc_event_inbox SET seen = 1 WHERE id = ?", (inbox_id,))
+    return get_npc_event_inbox_item(inbox_id)
+
+
+def create_proactive_message(
+    npc_id: str,
+    content: str,
+    trigger_event_id: int | None,
+    tick_log_id: int | None,
+    priority: int = 5,
+    expires_at: str | None = None,
+) -> dict[str, Any]:
+    with connect() as connection:
+        cursor = connection.execute(
+            """
+            INSERT INTO proactive_messages
+                (npc_id, content, trigger_event_id, tick_log_id, priority, expires_at)
+            VALUES
+                (?, ?, ?, ?, ?, ?)
+            """,
+            (npc_id, content, trigger_event_id, tick_log_id, priority, expires_at),
+        )
+        message_id = int(cursor.lastrowid)
+    message = get_proactive_message(message_id)
+    if message is None:
+        raise RuntimeError(f"Proactive message was inserted but cannot be loaded: {message_id}")
+    return message
+
+
+def get_proactive_message(message_id: int) -> dict[str, Any] | None:
+    with connect() as connection:
+        row = connection.execute("SELECT * FROM proactive_messages WHERE id = ?", (message_id,)).fetchone()
+    return parse_proactive_message(row)
+
+
+def get_proactive_messages(
+    npc_id: str | None = None,
+    delivered: bool | None = False,
+    limit: int = 20,
+) -> list[dict[str, Any]]:
+    clauses = []
+    params: list[Any] = []
+    if npc_id is not None:
+        clauses.append("npc_id = ?")
+        params.append(npc_id)
+    if delivered is not None:
+        clauses.append("delivered = ?")
+        params.append(serialize_bool(delivered))
+    where_clause = f"WHERE {' AND '.join(clauses)}" if clauses else ""
+    params.append(limit)
+    with connect() as connection:
+        rows = connection.execute(
+            f"""
+            SELECT * FROM proactive_messages
+            {where_clause}
+            ORDER BY priority DESC, id ASC
+            LIMIT ?
+            """,
+            tuple(params),
+        ).fetchall()
+    return [message for row in rows if (message := parse_proactive_message(row)) is not None]
+
+
+def parse_proactive_message(row: sqlite3.Row | None) -> dict[str, Any] | None:
+    message = row_to_dict(row)
+    if message is None:
+        return None
+    message["delivered"] = bool(message["delivered"])
+    return message
+
+
+def mark_proactive_message_delivered(message_id: int) -> dict[str, Any] | None:
+    with connect() as connection:
+        connection.execute("UPDATE proactive_messages SET delivered = 1 WHERE id = ?", (message_id,))
+    return get_proactive_message(message_id)
+
+
+def upsert_npc_plan(
+    npc_id: str,
+    goal: str,
+    steps: list[dict[str, Any]],
+    current_step: str,
+    status: str,
+    blocker: str = "",
+    source_event_id: int | None = None,
+) -> dict[str, Any]:
+    if status not in {"active", "blocked", "completed", "abandoned"}:
+        raise ValueError(f"Unsupported NPC plan status: {status}")
+    with connect() as connection:
+        connection.execute(
+            """
+            INSERT INTO npc_plans
+                (npc_id, goal, steps_json, current_step, status, blocker, source_event_id, updated_at)
+            VALUES
+                (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+            ON CONFLICT(npc_id) DO UPDATE SET
+                goal = excluded.goal,
+                steps_json = excluded.steps_json,
+                current_step = excluded.current_step,
+                status = excluded.status,
+                blocker = excluded.blocker,
+                source_event_id = excluded.source_event_id,
+                updated_at = CURRENT_TIMESTAMP
+            """,
+            (npc_id, goal, json_dumps(steps), current_step, status, blocker, source_event_id),
+        )
+    plan = get_npc_plan(npc_id)
+    if plan is None:
+        raise RuntimeError(f"NPC plan was upserted but cannot be loaded: {npc_id}")
+    return plan
+
+
+def get_npc_plan(npc_id: str) -> dict[str, Any] | None:
+    with connect() as connection:
+        row = connection.execute("SELECT * FROM npc_plans WHERE npc_id = ?", (npc_id,)).fetchone()
+    plan = row_to_dict(row)
+    if plan is None:
+        return None
+    plan["steps"] = json_loads(plan.get("steps_json"), [])
+    return plan
+
+
+def set_npc_cooldown(
+    npc_id: str,
+    cooldown_key: str,
+    until_turn_or_timestamp: str,
+    reason: str,
+) -> dict[str, Any]:
+    with connect() as connection:
+        connection.execute(
+            """
+            INSERT INTO npc_cooldowns
+                (npc_id, cooldown_key, until_turn_or_timestamp, reason, updated_at)
+            VALUES
+                (?, ?, ?, ?, CURRENT_TIMESTAMP)
+            ON CONFLICT(npc_id, cooldown_key) DO UPDATE SET
+                until_turn_or_timestamp = excluded.until_turn_or_timestamp,
+                reason = excluded.reason,
+                updated_at = CURRENT_TIMESTAMP
+            """,
+            (npc_id, cooldown_key, until_turn_or_timestamp, reason),
+        )
+    cooldown = get_npc_cooldown(npc_id, cooldown_key)
+    if cooldown is None:
+        raise RuntimeError(f"NPC cooldown was upserted but cannot be loaded: {npc_id}:{cooldown_key}")
+    return cooldown
+
+
+def get_npc_cooldown(npc_id: str, cooldown_key: str) -> dict[str, Any] | None:
+    with connect() as connection:
+        row = connection.execute(
+            "SELECT * FROM npc_cooldowns WHERE npc_id = ? AND cooldown_key = ?",
+            (npc_id, cooldown_key),
+        ).fetchone()
+    return row_to_dict(row)
+
+
+def upsert_npc_runtime_state(
+    npc_id: str,
+    lifecycle_status: str = "active",
+    tick_enabled: bool = True,
+    last_tick_at: str | None = None,
+) -> dict[str, Any]:
+    if lifecycle_status not in {"active", "paused", "disabled"}:
+        raise ValueError(f"Unsupported NPC lifecycle status: {lifecycle_status}")
+    with connect() as connection:
+        connection.execute(
+            """
+            INSERT INTO npc_runtime_state
+                (npc_id, lifecycle_status, tick_enabled, last_tick_at, updated_at)
+            VALUES
+                (?, ?, ?, ?, CURRENT_TIMESTAMP)
+            ON CONFLICT(npc_id) DO UPDATE SET
+                lifecycle_status = excluded.lifecycle_status,
+                tick_enabled = excluded.tick_enabled,
+                last_tick_at = COALESCE(excluded.last_tick_at, npc_runtime_state.last_tick_at),
+                updated_at = CURRENT_TIMESTAMP
+            """,
+            (npc_id, lifecycle_status, serialize_bool(tick_enabled), last_tick_at),
+        )
+    return get_npc_runtime_state(npc_id)
+
+
+def get_npc_runtime_state(npc_id: str) -> dict[str, Any]:
+    with connect() as connection:
+        row = connection.execute("SELECT * FROM npc_runtime_state WHERE npc_id = ?", (npc_id,)).fetchone()
+    runtime = row_to_dict(row)
+    if runtime is None:
+        return upsert_npc_runtime_state(npc_id=npc_id)
+    runtime["tick_enabled"] = bool(runtime["tick_enabled"])
+    return runtime
+
+
+def log_autonomous_tick(
+    npc_id: str,
+    trigger_event_id: int | None,
+    mode: str,
+    observation: dict[str, Any],
+    retrieved_memories: list[dict[str, Any]],
+    available_actions: list[dict[str, Any]],
+    unavailable_actions: list[dict[str, Any]],
+    llm_decision: dict[str, Any],
+    proposed_action: dict[str, Any],
+    validation: dict[str, Any],
+    action_result: dict[str, Any],
+    plan_update: dict[str, Any],
+    memory_candidate: dict[str, Any],
+    reflection: dict[str, Any],
+    proactive_message_id: int | None,
+) -> dict[str, Any]:
+    with connect() as connection:
+        cursor = connection.execute(
+            """
+            INSERT INTO autonomous_tick_logs
+                (
+                    npc_id,
+                    trigger_event_id,
+                    mode,
+                    observation_json,
+                    retrieved_memories_json,
+                    available_actions_json,
+                    unavailable_actions_json,
+                    llm_decision_json,
+                    proposed_action_json,
+                    validation_json,
+                    action_result_json,
+                    plan_update_json,
+                    memory_candidate_json,
+                    reflection_json,
+                    proactive_message_id
+                )
+            VALUES
+                (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                npc_id,
+                trigger_event_id,
+                mode,
+                json_dumps(observation),
+                json_dumps(retrieved_memories),
+                json_dumps(available_actions),
+                json_dumps(unavailable_actions),
+                json_dumps(llm_decision),
+                json_dumps(proposed_action),
+                json_dumps(validation),
+                json_dumps(action_result),
+                json_dumps(plan_update),
+                json_dumps(memory_candidate),
+                json_dumps(reflection),
+                proactive_message_id,
+            ),
+        )
+        tick_log_id = int(cursor.lastrowid)
+    tick_log = get_autonomous_tick_log(tick_log_id)
+    if tick_log is None:
+        raise RuntimeError(f"Autonomous tick log was inserted but cannot be loaded: {tick_log_id}")
+    return tick_log
+
+
+def get_autonomous_tick_log(tick_log_id: int) -> dict[str, Any] | None:
+    with connect() as connection:
+        row = connection.execute("SELECT * FROM autonomous_tick_logs WHERE id = ?", (tick_log_id,)).fetchone()
+    log = row_to_dict(row)
+    if log is None:
+        return None
+    json_fields = {
+        "observation": ("observation_json", {}),
+        "retrieved_memories": ("retrieved_memories_json", []),
+        "available_actions": ("available_actions_json", []),
+        "unavailable_actions": ("unavailable_actions_json", []),
+        "llm_decision": ("llm_decision_json", {}),
+        "proposed_action": ("proposed_action_json", {}),
+        "validation": ("validation_json", {}),
+        "action_result": ("action_result_json", {}),
+        "plan_update": ("plan_update_json", {}),
+        "memory_candidate": ("memory_candidate_json", {}),
+        "reflection": ("reflection_json", {}),
+    }
+    for public_field, (raw_field, fallback) in json_fields.items():
+        log[public_field] = json_loads(log.get(raw_field), fallback)
+    return log
 
 
 def add_recent_interaction(
