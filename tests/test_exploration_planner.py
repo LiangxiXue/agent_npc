@@ -40,6 +40,7 @@ def test_repeated_mira_topic_without_new_evidence_prioritizes_guard_post() -> No
 
     context = build_exploration_context("traveler", observation, _actions())
 
+    assert context["traveler_id"] == "traveler"
     thread = context["conversation_threads"][0]
     assert thread["npc_id"] == "mira"
     assert thread["topic"] == "ruins"

@@ -24,6 +24,7 @@ def build_exploration_context(
     action_scores = _score_available_actions(available_actions, conversation_threads, leads, recent_events)
 
     return {
+        "traveler_id": traveler_id,
         "conversation_threads": conversation_threads,
         "leads": leads,
         "action_scores": action_scores,
