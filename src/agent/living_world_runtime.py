@@ -10,6 +10,7 @@ Implements the 4-phase round loop:
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from time import perf_counter
 from typing import Any, Protocol
 
 from src.agent.autonomous_tick import run_autonomous_tick
@@ -208,13 +209,20 @@ class LivingWorldScheduler:
 
     def run(self, rounds: int) -> dict[str, Any]:
         """Execute the full simulation for the given number of rounds."""
+        run_started = perf_counter()
         for round_num in range(1, rounds + 1):
             round_data = self._execute_round(round_num)
             self.round_log.append(round_data)
-        return self._build_final_result()
+        result = self._build_final_result()
+        result["timings"] = {"total_ms": _elapsed_ms(run_started)}
+        return result
 
     def _execute_round(self, round_num: int) -> dict[str, Any]:
+        round_started = perf_counter()
+        timings: dict[str, float] = {}
+
         # ═══ Phase A: AMBIENT ═══
+        ambient_started = perf_counter()
         ambient_events = []
         if self.npc_routines_every_round:
             for routine in database.list_npc_routines(enabled_only=True):
@@ -234,20 +242,28 @@ class LivingWorldScheduler:
                 )
                 ambient_events.append(event)
                 dispatch_world_event_to_inbox(event)
+        timings["ambient_routines_ms"] = _elapsed_ms(ambient_started)
 
         # ═══ Phase B: TRAVELER ═══
+        traveler_started = perf_counter()
         world_state = self._build_world_state(round_num, ambient_events)
         traveler_result = self.traveler.tick(world_state)
+        timings["traveler_tick_ms"] = _elapsed_ms(traveler_started)
 
         # ═══ Phase C: NPC ═══
+        npc_started = perf_counter()
         npc_results = self._execute_npc_phase(traveler_result)
+        timings["npc_ticks_ms"] = _elapsed_ms(npc_started)
 
         # ═══ Phase D: RESOLUTION ═══
+        arc_started = perf_counter()
         all_events = ambient_events + traveler_result.get("created_events", [])
         for nr in npc_results:
             all_events.extend(nr.get("created_events", []))
 
         arc_update = self.arc_director.tick(world_state, all_events, npc_results)
+        timings["arc_resolution_ms"] = _elapsed_ms(arc_started)
+        timings["total_ms"] = _elapsed_ms(round_started)
 
         return {
             "round_number": round_num,
@@ -255,6 +271,7 @@ class LivingWorldScheduler:
             "traveler_tick": traveler_result,
             "npc_ticks": npc_results,
             "arc_update": arc_update,
+            "timings": timings,
         }
 
     def _execute_npc_phase(self, traveler_result: dict[str, Any]) -> list[dict[str, Any]]:
@@ -356,6 +373,7 @@ def _traveler_tick_to_dict(result: TravelerTickResult) -> dict[str, Any]:
         "reflection": result.reflection,
         "deception_metadata": result.deception_metadata,
         "disclosure_metadata": result.disclosure_metadata,
+        "timings": result.timings,
         "tick_log_id": result.tick_log_id,
     }
 
@@ -410,3 +428,7 @@ def _extract_npc_events(npc_ticks: list[dict[str, Any]]) -> list[dict[str, Any]]
         if triggered:
             events.append({"payload": {"arc_signal": "chaos"}})
     return events
+
+
+def _elapsed_ms(started: float) -> float:
+    return round((perf_counter() - started) * 1000, 3)

@@ -1,6 +1,7 @@
 """Tests for Living World Runtime — Actor adapters and Scheduler."""
 
 import os
+import tempfile
 import unittest
 from pathlib import Path
 from typing import Any
@@ -21,6 +22,7 @@ from src.agent.living_world_runtime import (  # noqa: E402
     NpcActorAdapter,
     TravelerActor,
 )
+from src.agent.timeline_export import export_simulation_result  # noqa: E402
 from src.agent.traveler_profile import load_profile  # noqa: E402
 from src.storage import database  # noqa: E402
 
@@ -208,6 +210,14 @@ class SchedulerTest(unittest.TestCase):
             self.assertIn("round_number", rd)
             self.assertIn("traveler_tick", rd)
             self.assertIn("arc_update", rd)
+            self.assertIn("timings", rd)
+            self.assertIn("ambient_routines_ms", rd["timings"])
+            self.assertIn("traveler_tick_ms", rd["timings"])
+            self.assertIn("npc_ticks_ms", rd["timings"])
+            self.assertIn("arc_resolution_ms", rd["timings"])
+            self.assertIn("total_ms", rd["timings"])
+            self.assertIn("timings", rd["traveler_tick"])
+            self.assertIn("observe_ms", rd["traveler_tick"]["timings"])
 
     def test_scheduler_round_events_do_not_duplicate_traveler_events(self) -> None:
         profile = load_profile("truth_seeking_scholar")
@@ -226,3 +236,32 @@ class SchedulerTest(unittest.TestCase):
         round_two_recent_events = result["rounds"][1]["traveler_tick"]["observation"]["recent_events"]
         event_ids = [event["id"] for event in round_two_recent_events if "id" in event]
         self.assertEqual(len(event_ids), len(set(event_ids)))
+
+    def test_timeline_export_renders_round_and_traveler_timings(self) -> None:
+        profile = load_profile("truth_seeking_scholar")
+        traveler = TravelerActor("timed_export", profile, use_llm=False)
+        traveler.initialize()
+
+        scheduler = LivingWorldScheduler(
+            traveler=traveler,
+            npc_adapters={},
+            arc_director=ArcDirectorActor(),
+            max_npc_ticks_per_round=0,
+            npc_routines_every_round=False,
+        )
+
+        result = scheduler.run(rounds=1)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            _, md_path = export_simulation_result(
+                result=result,
+                profile=profile,
+                output_dir=tmpdir,
+                run_id="timed-export-test",
+            )
+            markdown = md_path.read_text(encoding="utf-8")
+
+        self.assertIn("**Timing**", markdown)
+        self.assertIn("Traveler internals", markdown)
+        self.assertIn("observe", markdown)
+        self.assertIn("trace log", markdown)

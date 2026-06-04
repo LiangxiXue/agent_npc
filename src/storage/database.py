@@ -443,12 +443,19 @@ def ensure_schema_migrations(connection: sqlite3.Connection) -> None:
             reflection_json TEXT NOT NULL DEFAULT '{}',
             deception_metadata_json TEXT NOT NULL DEFAULT '{}',
             disclosure_metadata_json TEXT NOT NULL DEFAULT '{}',
+            timings_json TEXT NOT NULL DEFAULT '{}',
             created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (traveler_id) REFERENCES traveler_state(traveler_id),
             FOREIGN KEY (trigger_event_id) REFERENCES world_events(id)
         )
         """
     )
+    traveler_tick_columns = {
+        row["name"]
+        for row in connection.execute("PRAGMA table_info(traveler_tick_logs)").fetchall()
+    }
+    if "timings_json" not in traveler_tick_columns:
+        connection.execute("ALTER TABLE traveler_tick_logs ADD COLUMN timings_json TEXT NOT NULL DEFAULT '{}'")
     connection.execute(
         """
         CREATE TABLE IF NOT EXISTS secret_tracking (
@@ -2557,6 +2564,7 @@ def log_traveler_tick(
     reflection: dict[str, Any] | None = None,
     deception_metadata: dict[str, Any] | None = None,
     disclosure_metadata: dict[str, Any] | None = None,
+    timings: dict[str, float] | None = None,
 ) -> dict[str, Any]:
     with connect() as connection:
         cursor = connection.execute(
@@ -2568,8 +2576,9 @@ def log_traveler_tick(
                 llm_decision_json, proposed_action_json,
                 validation_json, action_result_json,
                 state_changes_json, relationship_changes_json, created_events_json,
-                reflection_json, deception_metadata_json, disclosure_metadata_json
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                reflection_json, deception_metadata_json, disclosure_metadata_json,
+                timings_json
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 traveler_id, round_number, trigger_event_id,
@@ -2587,6 +2596,7 @@ def log_traveler_tick(
                 json.dumps(reflection or {}, ensure_ascii=False),
                 json.dumps(deception_metadata or {}, ensure_ascii=False),
                 json.dumps(disclosure_metadata or {}, ensure_ascii=False),
+                json.dumps(timings or {}, ensure_ascii=False),
             ),
         )
         log_id = int(cursor.lastrowid)
@@ -2612,13 +2622,22 @@ def get_traveler_tick_logs_for_run(traveler_id: str, limit: int = 100) -> list[d
     return [_deserialize_tick_log(dict(row)) for row in rows]
 
 
+def update_traveler_tick_timings(log_id: int, timings: dict[str, float]) -> dict[str, Any]:
+    with connect() as connection:
+        connection.execute(
+            "UPDATE traveler_tick_logs SET timings_json = ? WHERE id = ?",
+            (json.dumps(timings, ensure_ascii=False), log_id),
+        )
+    return get_traveler_tick_log(log_id)
+
+
 def _deserialize_tick_log(log: dict[str, Any]) -> dict[str, Any]:
     json_fields = [
         "observation_json", "retrieved_memories_json", "available_actions_json",
         "action_biases_json", "llm_decision_json", "proposed_action_json",
         "validation_json", "action_result_json", "state_changes_json",
         "relationship_changes_json", "created_events_json", "reflection_json",
-        "deception_metadata_json", "disclosure_metadata_json",
+        "deception_metadata_json", "disclosure_metadata_json", "timings_json",
     ]
     for field in json_fields:
         plain_key = field.replace("_json", "")

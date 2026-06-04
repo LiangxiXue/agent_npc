@@ -68,6 +68,32 @@ class TravelerTickTest(unittest.TestCase):
         self.assertIsNotNone(result.action_result)
         self.assertGreater(result.tick_log_id, 0)
 
+    def test_traveler_tick_records_internal_timings(self) -> None:
+        result = run_traveler_tick(
+            traveler_id=self.traveler_id,
+            round_number=1,
+            profile=self.profile,
+            world_state=self._world_state(),
+            use_llm=False,
+        )
+
+        expected_keys = {
+            "observe_ms",
+            "retrieve_memory_ms",
+            "build_action_surface_ms",
+            "decide_ms",
+            "validate_ms",
+            "act_ms",
+            "reflect_ms",
+            "trace_log_ms",
+            "total_ms",
+        }
+        self.assertTrue(expected_keys.issubset(result.timings))
+        self.assertGreaterEqual(result.timings["total_ms"], 0.0)
+
+        tick_log = database.get_traveler_tick_log(result.tick_log_id)
+        self.assertEqual(tick_log["timings"], result.timings)
+
     def test_tick_move_to_changes_location(self) -> None:
         """A tick that selects move_to should update traveler location."""
         move_decision = {

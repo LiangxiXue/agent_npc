@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
+from time import perf_counter
 from typing import Any
 
 from src.agent.event_visibility import dispatch_world_event_to_inbox
@@ -43,6 +44,7 @@ class TravelerTickResult:
     reflection: dict[str, Any]
     deception_metadata: dict[str, Any] | None
     disclosure_metadata: dict[str, Any] | None
+    timings: dict[str, float]
     tick_log_id: int
 
 
@@ -66,14 +68,21 @@ def run_traveler_tick(
         memory_retrieval_mode: Memory retrieval strategy.
     """
     database.initialize_database()
+    total_started = perf_counter()
+    timings: dict[str, float] = {}
 
     # 1. OBSERVE
+    observe_started = perf_counter()
     observation = _build_observation(traveler_id, round_number, world_state, memory_retrieval_mode)
+    timings["observe_ms"] = _elapsed_ms(observe_started)
 
     # 2. RETRIEVE MEMORY
+    retrieve_started = perf_counter()
     retrieved_memories = _retrieve_traveler_memories(traveler_id, observation)
+    timings["retrieve_memory_ms"] = _elapsed_ms(retrieve_started)
 
     # 3. BUILD ACTION SURFACE
+    action_surface_started = perf_counter()
     state_mgr = TravelerStateManager(traveler_id)
     traveler_state = state_mgr.get_state()
     npc_ids = _collect_npc_ids(world_state)
@@ -90,8 +99,10 @@ def run_traveler_tick(
         scene_objects=scene_objects,
     )
     biases = compute_action_biases(available_actions, profile)
+    timings["build_action_surface_ms"] = _elapsed_ms(action_surface_started)
 
     # 4. DECIDE
+    decide_started = perf_counter()
     decision = decide_traveler_action(
         profile=profile,
         observation=observation,
@@ -100,11 +111,15 @@ def run_traveler_tick(
         use_llm=use_llm,
         allow_llm_fallback=allow_llm_fallback,
     )
+    timings["decide_ms"] = _elapsed_ms(decide_started)
 
     # 5. VALIDATE
+    validate_started = perf_counter()
     validation = _validate_traveler_decision(decision, available_actions)
+    timings["validate_ms"] = _elapsed_ms(validate_started)
 
     # 6. ACT
+    act_started = perf_counter()
     rel_mgr = TravelerRelationshipManager(traveler_id)
     secret_tracker = SecretTracker()
 
@@ -125,11 +140,15 @@ def run_traveler_tick(
         action_result = _empty_action_result(validation.get("reason", "blocked"))
         state_changes, rel_changes = [], []
         created_events, deception_meta, disclosure_meta = [], None, None
+    timings["act_ms"] = _elapsed_ms(act_started)
 
     # 7. REFLECT
+    reflect_started = perf_counter()
     reflection = _build_reflection(traveler_id, decision, action_result)
+    timings["reflect_ms"] = _elapsed_ms(reflect_started)
 
     # 8. LOG TRACE
+    trace_log_started = perf_counter()
     tick_log = database.log_traveler_tick(
         traveler_id=traveler_id,
         round_number=round_number,
@@ -148,6 +167,9 @@ def run_traveler_tick(
         deception_metadata=deception_meta or {},
         disclosure_metadata=disclosure_meta or {},
     )
+    timings["trace_log_ms"] = _elapsed_ms(trace_log_started)
+    timings["total_ms"] = _elapsed_ms(total_started)
+    tick_log = database.update_traveler_tick_timings(int(tick_log["id"]), timings)
 
     return TravelerTickResult(
         traveler_id=traveler_id,
@@ -168,6 +190,7 @@ def run_traveler_tick(
         reflection=reflection,
         deception_metadata=deception_meta,
         disclosure_metadata=disclosure_meta,
+        timings=timings,
         tick_log_id=int(tick_log["id"]),
     )
 
@@ -580,3 +603,7 @@ def _event_summary(event: dict[str, Any]) -> dict[str, Any]:
         "event_type": event.get("event_type"),
         "content": event.get("content"),
     }
+
+
+def _elapsed_ms(started: float) -> float:
+    return round((perf_counter() - started) * 1000, 3)

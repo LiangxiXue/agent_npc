@@ -80,6 +80,17 @@ def _write_markdown(result: dict[str, Any], profile: TravelerProfile, path: Path
         lines.append(f"### Round {rn}")
         lines.append(f"")
 
+        timings = rd.get("timings", {})
+        if timings:
+            lines.append(
+                "- **Timing**: "
+                f"total={_format_ms(timings.get('total_ms'))}; "
+                f"ambient={_format_ms(timings.get('ambient_routines_ms'))}, "
+                f"traveler={_format_ms(timings.get('traveler_tick_ms'))}, "
+                f"npc={_format_ms(timings.get('npc_ticks_ms'))}, "
+                f"arc={_format_ms(timings.get('arc_resolution_ms'))}"
+            )
+
         traveler = rd.get("traveler_tick", {})
         action = traveler.get("proposed_action", {})
         action_type = action.get("action_type", "unknown")
@@ -87,6 +98,20 @@ def _write_markdown(result: dict[str, Any], profile: TravelerProfile, path: Path
         reason = decision.get("decision_reason", "no reason recorded")
 
         lines.append(f"- **Traveler**: `{action_type}` — {reason}")
+
+        traveler_timings = traveler.get("timings", {})
+        if traveler_timings:
+            lines.append(
+                "  - Traveler internals: "
+                f"observe={_format_ms(traveler_timings.get('observe_ms'))}, "
+                f"retrieve memory={_format_ms(traveler_timings.get('retrieve_memory_ms'))}, "
+                f"build action surface={_format_ms(traveler_timings.get('build_action_surface_ms'))}, "
+                f"decide={_format_ms(traveler_timings.get('decide_ms'))}, "
+                f"validate={_format_ms(traveler_timings.get('validate_ms'))}, "
+                f"act={_format_ms(traveler_timings.get('act_ms'))}, "
+                f"reflect={_format_ms(traveler_timings.get('reflect_ms'))}, "
+                f"trace log={_format_ms(traveler_timings.get('trace_log_ms'))}"
+            )
 
         # Relationship changes
         rel_changes = traveler.get("relationship_changes", [])
@@ -153,3 +178,9 @@ def _profile_summary(profile: TravelerProfile) -> dict[str, Any]:
         "secret_count": len(profile.secrets),
         "goal_count": len(profile.private_goals),
     }
+
+
+def _format_ms(value: Any) -> str:
+    if isinstance(value, (int, float)):
+        return f"{float(value):.3f} ms"
+    return "n/a"

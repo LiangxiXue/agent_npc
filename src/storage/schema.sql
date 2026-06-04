@@ -321,6 +321,7 @@ CREATE TABLE IF NOT EXISTS traveler_tick_logs (
     reflection_json TEXT NOT NULL DEFAULT '{}',
     deception_metadata_json TEXT NOT NULL DEFAULT '{}',
     disclosure_metadata_json TEXT NOT NULL DEFAULT '{}',
+    timings_json TEXT NOT NULL DEFAULT '{}',
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (traveler_id) REFERENCES traveler_state(traveler_id),
     FOREIGN KEY (trigger_event_id) REFERENCES world_events(id)
