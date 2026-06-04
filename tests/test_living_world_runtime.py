@@ -498,3 +498,4 @@ class SchedulerTest(unittest.TestCase):
         self.assertIn("ask_ron_about_guard_ledger", markdown)
         self.assertIn("cumulative signals=6", markdown)
         self.assertIn("NPC mira", markdown)
+        self.assertIn("NPC can advance a known lead.", markdown)
