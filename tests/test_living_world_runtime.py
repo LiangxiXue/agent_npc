@@ -216,6 +216,34 @@ class SchedulerTest(unittest.TestCase):
         self.assertNotEqual(result["rounds"][0]["arc_update"]["phase"], "resolved")
         self.assertEqual(result["final_arc_outcome"], "")
 
+    def test_scheduler_can_add_low_priority_routine_ticks_for_idle_npcs(self) -> None:
+        profile = load_profile("truth_seeking_scholar")
+        traveler = TravelerActor("idle_probe", profile, use_llm=False)
+        traveler.initialize()
+
+        npc_adapters = {
+            "lina": NpcActorAdapter("lina"),
+            "ron": NpcActorAdapter("ron"),
+            "mira": NpcActorAdapter("mira"),
+            "sable": NpcActorAdapter("sable"),
+        }
+        scheduler = LivingWorldScheduler(
+            traveler=traveler,
+            npc_adapters=npc_adapters,
+            arc_director=ArcDirectorActor(),
+            max_npc_ticks_per_round=4,
+            npc_routines_every_round=False,
+            idle_npc_probe_enabled=True,
+        )
+
+        result = scheduler.run(rounds=1)
+
+        ticked_npcs = {
+            tick["npc_id"]
+            for tick in result["rounds"][0]["npc_ticks"]
+        }
+        self.assertIn("sable", ticked_npcs)
+
     def test_scheduler_collects_round_logs(self) -> None:
         profile = load_profile("truth_seeking_scholar")
         traveler = TravelerActor("sched_rounds", profile, use_llm=False)

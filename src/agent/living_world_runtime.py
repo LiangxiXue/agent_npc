@@ -208,6 +208,7 @@ class LivingWorldScheduler:
         max_npc_ticks_per_round: int = 3,
         npc_routines_every_round: bool = True,
         npc_cooldown_enabled: bool = True,
+        idle_npc_probe_enabled: bool = False,
     ):
         self.traveler = traveler
         self.npc_adapters = npc_adapters
@@ -215,6 +216,7 @@ class LivingWorldScheduler:
         self.max_npc_ticks_per_round = max_npc_ticks_per_round
         self.npc_routines_every_round = npc_routines_every_round
         self.npc_cooldown_enabled = npc_cooldown_enabled
+        self.idle_npc_probe_enabled = idle_npc_probe_enabled
         self.round_log: list[dict[str, Any]] = []
 
     def run(self, rounds: int) -> dict[str, Any]:
@@ -302,6 +304,33 @@ class LivingWorldScheduler:
                 npcs_with_inbox.append((2, npc_id))
             else:
                 npcs_with_inbox.append((3, npc_id))
+
+        if self.idle_npc_probe_enabled:
+            npcs_with_real_inbox = {npc_id for _, npc_id in npcs_with_inbox}
+            for npc_id in self.npc_adapters:
+                if npc_id in npcs_with_real_inbox:
+                    continue
+                location = database.get_npc_location_state(npc_id)
+                event = database.create_world_event(
+                    event_type="npc_idle_routine_probe",
+                    content=f"Low-priority idle routine probe for {npc_id}.",
+                    source_type="scheduler",
+                    source_id="living_world_scheduler",
+                    location_id=location["location_id"],
+                    visibility="npc_only",
+                    payload={
+                        "target_npc_ids": [npc_id],
+                        "arc_id": ARC_ID,
+                        "arc_signal": arc_signal_for_npc(npc_id),
+                    },
+                )
+                database.add_npc_event_inbox_item(
+                    npc_id=npc_id,
+                    event_id=int(event["id"]),
+                    relevance_score=0.2,
+                    reason="idle_probe",
+                )
+                npcs_with_inbox.append((5, npc_id))
 
         npcs_with_inbox.sort(key=lambda x: x[0])
 
