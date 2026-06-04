@@ -1,8 +1,8 @@
 # Memory-Driven Interactive Character Agent
 
-这是一个以文字冒险 NPC 交互为验证场景的记忆驱动角色 Agent 原型。项目重点不是制作完整游戏，而是展示角色 Agent 如何在多轮交互中读取稳定世界设定、检索玩家相关记忆、读取当前状态、形成主观信念、选择目标和计划、提出环境约束下的角色动作，并保存可解释的执行轨迹。
+这是一个以文字冒险 NPC 交互为验证场景的记忆驱动角色 Agent 原型。项目重点不是制作完整游戏，而是展示角色 Agent 如何在多轮交互和可调度世界事件中读取稳定世界设定、检索长期记忆、维护主观信念和目标计划、提出受约束行动，并保存可解释的执行轨迹。
 
-当前实现已经从单 NPC MVP 扩展为四 NPC、多任务、带社交策略和 NPCMind 的角色 Agent 原型：Lina 保留钥匙/遗迹主线，Ron、Mira、Sable 分别验证守卫证据、遗迹研究、古物交易与误导式社交行为。同样一句“地下遗迹入口在哪里”，不同 NPC 会形成不同信念、情绪、目标和计划。玩家可见的主回合 runtime 需要配置 OpenAI-compatible LLM；LLM 参与结构化决策、最终回复润色和后台记忆处理。测试通过 patch OpenAI-compatible 调用保持离线可运行；检索层支持 OpenAI-compatible embedding、Hybrid RAG 和本地 fallback。
+当前实现已经从单 NPC MVP 扩展为四 NPC、多任务、Hybrid RAG、后台记忆 worker、NPCMind、自主 NPC tick、遗迹主线 living-world runtime，以及可配置 Traveler agent。玩家可见的主回合 runtime 需要 OpenAI-compatible LLM；测试和 `--mock` 演示通过 patch / deterministic fallback 保持离线可运行。LLM 可以参与结构化 decision、最终回复润色、长期记忆候选/审查、受约束 autonomous tick 和 Traveler 决策，但世界事实、任务推进和状态变更仍由程序拥有。
 
 ## 当前项目状态
 
@@ -11,25 +11,24 @@
 - 多 NPC 原型：`lina`、`ron`、`mira`、`sable`，每个 NPC 有独立状态、主任务、长期记忆、短期上下文和交互日志。
 - 四条任务线：`lost_key`、`gate_badge`、`ancient_notes`、`relic_tip`，统一经过程序拥有的任务状态机校验。
 - 社交策略层：decision 输出包含 `social_intent` 和 `social_stance`，Sable 使用 `hidden_alignment='exploit_ruins'` 验证欺骗、拉拢、试探、反对等社交行为不会越权改写事实。
-- NPCMind 心智层：`src/agent/npc_mind.py` 负责从 `Observation` 形成 subjective belief、emotion、active goal、active plan、social strategy 和 reflection。
-- 主观信念与情绪：NPC 会根据同一玩家输入产生不同解释；Lina 对过早询问遗迹入口更怀疑，Sable 会把同一输入视为可利用线索。
-- 目标与计划：NPC 不只响应当前输入，还会激活目标并维护计划，例如 Lina 的 `lina_test_player_trust` 计划包含 `ask_motive`、`offer_minor_task`、`reward_trust`、`partial_disclosure`。
-- Reflection 系统：环境执行后生成内部反思；被阻止的动作、状态变化、世界事件或非普通闲聊目标会写入 future-facing procedural memory，普通闲聊不会污染长期记忆。
+- NPCMind 心智层：`src/agent/npc_mind.py` 从 `Observation` 形成 subjective belief、emotion、active goal、active plan、social strategy 和 reflection。
+- Narrative Environment：`src/agent/environment.py` 将每轮上下文整理为 `Observation`，把 LLM decision 和 NPCMind context 转成带 `goal_id`、`plan_step`、`speech_goal` 的 `NPCAction`，再由程序规则校验并执行成 `ActionResult`。
+- ActionValidator：`src/agent/action_validator.py` 将动作校验边界从环境执行中拆出，负责把非法提案安全降级为不会改写状态的行动。
+- Response guard：回复层会使用 belief / goal / plan / reflection 作为私有上下文，但会阻止 `belief_id`、`goal_id`、`plan_id`、JSON、数据库字段和 trace 字段泄露到玩家台词。
+- 记忆系统：短期交互进入 `recent_interactions`；长期重要事实进入类型化 `memories`，当前长期记忆类型为 `semantic`、`episodic`、`relational`、`procedural`，并带 `facets`、`scope`、`evidence_text`、`stability`、`future_usefulness` 元数据；检索支持 `off`、`legacy`、`typed`、`semantic`、`hybrid`。
+- 后台记忆任务：实时回合只 enqueue `memory_jobs`，长期记忆候选、审查、写入和 embedding 更新由单次脚本、API 或常驻 worker 处理。
+- Provider-aware retrieval：embedding provider 支持 `mock_hash` 和 OpenAI-compatible；backend 支持 `sqlite_cosine` 和可选 `faiss`，不可用时自动 fallback。
 - Streamlit 调试台：`app.py` 提供 NPC 选择、输入、状态面板、检索预览、执行轨迹、工具调用、状态变化和 trace 导出。
 - React/Vite 玩家端：`frontend/` 提供暗色像素 RPG 界面，保留开发者 trace 面板。
-- FastAPI 玩家端接口：`src/api/server.py` 包装同一套 Agent workflow，提供对话、检索预览、trace 导出、embedding rebuild 和后台记忆任务处理接口。
-- SQLite 持久化：保存 NPC 状态、玩家状态、物品、地点、任务、长期记忆、记忆/设定 embedding、后台记忆任务、世界事件和交互日志。
-- 显式上下文层：`retrieved_lore`、`retrieved_memories`、`state_snapshot`、`recent_context` 分离进入 decision/response/trace。
-- 记忆系统：短期交互进入 `recent_interactions`；长期重要事实进入类型化 `memories`，当前长期记忆类型为 `semantic`、`episodic`、`relational`、`procedural`，并带 `facets`、`scope`、`evidence_text`、`stability`、`future_usefulness` 元数据；检索支持 `off`、`legacy`、`typed`、`semantic`、`hybrid`。
-- 后台记忆任务：实时回合只 enqueue `memory_jobs`，长期记忆候选、审查、写入和 embedding 更新由单次脚本、API 或常驻 worker 处理，降低玩家端等待时间。
-- Provider-aware retrieval：embedding provider 支持 `mock_hash` 和 OpenAI-compatible；backend 支持 `sqlite_cosine` 和可选 `faiss`，不可用时自动 fallback。
-- LLM runtime 路径：同一 OpenAI-compatible client 可参与结构化 decision、最终回复润色、记忆候选生成和记忆审查；玩家可见主流程需要可用 API key，测试通过 patch 调用保持离线可运行。
-- ActionValidator：`src/agent/action_validator.py` 将动作校验边界从环境执行中拆出，负责把非法提案安全降级为不会改写状态的行动。
-- Narrative Environment：`src/agent/environment.py` 将每轮上下文整理为 `Observation`，把 LLM decision 和 NPCMind context 转成带 `goal_id`、`plan_step`、`speech_goal` 的 `NPCAction`，再由程序规则校验并执行成 `ActionResult`。LLM 只能提出行动，世界事实以环境执行结果为准。
-- Response guard：回复层会使用 belief / goal / plan / reflection 作为私有上下文，但会阻止 `belief_id`、`goal_id`、`plan_id`、JSON、数据库字段和 trace 字段泄露到玩家台词。
-- 可解释 trace：每轮记录检索、状态、Observation、Belief Update、Goal Selection、Plan Step、decision、NPCAction、ActionResult、Reflection、工具、状态变化、memory job 状态、timings 和 workflow steps。
+- FastAPI 玩家端接口：`src/api/server.py` 包装同一套 Agent workflow，提供对话、检索预览、trace 导出、embedding rebuild、后台记忆任务处理、自主 tick 和 trace HTML 接口。
+- 自主 NPC runtime：`src/agent/autonomous_tick.py` 通过 `world_event -> npc_event_inbox -> ActionCatalog -> constrained decision -> validation -> mailbox/trace` 让 NPC 响应世界事件并主动生成计划和消息。
+- Living World ruins demo：`src/agent/world_arc.py`、`src/agent/living_world.py` 和 `scripts/run_living_world_demo.py` 将玩家动作、场景对象、NPC routines、autonomous tick、ArcDirector 和可变结局连在一起。
+- Traveler runtime：`data/travelers/*.yaml`、`src/agent/traveler_*`、`src/agent/living_world_runtime.py` 和 `scripts/run_traveler_world_demo.py` 支持用可配置 Traveler profile 替代手动玩家，运行多轮 living-world simulation。
+- Exploration planner：`src/agent/exploration_planner.py` 为 Traveler fallback 和 timeline export 提供线索路由、信息增益和重复探索降权。
+- Timeline export：living-world Traveler demo 可导出 JSON 和 Markdown，包含 round、Traveler 内部 timings、NPC tick、exploration routing 和 arc progress。
+- 可解释 trace：玩家回合和 autonomous/living-world runtime 都记录检索、状态、Observation、Belief Update、Goal Selection、Plan Step、decision、NPCAction、ActionResult、Reflection、工具、状态变化、memory job、timings 和 workflow steps。
 
-### 当前工作流
+### 玩家回合工作流
 
 ```text
 Player Input
@@ -60,17 +59,36 @@ memory_jobs
 -> Embedding Update
 ```
 
-### 已验证
+### Living World 工作流
 
-当前测试命令：
-
-```powershell
-.venv/bin/python -m unittest discover -s tests -v
+```text
+Traveler profile
+-> TravelerActor observe / retrieve / decide / validate / act / reflect
+-> world_events
+-> NPC routines and npc_event_inbox dispatch
+-> NpcActorAdapter autonomous_tick
+-> ArcDirectorActor score and resolve arc
+-> Major event detection
+-> JSON / Markdown timeline export
 ```
 
-当前验证结果：74 个测试全部通过。
+## 验证
 
-玩家端构建命令：
+建议使用仓库内虚拟环境运行测试：
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest -q
+```
+
+查看当前测试收集数量：
+
+```powershell
+.\.venv\Scripts\python.exe -m pytest --collect-only -q
+```
+
+最近本地完整验证（2026-06-04）：`211 passed, 3 warnings, 17 subtests passed`。
+
+前端构建命令：
 
 ```powershell
 cd frontend
@@ -129,13 +147,31 @@ data/agent_state.db
 
 ## 关键脚本
 
-命令行四 NPC 演示：
+命令行四 NPC 玩家回合演示：
 
 ```powershell
 python scripts/run_mvp_demo.py
 ```
 
-导出 trace：
+主动 NPC runtime 演示：
+
+```powershell
+python scripts/run_autonomous_llm_demo.py --mock
+```
+
+遗迹主线 living-world demo：
+
+```powershell
+python scripts/run_living_world_demo.py --mock
+```
+
+Traveler Living World 验收 demo：
+
+```powershell
+.\.venv\Scripts\python.exe scripts\run_traveler_world_demo.py --profile truth_seeking_scholar --rounds 20 --mock --max-npc-ticks 4 --idle-npc-probe --stop-on-outcome --export-dir data/traces/living_world_acceptance
+```
+
+导出玩家回合 trace：
 
 ```powershell
 python scripts/export_trace.py
@@ -180,6 +216,8 @@ agent_npc/
 ├── requirements.txt
 ├── data/
 │   ├── lore/
+│   ├── travelers/
+│   ├── traces/
 │   ├── eval/
 │   ├── history/
 │   └── agent_trace_export.json
@@ -187,19 +225,22 @@ agent_npc/
 │   ├── delivery/
 │   ├── design/
 │   ├── evaluation/
-│   └── reference/
+│   ├── reference/
+│   └── superpowers/
 ├── frontend/
 │   ├── public/assets/pixel/
 │   └── src/
 ├── scripts/
 │   ├── export_trace.py
 │   ├── generate_pixel_assets.py
-│   ├── probe_context_retrieval.py
-│   ├── process_memory_jobs.py
 │   ├── memory_worker.py
+│   ├── process_memory_jobs.py
 │   ├── rebuild_memory_embeddings.py
+│   ├── run_autonomous_llm_demo.py
+│   ├── run_living_world_demo.py
 │   ├── run_memory_eval.py
 │   ├── run_mvp_demo.py
+│   ├── run_traveler_world_demo.py
 │   └── test_llm_api.py
 ├── src/
 │   ├── agent/
@@ -207,10 +248,14 @@ agent_npc/
 │   ├── storage/
 │   └── tools/
 └── tests/
-    ├── test_api.py
-    ├── test_display_translation.py
-    ├── test_llm_client.py
-    ├── test_npc_mind.py
+    ├── test_autonomous_tick.py
+    ├── test_living_world.py
+    ├── test_living_world_runtime.py
+    ├── test_traveler_actions.py
+    ├── test_traveler_decision.py
+    ├── test_traveler_profile.py
+    ├── test_traveler_state.py
+    ├── test_traveler_tick.py
     └── test_workflow.py
 ```
 
@@ -230,12 +275,14 @@ $env:AGENT_NPC_LLM_RETRIES = "1"
 streamlit run app.py
 ```
 
-1. 结构化 decision JSON；
+1. 玩家回合结构化 decision JSON；
 2. 最终 NPC 回复润色；
 3. 长期记忆候选生成；
-4. 长期记忆候选审查。
+4. 长期记忆候选审查；
+5. autonomous NPC tick 的受约束策略选择；
+6. Traveler decision。
 
-玩家可见的主回合 runtime 需要配置可用 API key。测试通过 patch OpenAI-compatible 调用保持离线可运行；本地规则分类、任务状态机、schema/business-rule 校验仍是程序确定性逻辑，不属于模型替身。
+玩家可见的主回合 runtime 需要配置可用 API key。测试、`--mock` autonomous demo 和 `--mock` Traveler demo 可以离线运行；本地规则分类、任务状态机、schema/business-rule 校验仍是程序确定性逻辑，不属于模型替身。
 
 SQLite 状态、任务状态机、工具权限、重大事实和最终记忆写入仍由程序控制。
 
@@ -291,40 +338,42 @@ Sable，我听说入口在酒馆后巷，我接受你说的先查换岗记录。
 
 普通聊天机器人通常只根据历史对话生成回复。本项目把回复放在一个可验证 Agent 闭环里：
 
-- NPC、玩家、任务、地点和世界事件都写入 SQLite；
+- NPC、玩家、Traveler、任务、地点、场景对象和世界事件都写入 SQLite；
 - decision 是结构化对象，包含 intent、工具调用、社交策略和回复关键词；
 - NPCMind 在 decision 前形成 belief、emotion、goal、plan 和 social strategy；
 - Environment 将 decision 和 mind context 转成 `NPCAction`，经过校验后才执行工具；
+- autonomous tick 只能从 ActionCatalog 暴露的可用行动中选择；
+- Traveler tick 有 profile bias、private goals、hard boundaries、relationships 和 private notes；
 - `ActionResult` 记录本轮是否 accepted、实际执行了哪些工具、状态前后变化和回复约束；
 - Reflection 在 `ActionResult` 之后生成内部反思，必要时写入长期 procedural memory；
 - 工具调用会真实改变数据库，但最终事实以 `ActionResult` 为准，而不是以 LLM 自述为准；
-- 任务推进经过程序状态机，不允许 LLM 直接越权完成任务；
+- 任务推进、arc phase、scene object state 和地点解锁经过程序状态机，不允许 LLM 直接越权完成；
 - 长期记忆由后台 LLM candidate/review、programmatic gate 和 dedup 管理；
 - 检索到的 lore / memory 会进入后续 decision 和 response；
-- trace 能解释每轮“检索了什么、NPC 如何理解、目标和计划是什么、为什么行动、改了什么状态、是否反思和写入记忆”。
+- trace 能解释每轮“检索了什么、角色如何理解、目标和计划是什么、为什么行动、改了什么状态、是否反思和写入记忆”。
 
 因此系统不是“说自己记得”，而是“根据记忆和状态做决策，并把行动结果写回系统”。
 
 ## 当前边界
 
 - Agent 编排仍是自定义 Python workflow，没有迁移到 LangGraph。
-- 玩家可见 LLM runtime 需要 OpenAI-compatible provider 和可用 API key；测试通过 patch LLM 调用保持离线可运行。
-- 当前 Environment 层主要提供流程边界、校验、执行和 trace 事实来源；`Decision + NPCMind -> NPCAction` 已包含角色动作类型、目标、计划步骤和 speech goal，但尚未实现完整世界模拟。
-- 当前 NPCMind 是确定性、可测试的第一版；belief、emotion、goal、plan 和 reflection 已接入主 workflow，但还不是完整认知架构或自主 agent tick。
+- 玩家可见 LLM runtime 需要 OpenAI-compatible provider 和可用 API key；测试和 `--mock` demo 通过 deterministic fallback / patch 保持离线可运行。
+- Living-world runtime 已经支持演示级多轮调度、NPC routines、Traveler tick、NPC autonomous tick、ArcDirector 和 timeline export，但仍是课程项目原型，不是完整通用游戏引擎。
+- NPCMind 是确定性、可测试的第一版；belief、emotion、goal、plan、reflection、plan blockers、cooldown 和 autonomous tick 已接入，但还不是完整认知架构。
+- Traveler profile 支持 YAML 配置、hidden identity、private goals、risk level、hard boundaries 和 relationship state；目前主要用于 ruins demo 的可复现实验。
 - 后台记忆任务支持通过脚本/API 单次处理，也支持 `scripts/memory_worker.py` 常驻消费。
 - FAISS 和真实 embedding 是可选增强，不是默认依赖。
 - 课程最终报告 PDF、PPT、录屏和最终截图仍需基于当前运行结果整理。
 
 ## 后续方向
 
-1. 做实 Environment 的空间和可见性模型：给 NPC、玩家、物品、事件和地点增加 location / visibility，让 Observation 不再只是按 `npc_id` 聚合上下文，而是反映 NPC 当前能看到、听到或通过信息网络知道的内容。
-2. 增加 NPC 私有知识和事件传播：世界事件不再全局可见，而是按酒馆传闻、守卫报告、学者记录、黑市网络等渠道传播给不同 NPC。
-3. 增加环境可行动作列表：由 Environment 根据当前状态生成 `available_actions`，LLM 只能从可用行动中选择，避免凭空生成工具或越权行动。
-4. 增加场景对象状态：例如 `tavern_backroom.locked`、`town_gate.guard_shift`、`ruins_entrance.discovered`、`sealed_door.symbols_observed`，让任务推进依赖对象状态而不只依赖 quest status。
-5. 增强 action prerequisites 和失败结果：为每类行动定义前置条件、失败原因和局部后果，例如不在 town_gate 不能检查 gate badge，没观察 inscription 不能完成 ancient_notes。
-6. 将计划状态从 memory facets 升级为专用表或事件流，让计划推进、阻塞和放弃更易查询。
-7. 引入 LangGraph 或显式节点编排，把当前 workflow 拆成更标准的 Agent graph。
-8. 增强后台 worker 的并发锁、重试策略、运行监控和服务化启动方式。
-9. 增强真实 LLM decision 的 schema 修复、失败案例记录和回归测试。
-10. 增加本地 embedding 模型、持久化 FAISS 索引或 Qdrant/Chroma backend。
-11. 完善课程交付材料：报告、PPT、截图、录屏、AI 使用说明和演示脚本。
+1. 将 Traveler memory 与现有 player/NPC memory 进一步统一，明确跨 actor 检索和隐私边界。
+2. 增强 NPC 主动消息队列，让 React 玩家端能直接消费 proactive messages。
+3. 增加更多场景对象、地点可见性和事件传播渠道，让 Observation 更接近“角色当前能看到、听到或通过信息网络知道的内容”。
+4. 扩展 `available_actions` 前置条件、失败结果和局部后果，让行动选择更接近可玩的系统。
+5. 将计划状态从 memory facets 升级为专用表或事件流，让计划推进、阻塞和放弃更易查询。
+6. 引入 LangGraph 或显式节点编排，把当前 workflow 拆成更标准的 Agent graph。
+7. 增强后台 worker 的并发锁、重试策略、运行监控和服务化启动方式。
+8. 增强真实 LLM decision 的 schema 修复、失败案例记录和回归测试。
+9. 增加本地 embedding 模型、持久化 FAISS 索引或 Qdrant/Chroma backend。
+10. 完善课程交付材料：报告、PPT、截图、录屏、AI 使用说明和演示脚本。
