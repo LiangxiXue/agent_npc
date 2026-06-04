@@ -61,7 +61,12 @@ def decide_traveler_action(
             if not allow_llm_fallback:
                 raise
 
-    return deterministic_fallback_decision(available_actions, biases, profile)
+    return deterministic_fallback_decision(
+        available_actions,
+        biases,
+        profile,
+        exploration_context=observation.get("exploration_context") if isinstance(observation, dict) else None,
+    )
 
 
 def _call_llm_decision(
@@ -79,7 +84,14 @@ def _call_llm_decision(
         system_prompt=TRAVELER_DECISION_SYSTEM_PROMPT,
         user_payload=payload,
     )
-    return _normalize_llm_decision(result, available_actions, biases, profile, allow_fallback=allow_fallback)
+    return _normalize_llm_decision(
+        result,
+        available_actions,
+        biases,
+        profile,
+        observation.get("exploration_context") if isinstance(observation, dict) else None,
+        allow_fallback=allow_fallback,
+    )
 
 
 def _build_decision_payload(
@@ -150,6 +162,7 @@ def _normalize_llm_decision(
     available_actions: list[dict[str, Any]],
     biases: list[ActionBias],
     profile: TravelerProfile,
+    exploration_context: dict[str, Any] | None = None,
     allow_fallback: bool = True,
 ) -> dict[str, Any]:
     # Accept both {"selected_action": {...}} and direct action shapes
@@ -161,7 +174,12 @@ def _normalize_llm_decision(
         else:
             if not allow_fallback:
                 raise ValueError("LLM decision missing selected_action.")
-            return deterministic_fallback_decision(available_actions, biases, profile)
+            return deterministic_fallback_decision(
+                available_actions,
+                biases,
+                profile,
+                exploration_context=exploration_context,
+            )
 
     action_type = str(selected.get("action_type", ""))
     args = selected.get("args") if isinstance(selected.get("args"), dict) else {}
@@ -171,7 +189,12 @@ def _normalize_llm_decision(
     if action_type not in available_types:
         if not allow_fallback:
             raise ValueError(f"LLM selected unavailable action '{action_type}'.")
-        return deterministic_fallback_decision(available_actions, biases, profile)
+        return deterministic_fallback_decision(
+            available_actions,
+            biases,
+            profile,
+            exploration_context=exploration_context,
+        )
 
     return {
         "selected_action": {"action_type": action_type, "args": args},
@@ -189,6 +212,7 @@ def deterministic_fallback_decision(
     available_actions: list[dict[str, Any]],
     biases: list[ActionBias] | None = None,
     profile: TravelerProfile | None = None,
+    exploration_context: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Deterministic fallback when LLM is unavailable or fails.
 
@@ -197,20 +221,26 @@ def deterministic_fallback_decision(
     """
     if biases and available_actions:
         bias_map = {b.action_type: b for b in biases}
+        action_scores = _exploration_action_scores(exploration_context)
         scored = [
-            (a, bias_map.get(a["action_type"], ActionBias(a["action_type"], (), (), "low", 0.0)))
+            (
+                a,
+                bias_map.get(a["action_type"], ActionBias(a["action_type"], (), (), "low", 0.0)),
+                _best_information_gain(a, action_scores),
+            )
             for a in available_actions
         ]
-        scored.sort(key=lambda pair: pair[1].profile_alignment_score, reverse=True)
-        best_action, best_bias = scored[0]
+        scored.sort(key=lambda pair: (pair[1].profile_alignment_score + pair[2]), reverse=True)
+        best_action, best_bias, information_gain = scored[0]
         return {
             "selected_action": {
                 "action_type": best_action["action_type"],
-                "args": _default_args_for_action(best_action),
+                "args": _default_args_for_action(best_action, exploration_context=exploration_context),
             },
             "decision_reason": (
                 f"Deterministic fallback: selected '{best_action['action_type']}' "
-                f"with alignment score {best_bias.profile_alignment_score}."
+                f"with alignment score {best_bias.profile_alignment_score} "
+                f"and information gain {round(information_gain, 3)}."
             ),
             "profile_alignment": {
                 "supporting": list(best_bias.supporting_motivations),
@@ -236,7 +266,10 @@ def deterministic_fallback_decision(
     }
 
 
-def _default_args_for_action(action: dict[str, Any]) -> dict[str, Any]:
+def _default_args_for_action(
+    action: dict[str, Any],
+    exploration_context: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     schema = action.get("args_schema", {})
     if not isinstance(schema, dict):
         return {}
@@ -245,12 +278,63 @@ def _default_args_for_action(action: dict[str, Any]) -> dict[str, Any]:
     for field, expected_type in schema.items():
         field_options = options.get(field) if isinstance(options.get(field), list) else []
         if field_options:
-            args[field] = str(field_options[0])
+            args[field] = _best_arg_option(action, field, field_options, exploration_context)
         elif expected_type == "string":
             args[field] = _fallback_string_arg(action.get("action_type", ""), field)
         elif expected_type == "integer":
             args[field] = 0
     return args
+
+
+def _exploration_action_scores(exploration_context: dict[str, Any] | None) -> dict[str, float]:
+    if not isinstance(exploration_context, dict):
+        return {}
+    raw_scores = exploration_context.get("action_scores")
+    if not isinstance(raw_scores, dict):
+        return {}
+    scores: dict[str, float] = {}
+    for key, value in raw_scores.items():
+        try:
+            scores[str(key)] = float(value)
+        except (TypeError, ValueError):
+            continue
+    return scores
+
+
+def _best_information_gain(action: dict[str, Any], action_scores: dict[str, float]) -> float:
+    if not action_scores:
+        return 0.0
+    action_type = str(action.get("action_type", ""))
+    options = action.get("arg_options") if isinstance(action.get("arg_options"), dict) else {}
+    candidates = [action_scores.get(action_type, 0.0)]
+    for field, field_options in options.items():
+        if not isinstance(field_options, list):
+            continue
+        for option in field_options:
+            candidates.append(action_scores.get(_action_score_key(action_type, str(field), str(option)), 0.0))
+    return max(candidates) if candidates else 0.0
+
+
+def _best_arg_option(
+    action: dict[str, Any],
+    field: str,
+    field_options: list[Any],
+    exploration_context: dict[str, Any] | None,
+) -> str:
+    action_scores = _exploration_action_scores(exploration_context)
+    if not action_scores:
+        return str(field_options[0])
+    action_type = str(action.get("action_type", ""))
+    return max(
+        (str(option) for option in field_options),
+        key=lambda option: action_scores.get(_action_score_key(action_type, field, option), 0.0),
+    )
+
+
+def _action_score_key(action_type: str, field: str, option: str) -> str:
+    if field in {"npc_id", "location_id"}:
+        return f"{action_type}:{option}"
+    return f"{action_type}:{field}:{option}"
 
 
 def _fallback_string_arg(action_type: str, field: str) -> str:

@@ -8,6 +8,7 @@ from time import perf_counter
 from typing import Any
 
 from src.agent.event_visibility import dispatch_world_event_to_inbox
+from src.agent.exploration_planner import build_exploration_context
 from src.agent.traveler_actions import (
     ActionBias,
     compute_action_biases,
@@ -99,13 +100,15 @@ def run_traveler_tick(
         scene_objects=scene_objects,
     )
     biases = compute_action_biases(available_actions, profile)
+    exploration_context = build_exploration_context(traveler_id, observation, available_actions)
+    decision_observation = {**observation, "exploration_context": exploration_context}
     timings["build_action_surface_ms"] = _elapsed_ms(action_surface_started)
 
     # 4. DECIDE
     decide_started = perf_counter()
     decision = decide_traveler_action(
         profile=profile,
-        observation=observation,
+        observation=decision_observation,
         available_actions=available_actions,
         unavailable_actions=unavailable_actions,
         use_llm=use_llm,
@@ -144,7 +147,7 @@ def run_traveler_tick(
 
     # 7. REFLECT
     reflect_started = perf_counter()
-    reflection = _build_reflection(traveler_id, decision, action_result)
+    reflection = _build_reflection(traveler_id, decision, action_result, exploration_context)
     timings["reflect_ms"] = _elapsed_ms(reflect_started)
 
     # 8. LOG TRACE
@@ -152,7 +155,7 @@ def run_traveler_tick(
     tick_log = database.log_traveler_tick(
         traveler_id=traveler_id,
         round_number=round_number,
-        observation=observation,
+        observation=decision_observation,
         retrieved_memories=retrieved_memories,
         available_actions=available_actions,
         action_biases=[asdict(b) for b in biases],
@@ -175,7 +178,7 @@ def run_traveler_tick(
         traveler_id=traveler_id,
         round_number=round_number,
         mode=decision.get("mode", "deterministic_fallback"),
-        observation=observation,
+        observation=decision_observation,
         retrieved_memories=retrieved_memories,
         available_actions=available_actions,
         unavailable_actions=unavailable_actions,
@@ -576,6 +579,7 @@ def _build_reflection(
     traveler_id: str,
     decision: dict[str, Any],
     action_result: dict[str, Any],
+    exploration_context: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     return {
         "traveler_id": traveler_id,
@@ -583,6 +587,7 @@ def _build_reflection(
         "accepted": action_result.get("accepted", False),
         "summary": f"Traveler {decision.get('selected_action', {}).get('action_type', 'unknown')} — {'accepted' if action_result.get('accepted') else 'blocked'}.",
         "decision_reason": decision.get("decision_reason", ""),
+        "exploration_context": exploration_context or {},
     }
 
 

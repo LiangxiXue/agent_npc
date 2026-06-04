@@ -94,6 +94,22 @@ class TravelerTickTest(unittest.TestCase):
         tick_log = database.get_traveler_tick_log(result.tick_log_id)
         self.assertEqual(tick_log["timings"], result.timings)
 
+    def test_tick_exposes_exploration_context_in_observation_and_reflection(self) -> None:
+        result = run_traveler_tick(
+            traveler_id=self.traveler_id,
+            round_number=1,
+            profile=self.profile,
+            world_state=self._world_state(),
+            use_llm=False,
+        )
+
+        self.assertIn("exploration_context", result.observation)
+        self.assertIn("action_scores", result.observation["exploration_context"])
+        self.assertEqual(
+            result.reflection["exploration_context"],
+            result.observation["exploration_context"],
+        )
+
     def test_tick_move_to_changes_location(self) -> None:
         """A tick that selects move_to should update traveler location."""
         move_decision = {
