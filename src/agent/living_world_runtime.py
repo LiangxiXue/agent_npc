@@ -104,13 +104,14 @@ class NpcActorAdapter:
 
     actor_type = "npc"
 
-    def __init__(self, npc_id: str):
+    def __init__(self, npc_id: str, autonomous_tick_mode: str = "llm_constrained"):
         self.actor_id = npc_id
+        self.autonomous_tick_mode = autonomous_tick_mode
 
     def tick(self, world_state: dict[str, Any]) -> dict[str, Any]:
         result = run_autonomous_tick(
             npc_id=self.actor_id,
-            mode="llm_constrained",
+            mode=self.autonomous_tick_mode,
             run_director=False,
         )
         return _npc_tick_to_dict(result)

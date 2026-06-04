@@ -165,6 +165,26 @@ class AutonomousTickTest(unittest.TestCase):
         self.assertEqual(result.validation["status"], "allowed")
         self.assertEqual(result.llm_decision["fallback_reason"], "LLM returned no valid selected_action.")
 
+    def test_deterministic_fallback_mode_skips_llm_call(self) -> None:
+        from src.agent.autonomous_tick import run_autonomous_tick
+
+        create_and_dispatch_event(
+            "traveler_talked_to_npc",
+            "Traveler asked Mira about ruins research in the archive.",
+            "mira",
+        )
+
+        with patch(
+            "src.agent.autonomous_tick.call_openai_compatible_json",
+            side_effect=AssertionError("LLM must not be called in deterministic fallback mode"),
+        ) as llm_call:
+            result = run_autonomous_tick("mira", mode="deterministic_fallback", run_director=False)
+
+        self.assertFalse(llm_call.called)
+        self.assertEqual(result.mode, "deterministic_fallback")
+        self.assertEqual(result.llm_decision["fallback_reason"], "mode=deterministic_fallback")
+        self.assertTrue(result.proposed_action.get("action_type"))
+
     def test_mira_suggest_next_investigation_does_not_require_quest_start(self) -> None:
         from src.agent.autonomous_tick import decision_from_selected_action
 

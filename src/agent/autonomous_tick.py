@@ -98,15 +98,23 @@ def run_autonomous_tick(
             {"available": len(available_actions), "unavailable": len(unavailable_actions)},
         )
     )
-    llm_decision = call_autonomous_llm(
-        npc_id=npc_id,
-        observation=observation,
-        trigger_event=trigger_event,
-        retrieved_memories=retrieved_memories,
-        available_actions=available_actions,
-        unavailable_actions=unavailable_actions,
-    )
-    timeline.append(timeline_event("llm_decision_received", {"goal": llm_decision.get("goal", "")}))
+    if is_offline_autonomous_mode(mode):
+        llm_decision = deterministic_fallback_decision(
+            available_actions,
+            trigger_event,
+            f"mode={mode}",
+        )
+        timeline.append(timeline_event("deterministic_decision_selected", {"goal": llm_decision.get("goal", "")}))
+    else:
+        llm_decision = call_autonomous_llm(
+            npc_id=npc_id,
+            observation=observation,
+            trigger_event=trigger_event,
+            retrieved_memories=retrieved_memories,
+            available_actions=available_actions,
+            unavailable_actions=unavailable_actions,
+        )
+        timeline.append(timeline_event("llm_decision_received", {"goal": llm_decision.get("goal", "")}))
     proposed_action = normalize_selected_action(llm_decision.get("selected_action"))
     if not proposed_action.get("action_type") and proposed_action.get("raw_selected_action") is None and available_actions:
         llm_decision = deterministic_fallback_decision(
@@ -330,6 +338,10 @@ def call_autonomous_llm(
         )
     except Exception as exc:
         return deterministic_fallback_decision(available_actions, trigger_event, str(exc))
+
+
+def is_offline_autonomous_mode(mode: str) -> bool:
+    return mode in {"deterministic_fallback", "offline", "mock"}
 
 
 def deterministic_fallback_decision(

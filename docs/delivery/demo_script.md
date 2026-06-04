@@ -298,6 +298,8 @@ player action
 .\.venv\Scripts\python.exe scripts\run_traveler_world_demo.py --profile truth_seeking_scholar --rounds 20 --mock --max-npc-ticks 4 --idle-npc-probe --stop-on-outcome --export-dir data/traces/living_world_acceptance
 ```
 
+`--mock` 会让 Traveler 与 NPC autonomous tick 都走离线 deterministic 路径，不需要真实 LLM。
+
 验收重点：
 
 - final arc phase 为 `resolved`；

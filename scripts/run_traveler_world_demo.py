@@ -28,6 +28,14 @@ from src.agent.traveler_profile import load_profile, list_available_profiles  # 
 from src.storage import database  # noqa: E402
 
 
+def build_npc_adapters(use_mock: bool) -> dict[str, NpcActorAdapter]:
+    autonomous_tick_mode = "deterministic_fallback" if use_mock else "llm_constrained"
+    return {
+        npc_id: NpcActorAdapter(npc_id, autonomous_tick_mode=autonomous_tick_mode)
+        for npc_id in ["lina", "ron", "mira", "sable"]
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run a Living World simulation with a Traveler profile.")
     parser.add_argument("--profile", default="truth_seeking_scholar", help="Traveler profile ID.")
@@ -55,14 +63,16 @@ def main() -> None:
         if status["provider"] != "openai_compatible" or not status["uses_api_key"]:
             raise SystemExit(
                 "LLM mode requires AGENT_NPC_LLM_PROVIDER=openai_compatible and "
-                "AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY. Use --mock only for offline smoke tests."
+                "AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY. Use --mock for the offline deterministic demo."
             )
 
     print(f"Profile: {profile.profile_id} — {profile.identity.public_name}")
     if use_llm:
-        print(f"Rounds: {args.rounds} | LLM: {status['model']} @ {status['base_url']}")
+        print(f"Round budget: {args.rounds} | LLM: {status['model']} @ {status['base_url']}")
     else:
-        print(f"Rounds: {args.rounds} | LLM: disabled (--mock)")
+        print(f"Round budget: {args.rounds} | LLM: disabled for Traveler and NPCs (--mock offline deterministic)")
+    if args.stop_on_outcome:
+        print("Stop condition: first resolved arc outcome or round budget, whichever comes first")
     print(f"Primary Motivation: {profile.primary_motivation}")
     print(f"Dominant Personality: {profile.dominant_personality_trait}")
     print("-" * 50)
@@ -76,10 +86,7 @@ def main() -> None:
     )
     traveler.initialize()
 
-    npc_adapters = {
-        npc_id: NpcActorAdapter(npc_id)
-        for npc_id in ["lina", "ron", "mira", "sable"]
-    }
+    npc_adapters = build_npc_adapters(use_mock=args.mock)
     director = ArcDirectorActor()
 
     scheduler = LivingWorldScheduler(
@@ -92,7 +99,10 @@ def main() -> None:
     )
 
     # Run simulation
-    print(f"\nRunning {args.rounds} rounds...")
+    if args.stop_on_outcome:
+        print(f"\nRunning until arc outcome or {args.rounds} rounds...")
+    else:
+        print(f"\nRunning {args.rounds} rounds...")
     if args.stop_on_outcome:
         result = scheduler.run_until_outcome(max_rounds=args.rounds)
     else:

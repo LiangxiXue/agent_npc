@@ -66,6 +66,53 @@ class ActorAdapterTest(unittest.TestCase):
         # With no inbox items, tick should be no_op
         self.assertIn("outcome", result)
 
+    def test_npc_adapter_defaults_to_llm_constrained_mode(self) -> None:
+        adapter = NpcActorAdapter("lina")
+        fake_result = type("FakeTick", (), {})()
+        fake_result.npc_id = "lina"
+        fake_result.outcome = "no_op"
+        fake_result.trigger_event = None
+        fake_result.proposed_action = {}
+        fake_result.validation = {}
+        fake_result.action_result = {}
+        fake_result.plan_update = {}
+        fake_result.proactive_message = None
+        fake_result.reflection = {}
+        fake_result.tick_log_id = 1
+
+        with patch("src.agent.living_world_runtime.run_autonomous_tick", return_value=fake_result) as tick:
+            adapter.tick({})
+
+        self.assertEqual(tick.call_args.kwargs["mode"], "llm_constrained")
+
+    def test_npc_adapter_can_use_deterministic_fallback_mode(self) -> None:
+        adapter = NpcActorAdapter("lina", autonomous_tick_mode="deterministic_fallback")
+        fake_result = type("FakeTick", (), {})()
+        fake_result.npc_id = "lina"
+        fake_result.outcome = "no_op"
+        fake_result.trigger_event = None
+        fake_result.proposed_action = {}
+        fake_result.validation = {}
+        fake_result.action_result = {}
+        fake_result.plan_update = {}
+        fake_result.proactive_message = None
+        fake_result.reflection = {}
+        fake_result.tick_log_id = 1
+
+        with patch("src.agent.living_world_runtime.run_autonomous_tick", return_value=fake_result) as tick:
+            adapter.tick({})
+
+        self.assertEqual(tick.call_args.kwargs["mode"], "deterministic_fallback")
+
+    def test_traveler_world_demo_mock_builds_offline_npc_adapters(self) -> None:
+        from scripts.run_traveler_world_demo import build_npc_adapters
+
+        mock_adapters = build_npc_adapters(use_mock=True)
+        live_adapters = build_npc_adapters(use_mock=False)
+
+        self.assertEqual(mock_adapters["lina"].autonomous_tick_mode, "deterministic_fallback")
+        self.assertEqual(live_adapters["lina"].autonomous_tick_mode, "llm_constrained")
+
     def test_npc_adapter_marks_empty_selected_action_as_skipped(self) -> None:
         adapter = NpcActorAdapter("lina")
         fake_result = type("FakeTick", (), {})()
