@@ -79,27 +79,38 @@ def _minimal_leads(observation: dict[str, Any], recent_events: list[Any]) -> lis
         if isinstance(observation.get("traveler_state"), dict)
         else ""
     )
+    has_field_evidence = any(_is_evidence_event(event) for event in recent_events)
     leads = [
         {
-            "lead_id": "check_guard_post",
-            "target_action_key": "move_to:guard_post",
-            "location_id": "guard_post",
-            "reason": "Guard records can provide external evidence before repeating a stalled topic.",
-            "score": 0.82,
+            "lead_id": "ask_ron_about_guard_ledger",
+            "action_type": "move_to",
+            "target": "guard_post",
+            "reason": "Mira thread needs external procedural evidence.",
         },
         {
-            "lead_id": "check_tavern",
-            "target_action_key": "move_to:tavern",
-            "location_id": "tavern",
-            "reason": "Tavern rumors can provide ambient evidence for ruins conversations.",
-            "score": 0.62,
+            "lead_id": "question_sable_about_rumors",
+            "action_type": "move_to",
+            "target": "market",
+            "reason": "Ruins rumors need adversarial cross-checking.",
+        },
+        {
+            "lead_id": "inspect_tavern_back_alley",
+            "action_type": "move_to",
+            "target": "tavern",
+            "reason": "Guardian route needs physical evidence.",
         },
     ]
+    if has_field_evidence and current_location != "archive":
+        leads.append(
+            {
+                "lead_id": "return_to_mira_with_field_notes",
+                "action_type": "move_to",
+                "target": "archive",
+                "reason": "New field evidence should be interpreted by Mira.",
+            }
+        )
     if current_location:
-        leads = [lead for lead in leads if lead["location_id"] != current_location]
-    if any(_is_evidence_event(event) for event in recent_events):
-        for lead in leads:
-            lead["score"] = round(max(0.35, float(lead["score"]) - 0.25), 3)
+        leads = [lead for lead in leads if lead["target"] != current_location]
     return leads
 
 
@@ -110,7 +121,11 @@ def _score_available_actions(
     recent_events: list[Any],
 ) -> dict[str, float]:
     scores: dict[str, float] = {}
-    lead_scores = {lead["target_action_key"]: float(lead["score"]) for lead in leads}
+    lead_scores = {
+        f"{lead['action_type']}:{lead['target']}": _lead_score(lead, recent_events)
+        for lead in leads
+        if isinstance(lead.get("action_type"), str) and isinstance(lead.get("target"), str)
+    }
     thread_by_npc = {thread["npc_id"]: thread for thread in conversation_threads}
 
     for action in available_actions:
@@ -130,6 +145,19 @@ def _score_available_actions(
             scores[action_type] = 0.35
 
     return scores
+
+
+def _lead_score(lead: dict[str, Any], recent_events: list[Any]) -> float:
+    base_scores = {
+        "ask_ron_about_guard_ledger": 0.82,
+        "question_sable_about_rumors": 0.78,
+        "inspect_tavern_back_alley": 0.68,
+        "return_to_mira_with_field_notes": 0.86,
+    }
+    score = base_scores.get(str(lead.get("lead_id", "")), 0.45)
+    if lead.get("lead_id") != "return_to_mira_with_field_notes" and any(_is_evidence_event(event) for event in recent_events):
+        score = max(0.35, score - 0.25)
+    return round(score, 3)
 
 
 def _conversation_score(thread: dict[str, Any] | None, recent_events: list[Any]) -> float:

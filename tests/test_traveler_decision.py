@@ -53,6 +53,30 @@ def test_fallback_picks_highest_information_gain_arg_option() -> None:
     assert decision["selected_action"]["args"]["npc_id"] == "mira"
 
 
+def test_fallback_picks_highest_information_gain_move_location() -> None:
+    actions = [
+        {
+            "action_type": "move_to",
+            "args_schema": {"location_id": "string"},
+            "arg_options": {"location_id": ["guard_post", "market", "tavern"]},
+        }
+    ]
+    biases = [ActionBias("move_to", (), (), "low", 0.5)]
+    exploration_context = {
+        "action_scores": {
+            "move_to:guard_post": 0.7,
+            "move_to:market": 0.95,
+            "move_to:tavern": 0.8,
+        },
+        "selection_policy": "Follow the highest information-gain lead.",
+    }
+
+    decision = deterministic_fallback_decision(actions, biases, exploration_context=exploration_context)
+
+    assert decision["selected_action"]["action_type"] == "move_to"
+    assert decision["selected_action"]["args"]["location_id"] == "market"
+
+
 def test_llm_normalization_fallback_preserves_exploration_context(monkeypatch) -> None:
     actions = [
         {
