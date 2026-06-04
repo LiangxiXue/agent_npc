@@ -139,6 +139,32 @@ class AutonomousTickTest(unittest.TestCase):
         self.assertEqual(result.validation["status"], "rejected_one_command_at_a_time")
         self.assertEqual(result.action_result["executed_tools"], [])
 
+    def test_empty_autonomous_llm_decision_falls_back_to_valid_available_action(self) -> None:
+        from src.agent.autonomous_tick import run_autonomous_tick
+
+        event = database.create_world_event(
+            event_type="traveler_talked_to_npc",
+            content="Traveler asked Mira about ruins research in the archive.",
+            source_type="traveler",
+            source_id="traveler_main",
+            location_id="archive",
+            visibility="npc_only",
+            payload={"arc_id": "ruins_chapter_1", "arc_signal": "research"},
+        )
+        database.add_npc_event_inbox_item(
+            "mira",
+            int(event["id"]),
+            relevance_score=1.0,
+            reason="explicit_target",
+        )
+
+        with patch("src.agent.autonomous_tick.call_openai_compatible_json", return_value={}):
+            result = run_autonomous_tick("mira", mode="llm_constrained", run_director=False)
+
+        self.assertTrue(result.proposed_action.get("action_type"))
+        self.assertNotEqual(result.validation["status"], "rejected_by_available_actions")
+        self.assertEqual(result.llm_decision["fallback_reason"], "LLM returned no valid selected_action.")
+
     def test_invalid_selected_action_args_are_reported_in_trace(self) -> None:
         from src.agent.autonomous_tick import run_autonomous_tick
 

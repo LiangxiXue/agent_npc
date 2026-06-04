@@ -108,6 +108,13 @@ def run_autonomous_tick(
     )
     timeline.append(timeline_event("llm_decision_received", {"goal": llm_decision.get("goal", "")}))
     proposed_action = normalize_selected_action(llm_decision.get("selected_action"))
+    if not proposed_action.get("action_type") and proposed_action.get("raw_selected_action") is None and available_actions:
+        llm_decision = deterministic_fallback_decision(
+            available_actions,
+            trigger_event,
+            "LLM returned no valid selected_action.",
+        )
+        proposed_action = normalize_selected_action(llm_decision.get("selected_action"))
     validation = validate_selected_action(proposed_action, available_actions)
     validation = enrich_validation_with_unavailable_reason(validation, proposed_action, unavailable_actions)
     if validation["status"] == "allowed":
