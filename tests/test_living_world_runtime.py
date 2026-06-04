@@ -1,0 +1,228 @@
+"""Tests for Living World Runtime — Actor adapters and Scheduler."""
+
+import os
+import unittest
+from pathlib import Path
+from typing import Any
+from unittest.mock import patch
+
+os.environ["AGENT_NPC_SKIP_ENV_FILE"] = "1"
+os.environ["AGENT_NPC_LLM_PROVIDER"] = "openai_compatible"
+os.environ["AGENT_NPC_LLM_API_KEY"] = "test-key"
+os.environ["AGENT_NPC_EMBEDDING_PROVIDER"] = "mock_hash"
+os.environ["AGENT_NPC_RETRIEVAL_BACKEND"] = "sqlite_cosine"
+
+TEST_DB_PATH = str(Path(__file__).resolve().parents[1] / "data" / "test_living_world_runtime.db")
+os.environ["AGENT_NPC_DB_PATH"] = TEST_DB_PATH
+
+from src.agent.living_world_runtime import (  # noqa: E402
+    ArcDirectorActor,
+    LivingWorldScheduler,
+    NpcActorAdapter,
+    TravelerActor,
+)
+from src.agent.traveler_profile import load_profile  # noqa: E402
+from src.storage import database  # noqa: E402
+
+
+class ActorAdapterTest(unittest.TestCase):
+    def setUp(self) -> None:
+        database.reset_database()
+
+    def test_traveler_actor_initializes_state_and_relationships(self) -> None:
+        profile = load_profile("truth_seeking_scholar")
+        actor = TravelerActor("test_actor", profile, use_llm=False)
+        actor.initialize()
+
+        state = database.get_traveler_state("test_actor")
+        self.assertEqual(state["traveler_id"], "test_actor")
+        self.assertEqual(state["profile_id"], "truth_seeking_scholar")
+
+        rels = database.get_all_traveler_relationships("test_actor")
+        self.assertGreaterEqual(len(rels), 4)
+
+    def test_traveler_actor_tick_returns_result(self) -> None:
+        profile = load_profile("truth_seeking_scholar")
+        actor = TravelerActor("test_actor2", profile, use_llm=False)
+        actor.initialize()
+
+        world_state = {
+            "round_number": 1,
+            "npc_states": {npc["npc_id"]: npc for npc in database.list_npcs()},
+            "scene_objects": database.list_scene_objects(),
+            "arc_state": database.get_world_arc_state("ruins_chapter_1"),
+            "world_events_since_last_round": [],
+        }
+        result = actor.tick(world_state)
+        self.assertEqual(result["traveler_id"], "test_actor2")
+        self.assertIn("decision", result)
+
+    def test_npc_adapter_tick_handles_no_inbox(self) -> None:
+        adapter = NpcActorAdapter("lina")
+        # Lina should exist after reset
+        result = adapter.tick({})
+        # With no inbox items, tick should be no_op
+        self.assertIn("outcome", result)
+
+    def test_npc_adapter_marks_empty_selected_action_as_skipped(self) -> None:
+        adapter = NpcActorAdapter("lina")
+        fake_result = type("FakeTick", (), {})()
+        fake_result.npc_id = "lina"
+        fake_result.outcome = "safe_message"
+        fake_result.trigger_event = {"id": 1}
+        fake_result.proposed_action = {"action_type": "", "args": {}, "raw_selected_action": None}
+        fake_result.validation = {
+            "status": "rejected_by_available_actions",
+            "reason": "selected action  is not in available_actions",
+        }
+        fake_result.action_result = {
+            "accepted": False,
+            "blocked_reason": "rejected_by_available_actions",
+        }
+        fake_result.plan_update = {}
+        fake_result.proactive_message = {"content": "Lina 暂时只留下含糊的提醒，没有改变任何世界状态。"}
+        fake_result.reflection = {}
+        fake_result.tick_log_id = 1
+
+        with patch("src.agent.living_world_runtime.run_autonomous_tick", return_value=fake_result):
+            result = adapter.tick({})
+
+        self.assertEqual(result["outcome"], "skipped_no_valid_action")
+        self.assertEqual(result["proposed_action"]["action_type"], "skip")
+        self.assertIsNone(result["proactive_message"])
+
+    def test_arc_director_tick_updates_arc_state(self) -> None:
+        director = ArcDirectorActor()
+        result = director.tick({"round_number": 1}, [], [])
+        self.assertEqual(result["arc_id"], "ruins_chapter_1")
+        self.assertIn("phase", result)
+
+    def test_arc_director_does_not_resolve_from_first_round_routine_noise(self) -> None:
+        director = ArcDirectorActor()
+        routine_events = [
+            {"payload": {"arc_signal": "guardian"}},
+            {"payload": {"arc_signal": "research"}},
+            {"payload": {"arc_signal": "sable"}},
+            {"payload": {"arc_signal": "chaos"}},
+        ]
+
+        result = director.tick({"round_number": 1}, routine_events, [])
+
+        self.assertNotEqual(result["phase"], "resolved")
+        self.assertEqual(result["outcome"], "")
+
+    def test_traveler_get_direct_targets(self) -> None:
+        profile = load_profile("truth_seeking_scholar")
+        actor = TravelerActor("test_actor3", profile, use_llm=False)
+        actor.initialize()
+
+        result = {
+            "proposed_action": {"action_type": "talk_to", "args": {"npc_id": "mira"}},
+        }
+        targets = actor.get_direct_targets(result)
+        self.assertIn("mira", targets)
+
+    def test_traveler_get_direct_targets_empty_for_non_npc_action(self) -> None:
+        profile = load_profile("truth_seeking_scholar")
+        actor = TravelerActor("test_actor4", profile, use_llm=False)
+        result = {
+            "proposed_action": {"action_type": "move_to", "args": {"location_id": "archive"}},
+        }
+        targets = actor.get_direct_targets(result)
+        self.assertEqual(len(targets), 0)
+
+
+class SchedulerTest(unittest.TestCase):
+    def setUp(self) -> None:
+        database.reset_database()
+
+    def test_scheduler_initializes_and_runs_minimal_simulation(self) -> None:
+        profile = load_profile("truth_seeking_scholar")
+        traveler = TravelerActor("scheduler_test", profile, use_llm=False)
+        traveler.initialize()
+
+        npc_adapters = {
+            "lina": NpcActorAdapter("lina"),
+            "ron": NpcActorAdapter("ron"),
+            "mira": NpcActorAdapter("mira"),
+            "sable": NpcActorAdapter("sable"),
+        }
+        director = ArcDirectorActor()
+
+        scheduler = LivingWorldScheduler(
+            traveler=traveler,
+            npc_adapters=npc_adapters,
+            arc_director=director,
+            max_npc_ticks_per_round=2,
+        )
+
+        result = scheduler.run(rounds=3)
+        self.assertEqual(result["total_rounds"], 3)
+        self.assertIn("final_arc_outcome", result)
+        self.assertIn("final_relationships", result)
+        self.assertEqual(len(result["rounds"]), 3)
+
+    def test_scheduler_does_not_resolve_arc_during_first_npc_ticks(self) -> None:
+        profile = load_profile("truth_seeking_scholar")
+        traveler = TravelerActor("early_arc", profile, use_llm=False)
+        traveler.initialize()
+
+        npc_adapters = {
+            "lina": NpcActorAdapter("lina"),
+            "ron": NpcActorAdapter("ron"),
+            "mira": NpcActorAdapter("mira"),
+            "sable": NpcActorAdapter("sable"),
+        }
+        scheduler = LivingWorldScheduler(
+            traveler=traveler,
+            npc_adapters=npc_adapters,
+            arc_director=ArcDirectorActor(),
+            max_npc_ticks_per_round=2,
+            npc_routines_every_round=True,
+        )
+
+        result = scheduler.run(rounds=1)
+
+        self.assertNotEqual(result["rounds"][0]["arc_update"]["phase"], "resolved")
+        self.assertEqual(result["final_arc_outcome"], "")
+
+    def test_scheduler_collects_round_logs(self) -> None:
+        profile = load_profile("truth_seeking_scholar")
+        traveler = TravelerActor("sched_rounds", profile, use_llm=False)
+        traveler.initialize()
+
+        npc_adapters = {"lina": NpcActorAdapter("lina")}
+        director = ArcDirectorActor()
+
+        scheduler = LivingWorldScheduler(
+            traveler=traveler,
+            npc_adapters=npc_adapters,
+            arc_director=director,
+            max_npc_ticks_per_round=1,
+            npc_routines_every_round=True,
+        )
+
+        result = scheduler.run(rounds=2)
+        self.assertEqual(len(result["rounds"]), 2)
+        for rd in result["rounds"]:
+            self.assertIn("round_number", rd)
+            self.assertIn("traveler_tick", rd)
+            self.assertIn("arc_update", rd)
+
+    def test_scheduler_round_events_do_not_duplicate_traveler_events(self) -> None:
+        profile = load_profile("truth_seeking_scholar")
+        traveler = TravelerActor("dedupe_rounds", profile, use_llm=False)
+        traveler.initialize()
+
+        scheduler = LivingWorldScheduler(
+            traveler=traveler,
+            npc_adapters={},
+            arc_director=ArcDirectorActor(),
+            max_npc_ticks_per_round=0,
+            npc_routines_every_round=False,
+        )
+
+        result = scheduler.run(rounds=2)
+        round_two_recent_events = result["rounds"][1]["traveler_tick"]["observation"]["recent_events"]
+        event_ids = [event["id"] for event in round_two_recent_events if "id" in event]
+        self.assertEqual(len(event_ids), len(set(event_ids)))

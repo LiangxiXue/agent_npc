@@ -1,0 +1,1420 @@
+{
+  "run_id": "20260603T130804-truth_seeking_scholar",
+  "profile_id": "truth_seeking_scholar",
+  "profile_summary": {
+    "profile_id": "truth_seeking_scholar",
+    "public_name": "Arin the Cartographer",
+    "public_role": "独立学者，受雇于远方学院进行遗迹测绘",
+    "primary_motivation": "curiosity",
+    "dominant_personality": "patient",
+    "exploration_style": "investigation_first",
+    "secret_count": 1,
+    "goal_count": 2
+  },
+  "exported_at": "2026-06-03T13:08:04.992993+00:00",
+  "traveler_id": "traveler_main",
+  "total_rounds": 3,
+  "final_arc_outcome": "guardian_advantage",
+  "final_arc_phase": "resolved",
+  "final_tension": 10,
+  "final_traveler_location": "archive",
+  "final_relationships": {
+    "lina": {
+      "trust": 0.0,
+      "suspicion": 0.0,
+      "affinity": 0.0,
+      "last_tone": "neutral"
+    },
+    "mira": {
+      "trust": 0.05,
+      "suspicion": 0.0,
+      "affinity": 0.1,
+      "last_tone": "friendly"
+    },
+    "ron": {
+      "trust": 0.0,
+      "suspicion": 0.0,
+      "affinity": 0.0,
+      "last_tone": "neutral"
+    },
+    "sable": {
+      "trust": 0.0,
+      "suspicion": 0.0,
+      "affinity": 0.0,
+      "last_tone": "neutral"
+    }
+  },
+  "rounds": [
+    {
+      "round_number": 1,
+      "ambient_events": [
+        {
+          "id": 1,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 2,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 3,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 4,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 5,
+          "event_type": "traveler_moved",
+          "content": "Arin the Cartographer moved to archive."
+        },
+        {
+          "id": 5,
+          "event_type": "traveler_moved",
+          "content": "Arin the Cartographer moved to archive."
+        }
+      ],
+      "traveler_tick": {
+        "traveler_id": "traveler_main",
+        "round_number": 1,
+        "mode": "llm",
+        "observation": {
+          "traveler_id": "traveler_main",
+          "round_number": 1,
+          "traveler_state": {
+            "current_location": "town_square",
+            "inventory": [
+              "cartography_kit",
+              "field_journal",
+              "letter_of_introduction"
+            ],
+            "private_notes": [
+              "听说 Mira 是对遗迹最了解的学者，应该先找她",
+              "守卫 Ron 看起来很严格，直接问遗迹入口可能会引起怀疑",
+              "Sable 的传闻不可信，但她的信息网络可能有线索"
+            ],
+            "active_goal": {}
+          },
+          "relationships": {
+            "lina": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "mira": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "ron": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "sable": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            }
+          },
+          "npc_states": {
+            "lina": {
+              "npc_id": "lina",
+              "name": "Lina",
+              "role": "Tavern Owner",
+              "description": "A cautious and practical tavern owner who knows local rumors.",
+              "hidden_alignment": "protect_ruins",
+              "mood": "neutral",
+              "trust": 20,
+              "affection": 30
+            },
+            "ron": {
+              "npc_id": "ron",
+              "name": "Ron",
+              "role": "Town Guard",
+              "description": "A disciplined town guard who tracks patrol reports and gate incidents.",
+              "hidden_alignment": "enforce_order",
+              "mood": "alert",
+              "trust": 18,
+              "affection": 20
+            },
+            "mira": {
+              "npc_id": "mira",
+              "name": "Mira",
+              "role": "Ruins Scholar",
+              "description": "A careful scholar who studies old ruins, inscriptions, and local myths.",
+              "hidden_alignment": "research_truth",
+              "mood": "curious",
+              "trust": 22,
+              "affection": 24
+            },
+            "sable": {
+              "npc_id": "sable",
+              "name": "Sable",
+              "role": "Traveling Relic Broker",
+              "description": "A polished relic broker who offers useful rumors while steering people toward exploitable ruin secrets.",
+              "hidden_alignment": "exploit_ruins",
+              "mood": "pleasant",
+              "trust": 16,
+              "affection": 18
+            }
+          },
+          "scene_objects": [
+            {
+              "object_id": "guard_ledger",
+              "name": "Guard Ledger",
+              "location_id": "guard_post"
+            },
+            {
+              "object_id": "mira_field_notes",
+              "name": "Mira Field Notes",
+              "location_id": "archive"
+            },
+            {
+              "object_id": "sable_rumor_stall",
+              "name": "Sable Rumor Stall",
+              "location_id": "market"
+            },
+            {
+              "object_id": "tavern_back_alley",
+              "name": "Tavern Back Alley",
+              "location_id": "tavern"
+            }
+          ],
+          "arc_state": {
+            "arc_id": "ruins_chapter_1",
+            "phase": "rumor",
+            "tension": 0,
+            "advantage": "none",
+            "outcome": "",
+            "metadata_json": "{\"title\": \"Ruins Chapter 1\"}",
+            "updated_at": "2026-06-03 13:02:57",
+            "metadata": {
+              "title": "Ruins Chapter 1"
+            }
+          },
+          "recent_events": [],
+          "memory_retrieval_mode": "hybrid"
+        },
+        "available_actions": [
+          "move_to",
+          "wait_and_observe",
+          "record_private_note"
+        ],
+        "action_biases": [
+          {
+            "action_type": "move_to",
+            "supporting_motivations": [
+              "curiosity",
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.725
+          },
+          {
+            "action_type": "wait_and_observe",
+            "supporting_motivations": [
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.5
+          },
+          {
+            "action_type": "record_private_note",
+            "supporting_motivations": [
+              "truth_seeking",
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.7
+          }
+        ],
+        "decision": {
+          "selected_action": {
+            "action_type": "move_to",
+            "args": {
+              "location_id": "archive"
+            }
+          },
+          "decision_reason": "Mira is the most knowledgeable scholar about the ruins; her field notes are kept at the archive, so moving there is the logical first step to begin my investigation.",
+          "profile_alignment": {
+            "curiosity": 0.95,
+            "truth_seeking": 0.9
+          },
+          "profile_tension": {},
+          "deception_choice": null,
+          "disclosure_choice": null,
+          "expected_consequence": "I will arrive at the archive and likely encounter Mira or her notes, allowing me to start gathering reliable information about the ruins.",
+          "mode": "llm"
+        },
+        "proposed_action": {
+          "action_type": "move_to",
+          "args": {
+            "location_id": "archive"
+          }
+        },
+        "validation": {
+          "status": "allowed",
+          "reason": "Action is available and args present."
+        },
+        "action_result": {
+          "accepted": true,
+          "blocked_reason": "",
+          "action_type": "move_to",
+          "state_changes": [
+            {
+              "field": "location",
+              "before": "town_square",
+              "after": "archive"
+            }
+          ],
+          "relationship_changes": [],
+          "created_event_ids": [
+            5
+          ]
+        },
+        "state_changes": [
+          {
+            "field": "location",
+            "before": "town_square",
+            "after": "archive"
+          }
+        ],
+        "relationship_changes": [],
+        "created_events": [
+          {
+            "id": 5,
+            "event_type": "traveler_moved",
+            "content": "Arin the Cartographer moved to archive."
+          }
+        ],
+        "reflection": {
+          "traveler_id": "traveler_main",
+          "action_type": "move_to",
+          "accepted": true,
+          "summary": "Traveler move_to — accepted.",
+          "decision_reason": "Mira is the most knowledgeable scholar about the ruins; her field notes are kept at the archive, so moving there is the logical first step to begin my investigation."
+        },
+        "deception_metadata": null,
+        "disclosure_metadata": null,
+        "tick_log_id": 1
+      },
+      "npc_ticks": [
+        {
+          "npc_id": "lina",
+          "outcome": "safe_message",
+          "trigger_event_id": 1,
+          "proposed_action": {
+            "action_type": "",
+            "args": {},
+            "raw_selected_action": null
+          },
+          "validation": {
+            "status": "rejected_by_available_actions",
+            "reason": "selected action  is not in available_actions"
+          },
+          "action_result": {
+            "accepted": false,
+            "blocked_reason": "rejected_by_available_actions",
+            "executed_tools": [],
+            "state_before": {},
+            "state_after": {},
+            "state_changes": [],
+            "events": [],
+            "response_constraints": [
+              "Do not claim world-state changes."
+            ]
+          },
+          "plan_update": {
+            "goal": "",
+            "current_step": "",
+            "status": "blocked",
+            "blocker": "selected action  is not in available_actions",
+            "id": 1,
+            "source_event_id": 1
+          },
+          "proactive_message": "Lina 暂时只留下含糊的提醒，没有改变任何世界状态。",
+          "reflection": {
+            "summary": "",
+            "belief_update": "",
+            "emotion": ""
+          },
+          "tick_log_id": 1,
+          "created_events": []
+        },
+        {
+          "npc_id": "ron",
+          "outcome": "no_op",
+          "trigger_event_id": 3,
+          "proposed_action": {
+            "action_type": "request_evidence",
+            "args": {
+              "evidence_type": "badge",
+              "message_intent": "I'm reviewing the patrol ledger and see an unverified badge. Show me your guard badge for verification before I can allow any gate access."
+            }
+          },
+          "validation": {
+            "status": "allowed",
+            "reason": "selected action is available and args match schema"
+          },
+          "action_result": {
+            "accepted": true,
+            "blocked_reason": "",
+            "executed_tools": [],
+            "state_before": {
+              "npc": {
+                "npc_id": "ron",
+                "name": "Ron",
+                "role": "Town Guard",
+                "hidden_alignment": "enforce_order",
+                "mood": "alert",
+                "trust": 18,
+                "affection": 20
+              },
+              "player": {
+                "location": "tavern",
+                "inventory": [],
+                "unlocked_locations": [
+                  "tavern",
+                  "town_square"
+                ]
+              },
+              "quest": {
+                "quest_id": "gate_badge",
+                "title": "Gate Badge",
+                "status": "not_started"
+              }
+            },
+            "state_after": {
+              "npc": {
+                "npc_id": "ron",
+                "name": "Ron",
+                "role": "Town Guard",
+                "hidden_alignment": "enforce_order",
+                "mood": "alert",
+                "trust": 18,
+                "affection": 20
+              },
+              "player": {
+                "location": "tavern",
+                "inventory": [],
+                "unlocked_locations": [
+                  "tavern",
+                  "town_square"
+                ]
+              },
+              "quest": {
+                "quest_id": "gate_badge",
+                "title": "Gate Badge",
+                "status": "not_started"
+              }
+            },
+            "state_changes": [],
+            "events": [],
+            "response_constraints": [
+              "Do not claim the underground ruins entrance is unlocked or available.",
+              "Do not claim the player received an item reward."
+            ]
+          },
+          "plan_update": {
+            "goal": "Enforce strict gate security protocols and verify all personnel before the night patrol.",
+            "current_step": "",
+            "status": "active",
+            "blocker": "",
+            "id": 2,
+            "source_event_id": 3
+          },
+          "proactive_message": null,
+          "reflection": {
+            "summary": "",
+            "belief_update": "",
+            "emotion": "alert"
+          },
+          "tick_log_id": 2,
+          "created_events": []
+        }
+      ],
+      "arc_update": {
+        "arc_id": "ruins_chapter_1",
+        "phase": "resolved",
+        "tension": 3,
+        "advantage": "guardian",
+        "outcome": "guardian_advantage",
+        "scores": {
+          "guardian": 2,
+          "research": 1,
+          "sable": 1,
+          "chaos": 2
+        },
+        "total_signals": 6
+      }
+    },
+    {
+      "round_number": 2,
+      "ambient_events": [
+        {
+          "id": 6,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 7,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 8,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 9,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 10,
+          "event_type": "traveler_talked_to_npc",
+          "content": "Arin the Cartographer talked to mira about 'her research on the local ruins and any warnings about them' (tone=friendly, honesty=full)."
+        }
+      ],
+      "traveler_tick": {
+        "traveler_id": "traveler_main",
+        "round_number": 2,
+        "mode": "llm",
+        "observation": {
+          "traveler_id": "traveler_main",
+          "round_number": 2,
+          "traveler_state": {
+            "current_location": "archive",
+            "inventory": [
+              "cartography_kit",
+              "field_journal",
+              "letter_of_introduction"
+            ],
+            "private_notes": [
+              "听说 Mira 是对遗迹最了解的学者，应该先找她",
+              "守卫 Ron 看起来很严格，直接问遗迹入口可能会引起怀疑",
+              "Sable 的传闻不可信，但她的信息网络可能有线索"
+            ],
+            "active_goal": {}
+          },
+          "relationships": {
+            "lina": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "mira": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "ron": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "sable": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            }
+          },
+          "npc_states": {
+            "lina": {
+              "npc_id": "lina",
+              "name": "Lina",
+              "role": "Tavern Owner",
+              "description": "A cautious and practical tavern owner who knows local rumors.",
+              "hidden_alignment": "protect_ruins",
+              "mood": "neutral",
+              "trust": 20,
+              "affection": 30
+            },
+            "ron": {
+              "npc_id": "ron",
+              "name": "Ron",
+              "role": "Town Guard",
+              "description": "A disciplined town guard who tracks patrol reports and gate incidents.",
+              "hidden_alignment": "enforce_order",
+              "mood": "alert",
+              "trust": 18,
+              "affection": 20
+            },
+            "mira": {
+              "npc_id": "mira",
+              "name": "Mira",
+              "role": "Ruins Scholar",
+              "description": "A careful scholar who studies old ruins, inscriptions, and local myths.",
+              "hidden_alignment": "research_truth",
+              "mood": "curious",
+              "trust": 22,
+              "affection": 24
+            },
+            "sable": {
+              "npc_id": "sable",
+              "name": "Sable",
+              "role": "Traveling Relic Broker",
+              "description": "A polished relic broker who offers useful rumors while steering people toward exploitable ruin secrets.",
+              "hidden_alignment": "exploit_ruins",
+              "mood": "pleasant",
+              "trust": 16,
+              "affection": 18
+            }
+          },
+          "scene_objects": [
+            {
+              "object_id": "guard_ledger",
+              "name": "Guard Ledger",
+              "location_id": "guard_post"
+            },
+            {
+              "object_id": "mira_field_notes",
+              "name": "Mira Field Notes",
+              "location_id": "archive"
+            },
+            {
+              "object_id": "sable_rumor_stall",
+              "name": "Sable Rumor Stall",
+              "location_id": "market"
+            },
+            {
+              "object_id": "tavern_back_alley",
+              "name": "Tavern Back Alley",
+              "location_id": "tavern"
+            }
+          ],
+          "arc_state": {
+            "arc_id": "ruins_chapter_1",
+            "phase": "resolved",
+            "tension": 3,
+            "advantage": "guardian",
+            "outcome": "guardian_advantage",
+            "metadata_json": "{\"title\": \"Ruins Chapter 1\", \"last_resolution_reason\": \"Arc resolved after resolved phase.\", \"last_resolution_confidence\": 0.7}",
+            "updated_at": "2026-06-03 13:04:31",
+            "metadata": {
+              "title": "Ruins Chapter 1",
+              "last_resolution_reason": "Arc resolved after resolved phase.",
+              "last_resolution_confidence": 0.7
+            }
+          },
+          "recent_events": [
+            {
+              "id": 1,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 2,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 3,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 4,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 5,
+              "event_type": "traveler_moved",
+              "content": "Arin the Cartographer moved to archive."
+            }
+          ],
+          "memory_retrieval_mode": "hybrid"
+        },
+        "available_actions": [
+          "move_to",
+          "talk_to",
+          "investigate",
+          "ask_for_help",
+          "share_information",
+          "trade_with",
+          "wait_and_observe",
+          "record_private_note"
+        ],
+        "action_biases": [
+          {
+            "action_type": "move_to",
+            "supporting_motivations": [
+              "curiosity",
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.725
+          },
+          {
+            "action_type": "talk_to",
+            "supporting_motivations": [
+              "curiosity",
+              "truth_seeking"
+            ],
+            "opposing_personality": [],
+            "risk_level": "medium",
+            "profile_alignment_score": 0.925
+          },
+          {
+            "action_type": "investigate",
+            "supporting_motivations": [
+              "curiosity",
+              "truth_seeking"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.925
+          },
+          {
+            "action_type": "ask_for_help",
+            "supporting_motivations": [
+              "safety"
+            ],
+            "opposing_personality": [
+              "cautious"
+            ],
+            "risk_level": "medium",
+            "profile_alignment_score": -0.1
+          },
+          {
+            "action_type": "share_information",
+            "supporting_motivations": [
+              "truth_seeking"
+            ],
+            "opposing_personality": [
+              "cautious"
+            ],
+            "risk_level": "high",
+            "profile_alignment_score": 0.3
+          },
+          {
+            "action_type": "trade_with",
+            "supporting_motivations": [],
+            "opposing_personality": [
+              "empathetic"
+            ],
+            "risk_level": "medium",
+            "profile_alignment_score": -0.7
+          },
+          {
+            "action_type": "wait_and_observe",
+            "supporting_motivations": [
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.5
+          },
+          {
+            "action_type": "record_private_note",
+            "supporting_motivations": [
+              "truth_seeking",
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.7
+          }
+        ],
+        "decision": {
+          "selected_action": {
+            "action_type": "talk_to",
+            "args": {
+              "npc_id": "mira",
+              "topic": "her research on the local ruins and any warnings about them",
+              "tone": "friendly",
+              "honesty_level": "full",
+              "disclosure": "none"
+            }
+          },
+          "decision_reason": "As a truth-seeking scholar, I need information about the ruins to understand them and prevent harm. Mira is the most knowledgeable person here, and I trust scholars. I will present myself honestly as a cartographer to build rapport and ask about her research.",
+          "profile_alignment": {
+            "curiosity": 0.95,
+            "truth_seeking": 0.9,
+            "trusts_scholars": 0.85,
+            "patient": 0.75,
+            "empathetic": 0.7
+          },
+          "profile_tension": {
+            "cautious": 0.6,
+            "suspicious": 0.45
+          },
+          "deception_choice": null,
+          "disclosure_choice": null,
+          "expected_consequence": "Mira will likely share some of her knowledge about the ruins, possibly mentioning dangers or her own theories. This could lead to further leads, such as the guard ledger or a need to explore the ruins themselves. The relationship may start to build trust.",
+          "mode": "llm"
+        },
+        "proposed_action": {
+          "action_type": "talk_to",
+          "args": {
+            "npc_id": "mira",
+            "topic": "her research on the local ruins and any warnings about them",
+            "tone": "friendly",
+            "honesty_level": "full",
+            "disclosure": "none"
+          }
+        },
+        "validation": {
+          "status": "allowed",
+          "reason": "Action is available and args present."
+        },
+        "action_result": {
+          "accepted": true,
+          "blocked_reason": "",
+          "action_type": "talk_to",
+          "state_changes": [],
+          "relationship_changes": [],
+          "created_event_ids": [
+            10
+          ]
+        },
+        "state_changes": [],
+        "relationship_changes": [],
+        "created_events": [
+          {
+            "id": 10,
+            "event_type": "traveler_talked_to_npc",
+            "content": "Arin the Cartographer talked to mira about 'her research on the local ruins and any warnings about them' (tone=friendly, honesty=full)."
+          }
+        ],
+        "reflection": {
+          "traveler_id": "traveler_main",
+          "action_type": "talk_to",
+          "accepted": true,
+          "summary": "Traveler talk_to — accepted.",
+          "decision_reason": "As a truth-seeking scholar, I need information about the ruins to understand them and prevent harm. Mira is the most knowledgeable person here, and I trust scholars. I will present myself honestly as a cartographer to build rapport and ask about her research."
+        },
+        "deception_metadata": null,
+        "disclosure_metadata": null,
+        "tick_log_id": 2
+      },
+      "npc_ticks": [
+        {
+          "npc_id": "mira",
+          "outcome": "safe_message",
+          "trigger_event_id": 2,
+          "proposed_action": {
+            "action_type": "",
+            "args": {},
+            "raw_selected_action": null
+          },
+          "validation": {
+            "status": "rejected_by_available_actions",
+            "reason": "selected action  is not in available_actions"
+          },
+          "action_result": {
+            "accepted": false,
+            "blocked_reason": "rejected_by_available_actions",
+            "executed_tools": [],
+            "state_before": {},
+            "state_after": {},
+            "state_changes": [],
+            "events": [],
+            "response_constraints": [
+              "Do not claim world-state changes."
+            ]
+          },
+          "plan_update": {
+            "goal": "",
+            "current_step": "",
+            "status": "blocked",
+            "blocker": "selected action  is not in available_actions",
+            "id": 3,
+            "source_event_id": 2
+          },
+          "proactive_message": "Mira 暂时只留下含糊的提醒，没有改变任何世界状态。",
+          "reflection": {
+            "summary": "",
+            "belief_update": "",
+            "emotion": ""
+          },
+          "tick_log_id": 3,
+          "created_events": []
+        },
+        {
+          "npc_id": "lina",
+          "outcome": "safe_message",
+          "trigger_event_id": 6,
+          "proposed_action": {
+            "action_type": "",
+            "args": {},
+            "raw_selected_action": null
+          },
+          "validation": {
+            "status": "rejected_by_available_actions",
+            "reason": "selected action  is not in available_actions"
+          },
+          "action_result": {
+            "accepted": false,
+            "blocked_reason": "rejected_by_available_actions",
+            "executed_tools": [],
+            "state_before": {},
+            "state_after": {},
+            "state_changes": [],
+            "events": [],
+            "response_constraints": [
+              "Do not claim world-state changes."
+            ]
+          },
+          "plan_update": {
+            "goal": "",
+            "current_step": "",
+            "status": "blocked",
+            "blocker": "selected action  is not in available_actions",
+            "id": 1,
+            "source_event_id": 6
+          },
+          "proactive_message": "Lina 暂时只留下含糊的提醒，没有改变任何世界状态。",
+          "reflection": {
+            "summary": "",
+            "belief_update": "",
+            "emotion": ""
+          },
+          "tick_log_id": 4,
+          "created_events": []
+        }
+      ],
+      "arc_update": {
+        "arc_id": "ruins_chapter_1",
+        "phase": "resolved",
+        "tension": 6,
+        "advantage": "guardian",
+        "outcome": "guardian_advantage",
+        "scores": {
+          "guardian": 2,
+          "research": 1,
+          "sable": 1,
+          "chaos": 2
+        },
+        "total_signals": 6
+      }
+    },
+    {
+      "round_number": 3,
+      "ambient_events": [
+        {
+          "id": 11,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 12,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 13,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 14,
+          "event_type": "npc_routine_activity"
+        }
+      ],
+      "traveler_tick": {
+        "traveler_id": "traveler_main",
+        "round_number": 3,
+        "mode": "llm",
+        "observation": {
+          "traveler_id": "traveler_main",
+          "round_number": 3,
+          "traveler_state": {
+            "current_location": "archive",
+            "inventory": [
+              "cartography_kit",
+              "field_journal",
+              "letter_of_introduction"
+            ],
+            "private_notes": [
+              "听说 Mira 是对遗迹最了解的学者，应该先找她",
+              "守卫 Ron 看起来很严格，直接问遗迹入口可能会引起怀疑",
+              "Sable 的传闻不可信，但她的信息网络可能有线索"
+            ],
+            "active_goal": {}
+          },
+          "relationships": {
+            "lina": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "mira": {
+              "trust": 0.05,
+              "suspicion": 0.0,
+              "affinity": 0.1,
+              "last_tone": "friendly"
+            },
+            "ron": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "sable": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            }
+          },
+          "npc_states": {
+            "lina": {
+              "npc_id": "lina",
+              "name": "Lina",
+              "role": "Tavern Owner",
+              "description": "A cautious and practical tavern owner who knows local rumors.",
+              "hidden_alignment": "protect_ruins",
+              "mood": "neutral",
+              "trust": 20,
+              "affection": 30
+            },
+            "ron": {
+              "npc_id": "ron",
+              "name": "Ron",
+              "role": "Town Guard",
+              "description": "A disciplined town guard who tracks patrol reports and gate incidents.",
+              "hidden_alignment": "enforce_order",
+              "mood": "alert",
+              "trust": 18,
+              "affection": 20
+            },
+            "mira": {
+              "npc_id": "mira",
+              "name": "Mira",
+              "role": "Ruins Scholar",
+              "description": "A careful scholar who studies old ruins, inscriptions, and local myths.",
+              "hidden_alignment": "research_truth",
+              "mood": "curious",
+              "trust": 22,
+              "affection": 24
+            },
+            "sable": {
+              "npc_id": "sable",
+              "name": "Sable",
+              "role": "Traveling Relic Broker",
+              "description": "A polished relic broker who offers useful rumors while steering people toward exploitable ruin secrets.",
+              "hidden_alignment": "exploit_ruins",
+              "mood": "pleasant",
+              "trust": 16,
+              "affection": 18
+            }
+          },
+          "scene_objects": [
+            {
+              "object_id": "guard_ledger",
+              "name": "Guard Ledger",
+              "location_id": "guard_post"
+            },
+            {
+              "object_id": "mira_field_notes",
+              "name": "Mira Field Notes",
+              "location_id": "archive"
+            },
+            {
+              "object_id": "sable_rumor_stall",
+              "name": "Sable Rumor Stall",
+              "location_id": "market"
+            },
+            {
+              "object_id": "tavern_back_alley",
+              "name": "Tavern Back Alley",
+              "location_id": "tavern"
+            }
+          ],
+          "arc_state": {
+            "arc_id": "ruins_chapter_1",
+            "phase": "resolved",
+            "tension": 6,
+            "advantage": "guardian",
+            "outcome": "guardian_advantage",
+            "metadata_json": "{\"title\": \"Ruins Chapter 1\", \"last_resolution_reason\": \"Arc resolved after resolved phase.\", \"last_resolution_confidence\": 0.7}",
+            "updated_at": "2026-06-03 13:06:37",
+            "metadata": {
+              "title": "Ruins Chapter 1",
+              "last_resolution_reason": "Arc resolved after resolved phase.",
+              "last_resolution_confidence": 0.7
+            }
+          },
+          "recent_events": [
+            {
+              "id": 2,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 3,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 4,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 5,
+              "event_type": "traveler_moved",
+              "content": "Arin the Cartographer moved to archive."
+            },
+            {
+              "id": 5,
+              "event_type": "traveler_moved",
+              "content": "Arin the Cartographer moved to archive."
+            },
+            {
+              "id": 6,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 7,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 8,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 9,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 10,
+              "event_type": "traveler_talked_to_npc",
+              "content": "Arin the Cartographer talked to mira about 'her research on the local ruins and any warnings about them' (tone=friendly, honesty=full)."
+            }
+          ],
+          "memory_retrieval_mode": "hybrid"
+        },
+        "available_actions": [
+          "move_to",
+          "talk_to",
+          "investigate",
+          "ask_for_help",
+          "share_information",
+          "trade_with",
+          "wait_and_observe",
+          "record_private_note"
+        ],
+        "action_biases": [
+          {
+            "action_type": "move_to",
+            "supporting_motivations": [
+              "curiosity",
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.725
+          },
+          {
+            "action_type": "talk_to",
+            "supporting_motivations": [
+              "curiosity",
+              "truth_seeking"
+            ],
+            "opposing_personality": [],
+            "risk_level": "medium",
+            "profile_alignment_score": 0.925
+          },
+          {
+            "action_type": "investigate",
+            "supporting_motivations": [
+              "curiosity",
+              "truth_seeking"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.925
+          },
+          {
+            "action_type": "ask_for_help",
+            "supporting_motivations": [
+              "safety"
+            ],
+            "opposing_personality": [
+              "cautious"
+            ],
+            "risk_level": "medium",
+            "profile_alignment_score": -0.1
+          },
+          {
+            "action_type": "share_information",
+            "supporting_motivations": [
+              "truth_seeking"
+            ],
+            "opposing_personality": [
+              "cautious"
+            ],
+            "risk_level": "high",
+            "profile_alignment_score": 0.3
+          },
+          {
+            "action_type": "trade_with",
+            "supporting_motivations": [],
+            "opposing_personality": [
+              "empathetic"
+            ],
+            "risk_level": "medium",
+            "profile_alignment_score": -0.7
+          },
+          {
+            "action_type": "wait_and_observe",
+            "supporting_motivations": [
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.5
+          },
+          {
+            "action_type": "record_private_note",
+            "supporting_motivations": [
+              "truth_seeking",
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.7
+          }
+        ],
+        "decision": {
+          "selected_action": {
+            "action_type": "investigate",
+            "args": {
+              "target_id": "mira_field_notes",
+              "method": "carefully read and cross-reference with my own field journal"
+            }
+          },
+          "decision_reason": "I just spoke with Mira about her research and warnings; examining her field notes now will give me concrete details to further my understanding of the ruins and aid my truth-seeking goal.",
+          "profile_alignment": {
+            "curiosity": 0.95,
+            "truth_seeking": 0.9
+          },
+          "profile_tension": {},
+          "deception_choice": null,
+          "disclosure_choice": null,
+          "expected_consequence": "I will find specific clues, inscriptions, or warnings that help me piece together the ruins' purpose and potential dangers, advancing my private goals.",
+          "mode": "llm"
+        },
+        "proposed_action": {
+          "action_type": "investigate",
+          "args": {
+            "target_id": "mira_field_notes",
+            "method": "carefully read and cross-reference with my own field journal"
+          }
+        },
+        "validation": {
+          "status": "allowed",
+          "reason": "Action is available and args present."
+        },
+        "action_result": {
+          "accepted": true,
+          "blocked_reason": "",
+          "action_type": "investigate",
+          "state_changes": [
+            {
+              "field": "scene_object.mira_field_notes.observed",
+              "before": false,
+              "after": true
+            }
+          ],
+          "relationship_changes": [],
+          "created_event_ids": [
+            15
+          ]
+        },
+        "state_changes": [
+          {
+            "field": "scene_object.mira_field_notes.observed",
+            "before": false,
+            "after": true
+          }
+        ],
+        "relationship_changes": [],
+        "created_events": [
+          {
+            "id": 15,
+            "event_type": "traveler_investigated",
+            "content": "Arin the Cartographer investigated mira_field_notes using carefully read and cross-reference with my own field journal."
+          }
+        ],
+        "reflection": {
+          "traveler_id": "traveler_main",
+          "action_type": "investigate",
+          "accepted": true,
+          "summary": "Traveler investigate — accepted.",
+          "decision_reason": "I just spoke with Mira about her research and warnings; examining her field notes now will give me concrete details to further my understanding of the ruins and aid my truth-seeking goal."
+        },
+        "deception_metadata": null,
+        "disclosure_metadata": null,
+        "tick_log_id": 3
+      },
+      "npc_ticks": [
+        {
+          "npc_id": "lina",
+          "outcome": "safe_message",
+          "trigger_event_id": 11,
+          "proposed_action": {
+            "action_type": "",
+            "args": {},
+            "raw_selected_action": null
+          },
+          "validation": {
+            "status": "rejected_by_available_actions",
+            "reason": "selected action  is not in available_actions"
+          },
+          "action_result": {
+            "accepted": false,
+            "blocked_reason": "rejected_by_available_actions",
+            "executed_tools": [],
+            "state_before": {},
+            "state_after": {},
+            "state_changes": [],
+            "events": [],
+            "response_constraints": [
+              "Do not claim world-state changes."
+            ]
+          },
+          "plan_update": {
+            "goal": "",
+            "current_step": "",
+            "status": "blocked",
+            "blocker": "selected action  is not in available_actions",
+            "id": 1,
+            "source_event_id": 11
+          },
+          "proactive_message": "Lina 暂时只留下含糊的提醒，没有改变任何世界状态。",
+          "reflection": {
+            "summary": "",
+            "belief_update": "",
+            "emotion": ""
+          },
+          "tick_log_id": 5,
+          "created_events": []
+        },
+        {
+          "npc_id": "ron",
+          "outcome": "safe_message",
+          "trigger_event_id": 8,
+          "proposed_action": {
+            "action_type": "",
+            "args": {},
+            "raw_selected_action": null
+          },
+          "validation": {
+            "status": "rejected_by_available_actions",
+            "reason": "selected action  is not in available_actions"
+          },
+          "action_result": {
+            "accepted": false,
+            "blocked_reason": "rejected_by_available_actions",
+            "executed_tools": [],
+            "state_before": {},
+            "state_after": {},
+            "state_changes": [],
+            "events": [],
+            "response_constraints": [
+              "Do not claim world-state changes."
+            ]
+          },
+          "plan_update": {
+            "goal": "",
+            "current_step": "",
+            "status": "blocked",
+            "blocker": "selected action  is not in available_actions",
+            "id": 2,
+            "source_event_id": 8
+          },
+          "proactive_message": "Ron 暂时只留下含糊的提醒，没有改变任何世界状态。",
+          "reflection": {
+            "summary": "",
+            "belief_update": "",
+            "emotion": ""
+          },
+          "tick_log_id": 6,
+          "created_events": []
+        }
+      ],
+      "arc_update": {
+        "arc_id": "ruins_chapter_1",
+        "phase": "resolved",
+        "tension": 10,
+        "advantage": "guardian",
+        "outcome": "guardian_advantage",
+        "scores": {
+          "guardian": 2,
+          "research": 1,
+          "sable": 1,
+          "chaos": 2
+        },
+        "total_signals": 6
+      }
+    }
+  ],
+  "major_events": [
+    {
+      "round": 1,
+      "severity": "critical",
+      "rule_id": "arc_outcome_reached",
+      "description": "Arc resolved with outcome: guardian_advantage. Advantage: guardian.",
+      "details": {
+        "arc_id": "ruins_chapter_1",
+        "phase": "resolved",
+        "tension": 3,
+        "advantage": "guardian",
+        "outcome": "guardian_advantage",
+        "scores": {
+          "guardian": 2,
+          "research": 1,
+          "sable": 1,
+          "chaos": 2
+        },
+        "total_signals": 6
+      }
+    },
+    {
+      "round": 2,
+      "severity": "critical",
+      "rule_id": "arc_outcome_reached",
+      "description": "Arc resolved with outcome: guardian_advantage. Advantage: guardian.",
+      "details": {
+        "arc_id": "ruins_chapter_1",
+        "phase": "resolved",
+        "tension": 6,
+        "advantage": "guardian",
+        "outcome": "guardian_advantage",
+        "scores": {
+          "guardian": 2,
+          "research": 1,
+          "sable": 1,
+          "chaos": 2
+        },
+        "total_signals": 6
+      }
+    },
+    {
+      "round": 3,
+      "severity": "critical",
+      "rule_id": "arc_outcome_reached",
+      "description": "Arc resolved with outcome: guardian_advantage. Advantage: guardian.",
+      "details": {
+        "arc_id": "ruins_chapter_1",
+        "phase": "resolved",
+        "tension": 10,
+        "advantage": "guardian",
+        "outcome": "guardian_advantage",
+        "scores": {
+          "guardian": 2,
+          "research": 1,
+          "sable": 1,
+          "chaos": 2
+        },
+        "total_signals": 6
+      }
+    }
+  ]
+}

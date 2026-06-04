@@ -271,3 +271,78 @@ CREATE TABLE IF NOT EXISTS interaction_logs (
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (npc_id) REFERENCES npcs (npc_id)
 );
+
+-- ── Living World Runtime tables ─────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS traveler_state (
+    traveler_id TEXT PRIMARY KEY,
+    profile_id TEXT NOT NULL,
+    current_location TEXT NOT NULL,
+    inventory_json TEXT NOT NULL DEFAULT '[]',
+    private_notes_json TEXT NOT NULL DEFAULT '[]',
+    active_goal_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS traveler_npc_relationship (
+    traveler_id TEXT NOT NULL,
+    npc_id TEXT NOT NULL,
+    trust REAL NOT NULL DEFAULT 0.0,
+    suspicion REAL NOT NULL DEFAULT 0.0,
+    affinity REAL NOT NULL DEFAULT 0.0,
+    leverage REAL NOT NULL DEFAULT 0.0,
+    exposure REAL NOT NULL DEFAULT 0.0,
+    debt REAL NOT NULL DEFAULT 0.0,
+    last_tone TEXT NOT NULL DEFAULT 'neutral',
+    known_secret_ids_json TEXT NOT NULL DEFAULT '[]',
+    updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (traveler_id, npc_id),
+    FOREIGN KEY (traveler_id) REFERENCES traveler_state(traveler_id),
+    FOREIGN KEY (npc_id) REFERENCES npcs(npc_id)
+);
+
+CREATE TABLE IF NOT EXISTS traveler_tick_logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    traveler_id TEXT NOT NULL,
+    round_number INTEGER NOT NULL,
+    trigger_event_id INTEGER,
+    observation_json TEXT NOT NULL DEFAULT '{}',
+    retrieved_memories_json TEXT NOT NULL DEFAULT '[]',
+    available_actions_json TEXT NOT NULL DEFAULT '[]',
+    action_biases_json TEXT NOT NULL DEFAULT '[]',
+    llm_decision_json TEXT NOT NULL DEFAULT '{}',
+    proposed_action_json TEXT NOT NULL DEFAULT '{}',
+    validation_json TEXT NOT NULL DEFAULT '{}',
+    action_result_json TEXT NOT NULL DEFAULT '{}',
+    state_changes_json TEXT NOT NULL DEFAULT '[]',
+    relationship_changes_json TEXT NOT NULL DEFAULT '[]',
+    created_events_json TEXT NOT NULL DEFAULT '[]',
+    reflection_json TEXT NOT NULL DEFAULT '{}',
+    deception_metadata_json TEXT NOT NULL DEFAULT '{}',
+    disclosure_metadata_json TEXT NOT NULL DEFAULT '{}',
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (traveler_id) REFERENCES traveler_state(traveler_id),
+    FOREIGN KEY (trigger_event_id) REFERENCES world_events(id)
+);
+
+CREATE TABLE IF NOT EXISTS secret_tracking (
+    secret_id TEXT PRIMARY KEY,
+    owner_id TEXT NOT NULL,
+    owner_type TEXT NOT NULL,
+    label TEXT NOT NULL,
+    content TEXT NOT NULL,
+    risk_level TEXT NOT NULL DEFAULT 'medium',
+    disclosed_to_json TEXT NOT NULL DEFAULT '[]',
+    exposure_count INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS simulation_runs (
+    run_id TEXT PRIMARY KEY,
+    profile_id TEXT NOT NULL,
+    config_json TEXT NOT NULL DEFAULT '{}',
+    status TEXT NOT NULL DEFAULT 'running',
+    started_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    completed_at TEXT
+);

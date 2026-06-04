@@ -387,10 +387,101 @@ def ensure_schema_migrations(connection: sqlite3.Connection) -> None:
         """
     )
 
+    # ── Living World Runtime tables ─────────────────────────────────
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS traveler_state (
+            traveler_id TEXT PRIMARY KEY,
+            profile_id TEXT NOT NULL,
+            current_location TEXT NOT NULL,
+            inventory_json TEXT NOT NULL DEFAULT '[]',
+            private_notes_json TEXT NOT NULL DEFAULT '[]',
+            active_goal_json TEXT NOT NULL DEFAULT '{}',
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS traveler_npc_relationship (
+            traveler_id TEXT NOT NULL,
+            npc_id TEXT NOT NULL,
+            trust REAL NOT NULL DEFAULT 0.0,
+            suspicion REAL NOT NULL DEFAULT 0.0,
+            affinity REAL NOT NULL DEFAULT 0.0,
+            leverage REAL NOT NULL DEFAULT 0.0,
+            exposure REAL NOT NULL DEFAULT 0.0,
+            debt REAL NOT NULL DEFAULT 0.0,
+            last_tone TEXT NOT NULL DEFAULT 'neutral',
+            known_secret_ids_json TEXT NOT NULL DEFAULT '[]',
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (traveler_id, npc_id),
+            FOREIGN KEY (traveler_id) REFERENCES traveler_state(traveler_id),
+            FOREIGN KEY (npc_id) REFERENCES npcs(npc_id)
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS traveler_tick_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            traveler_id TEXT NOT NULL,
+            round_number INTEGER NOT NULL,
+            trigger_event_id INTEGER,
+            observation_json TEXT NOT NULL DEFAULT '{}',
+            retrieved_memories_json TEXT NOT NULL DEFAULT '[]',
+            available_actions_json TEXT NOT NULL DEFAULT '[]',
+            action_biases_json TEXT NOT NULL DEFAULT '[]',
+            llm_decision_json TEXT NOT NULL DEFAULT '{}',
+            proposed_action_json TEXT NOT NULL DEFAULT '{}',
+            validation_json TEXT NOT NULL DEFAULT '{}',
+            action_result_json TEXT NOT NULL DEFAULT '{}',
+            state_changes_json TEXT NOT NULL DEFAULT '[]',
+            relationship_changes_json TEXT NOT NULL DEFAULT '[]',
+            created_events_json TEXT NOT NULL DEFAULT '[]',
+            reflection_json TEXT NOT NULL DEFAULT '{}',
+            deception_metadata_json TEXT NOT NULL DEFAULT '{}',
+            disclosure_metadata_json TEXT NOT NULL DEFAULT '{}',
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (traveler_id) REFERENCES traveler_state(traveler_id),
+            FOREIGN KEY (trigger_event_id) REFERENCES world_events(id)
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS secret_tracking (
+            secret_id TEXT PRIMARY KEY,
+            owner_id TEXT NOT NULL,
+            owner_type TEXT NOT NULL,
+            label TEXT NOT NULL,
+            content TEXT NOT NULL,
+            risk_level TEXT NOT NULL DEFAULT 'medium',
+            disclosed_to_json TEXT NOT NULL DEFAULT '[]',
+            exposure_count INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS simulation_runs (
+            run_id TEXT PRIMARY KEY,
+            profile_id TEXT NOT NULL,
+            config_json TEXT NOT NULL DEFAULT '{}',
+            status TEXT NOT NULL DEFAULT 'running',
+            started_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            completed_at TEXT
+        )
+        """
+    )
+
 
 def reset_database(db_path: str | Path | None = None) -> None:
     """Clear all demo tables and recreate the MVP seed data."""
     with connect(db_path) as connection:
+        connection.execute("PRAGMA foreign_keys = OFF")
         connection.executescript(
             """
             DROP TABLE IF EXISTS interaction_logs;
@@ -416,8 +507,14 @@ def reset_database(db_path: str | Path | None = None) -> None:
             DROP TABLE IF EXISTS player_items;
             DROP TABLE IF EXISTS player_state;
             DROP TABLE IF EXISTS npcs;
+            DROP TABLE IF EXISTS traveler_tick_logs;
+            DROP TABLE IF EXISTS traveler_npc_relationship;
+            DROP TABLE IF EXISTS traveler_state;
+            DROP TABLE IF EXISTS secret_tracking;
+            DROP TABLE IF EXISTS simulation_runs;
             """
         )
+        connection.execute("PRAGMA foreign_keys = ON")
     initialize_database(db_path)
 
 
@@ -2287,3 +2384,337 @@ def get_interaction_logs(limit: int = 10) -> list[dict[str, Any]]:
         log["state_changes"] = json.loads(log["state_changes"])
         log["workflow_steps"] = json.loads(log["workflow_steps"])
     return logs
+
+
+# ══════════════════════════════════════════════════════════════════════
+#  Traveler State / Relationship / Tick Log access
+# ══════════════════════════════════════════════════════════════════════
+
+# ── Traveler State ────────────────────────────────────────────────────
+
+def upsert_traveler_state(
+    traveler_id: str,
+    profile_id: str,
+    current_location: str,
+    inventory: list[str] | None = None,
+    private_notes: list[str] | None = None,
+    active_goal: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    with connect() as connection:
+        connection.execute(
+            """
+            INSERT INTO traveler_state (traveler_id, profile_id, current_location, inventory_json, private_notes_json, active_goal_json, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+            ON CONFLICT(traveler_id) DO UPDATE SET
+                profile_id = excluded.profile_id,
+                current_location = excluded.current_location,
+                inventory_json = excluded.inventory_json,
+                private_notes_json = excluded.private_notes_json,
+                active_goal_json = excluded.active_goal_json,
+                updated_at = CURRENT_TIMESTAMP
+            """,
+            (
+                traveler_id,
+                profile_id,
+                current_location,
+                json.dumps(inventory or [], ensure_ascii=False),
+                json.dumps(private_notes or [], ensure_ascii=False),
+                json.dumps(active_goal or {}, ensure_ascii=False),
+            ),
+        )
+    return get_traveler_state(traveler_id)
+
+
+def get_traveler_state(traveler_id: str) -> dict[str, Any]:
+    with connect() as connection:
+        row = connection.execute(
+            "SELECT * FROM traveler_state WHERE traveler_id = ?", (traveler_id,)
+        ).fetchone()
+    if row is None:
+        raise KeyError(f"Traveler '{traveler_id}' not found in traveler_state")
+    state = dict(row)
+    state["inventory"] = json.loads(state.pop("inventory_json"))
+    state["private_notes"] = json.loads(state.pop("private_notes_json"))
+    state["active_goal"] = json.loads(state.pop("active_goal_json"))
+    return state
+
+
+def update_traveler_location(traveler_id: str, location_id: str) -> dict[str, Any]:
+    with connect() as connection:
+        connection.execute(
+            "UPDATE traveler_state SET current_location = ?, updated_at = CURRENT_TIMESTAMP WHERE traveler_id = ?",
+            (location_id, traveler_id),
+        )
+    return get_traveler_state(traveler_id)
+
+
+def update_traveler_inventory(traveler_id: str, inventory: list[str]) -> dict[str, Any]:
+    with connect() as connection:
+        connection.execute(
+            "UPDATE traveler_state SET inventory_json = ?, updated_at = CURRENT_TIMESTAMP WHERE traveler_id = ?",
+            (json.dumps(inventory, ensure_ascii=False), traveler_id),
+        )
+    return get_traveler_state(traveler_id)
+
+
+# ── Traveler-NPC Relationships ────────────────────────────────────────
+
+def upsert_traveler_relationship(
+    traveler_id: str,
+    npc_id: str,
+    trust: float | None = None,
+    suspicion: float | None = None,
+    affinity: float | None = None,
+    leverage: float | None = None,
+    exposure: float | None = None,
+    debt: float | None = None,
+    last_tone: str | None = None,
+    known_secret_ids: list[str] | None = None,
+) -> dict[str, Any]:
+    current = get_traveler_relationship(traveler_id, npc_id) or {}
+    fields = {
+        "trust": trust if trust is not None else current.get("trust", 0.0),
+        "suspicion": suspicion if suspicion is not None else current.get("suspicion", 0.0),
+        "affinity": affinity if affinity is not None else current.get("affinity", 0.0),
+        "leverage": leverage if leverage is not None else current.get("leverage", 0.0),
+        "exposure": exposure if exposure is not None else current.get("exposure", 0.0),
+        "debt": debt if debt is not None else current.get("debt", 0.0),
+        "last_tone": last_tone if last_tone is not None else current.get("last_tone", "neutral"),
+        "known_secret_ids": known_secret_ids if known_secret_ids is not None else current.get("known_secret_ids", []),
+    }
+    with connect() as connection:
+        connection.execute(
+            """
+            INSERT INTO traveler_npc_relationship
+                (traveler_id, npc_id, trust, suspicion, affinity, leverage, exposure, debt, last_tone, known_secret_ids_json, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+            ON CONFLICT(traveler_id, npc_id) DO UPDATE SET
+                trust = excluded.trust,
+                suspicion = excluded.suspicion,
+                affinity = excluded.affinity,
+                leverage = excluded.leverage,
+                exposure = excluded.exposure,
+                debt = excluded.debt,
+                last_tone = excluded.last_tone,
+                known_secret_ids_json = excluded.known_secret_ids_json,
+                updated_at = CURRENT_TIMESTAMP
+            """,
+            (
+                traveler_id, npc_id,
+                fields["trust"], fields["suspicion"], fields["affinity"],
+                fields["leverage"], fields["exposure"], fields["debt"],
+                fields["last_tone"],
+                json.dumps(fields["known_secret_ids"], ensure_ascii=False),
+            ),
+        )
+    return get_traveler_relationship(traveler_id, npc_id) or {}
+
+
+def get_traveler_relationship(traveler_id: str, npc_id: str) -> dict[str, Any] | None:
+    with connect() as connection:
+        row = connection.execute(
+            "SELECT * FROM traveler_npc_relationship WHERE traveler_id = ? AND npc_id = ?",
+            (traveler_id, npc_id),
+        ).fetchone()
+    if row is None:
+        return None
+    rel = dict(row)
+    rel["known_secret_ids"] = json.loads(rel.pop("known_secret_ids_json"))
+    return rel
+
+
+def get_all_traveler_relationships(traveler_id: str) -> list[dict[str, Any]]:
+    with connect() as connection:
+        rows = connection.execute(
+            "SELECT * FROM traveler_npc_relationship WHERE traveler_id = ?",
+            (traveler_id,),
+        ).fetchall()
+    results = []
+    for row in rows:
+        rel = dict(row)
+        rel["known_secret_ids"] = json.loads(rel.pop("known_secret_ids_json"))
+        results.append(rel)
+    return results
+
+
+# ── Traveler Tick Logs ────────────────────────────────────────────────
+
+def log_traveler_tick(
+    traveler_id: str,
+    round_number: int,
+    trigger_event_id: int | None = None,
+    observation: dict[str, Any] | None = None,
+    retrieved_memories: list[dict[str, Any]] | None = None,
+    available_actions: list[dict[str, Any]] | None = None,
+    action_biases: list[dict[str, Any]] | None = None,
+    llm_decision: dict[str, Any] | None = None,
+    proposed_action: dict[str, Any] | None = None,
+    validation: dict[str, Any] | None = None,
+    action_result: dict[str, Any] | None = None,
+    state_changes: list[dict[str, Any]] | None = None,
+    relationship_changes: list[dict[str, Any]] | None = None,
+    created_events: list[dict[str, Any]] | None = None,
+    reflection: dict[str, Any] | None = None,
+    deception_metadata: dict[str, Any] | None = None,
+    disclosure_metadata: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    with connect() as connection:
+        cursor = connection.execute(
+            """
+            INSERT INTO traveler_tick_logs (
+                traveler_id, round_number, trigger_event_id,
+                observation_json, retrieved_memories_json,
+                available_actions_json, action_biases_json,
+                llm_decision_json, proposed_action_json,
+                validation_json, action_result_json,
+                state_changes_json, relationship_changes_json, created_events_json,
+                reflection_json, deception_metadata_json, disclosure_metadata_json
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                traveler_id, round_number, trigger_event_id,
+                json.dumps(observation or {}, ensure_ascii=False),
+                json.dumps(retrieved_memories or [], ensure_ascii=False),
+                json.dumps(available_actions or [], ensure_ascii=False),
+                json.dumps(action_biases or [], ensure_ascii=False),
+                json.dumps(llm_decision or {}, ensure_ascii=False),
+                json.dumps(proposed_action or {}, ensure_ascii=False),
+                json.dumps(validation or {}, ensure_ascii=False),
+                json.dumps(action_result or {}, ensure_ascii=False),
+                json.dumps(state_changes or [], ensure_ascii=False),
+                json.dumps(relationship_changes or [], ensure_ascii=False),
+                json.dumps(created_events or [], ensure_ascii=False),
+                json.dumps(reflection or {}, ensure_ascii=False),
+                json.dumps(deception_metadata or {}, ensure_ascii=False),
+                json.dumps(disclosure_metadata or {}, ensure_ascii=False),
+            ),
+        )
+        log_id = int(cursor.lastrowid)
+    return get_traveler_tick_log(log_id)
+
+
+def get_traveler_tick_log(log_id: int) -> dict[str, Any]:
+    with connect() as connection:
+        row = connection.execute(
+            "SELECT * FROM traveler_tick_logs WHERE id = ?", (log_id,)
+        ).fetchone()
+    if row is None:
+        raise KeyError(f"Traveler tick log {log_id} not found")
+    return _deserialize_tick_log(dict(row))
+
+
+def get_traveler_tick_logs_for_run(traveler_id: str, limit: int = 100) -> list[dict[str, Any]]:
+    with connect() as connection:
+        rows = connection.execute(
+            "SELECT * FROM traveler_tick_logs WHERE traveler_id = ? ORDER BY round_number ASC LIMIT ?",
+            (traveler_id, limit),
+        ).fetchall()
+    return [_deserialize_tick_log(dict(row)) for row in rows]
+
+
+def _deserialize_tick_log(log: dict[str, Any]) -> dict[str, Any]:
+    json_fields = [
+        "observation_json", "retrieved_memories_json", "available_actions_json",
+        "action_biases_json", "llm_decision_json", "proposed_action_json",
+        "validation_json", "action_result_json", "state_changes_json",
+        "relationship_changes_json", "created_events_json", "reflection_json",
+        "deception_metadata_json", "disclosure_metadata_json",
+    ]
+    for field in json_fields:
+        plain_key = field.replace("_json", "")
+        log[plain_key] = json.loads(log.pop(field, "{}") or "{}")
+    return log
+
+
+# ── Secret Tracking ───────────────────────────────────────────────────
+
+def upsert_secret(
+    secret_id: str,
+    owner_id: str,
+    owner_type: str,
+    label: str,
+    content: str,
+    risk_level: str = "medium",
+) -> dict[str, Any]:
+    with connect() as connection:
+        connection.execute(
+            """
+            INSERT INTO secret_tracking (secret_id, owner_id, owner_type, label, content, risk_level)
+            VALUES (?, ?, ?, ?, ?, ?)
+            ON CONFLICT(secret_id) DO UPDATE SET
+                label = excluded.label,
+                content = excluded.content,
+                risk_level = excluded.risk_level
+            """,
+            (secret_id, owner_id, owner_type, label, content, risk_level),
+        )
+    return get_secret(secret_id)
+
+
+def get_secret(secret_id: str) -> dict[str, Any] | None:
+    with connect() as connection:
+        row = connection.execute(
+            "SELECT * FROM secret_tracking WHERE secret_id = ?", (secret_id,)
+        ).fetchone()
+    if row is None:
+        return None
+    secret = dict(row)
+    secret["disclosed_to"] = json.loads(secret.pop("disclosed_to_json"))
+    return secret
+
+
+def record_secret_disclosure(
+    secret_id: str,
+    disclosed_to_actor_id: str,
+    disclosed_to_actor_type: str,
+    round_number: int,
+    method: str = "voluntary",
+) -> dict[str, Any]:
+    secret = get_secret(secret_id)
+    if secret is None:
+        raise KeyError(f"Secret '{secret_id}' not found")
+    disclosures = secret.get("disclosed_to", [])
+    disclosures.append({
+        "actor_id": disclosed_to_actor_id,
+        "actor_type": disclosed_to_actor_type,
+        "round": round_number,
+        "method": method,
+    })
+    with connect() as connection:
+        connection.execute(
+            "UPDATE secret_tracking SET disclosed_to_json = ?, exposure_count = exposure_count + 1 WHERE secret_id = ?",
+            (json.dumps(disclosures, ensure_ascii=False), secret_id),
+        )
+    return get_secret(secret_id) or {}
+
+
+# ── Simulation Runs ───────────────────────────────────────────────────
+
+def create_simulation_run(run_id: str, profile_id: str, config: dict[str, Any] | None = None) -> dict[str, Any]:
+    with connect() as connection:
+        connection.execute(
+            "INSERT INTO simulation_runs (run_id, profile_id, config_json) VALUES (?, ?, ?)",
+            (run_id, profile_id, json.dumps(config or {}, ensure_ascii=False)),
+        )
+    return get_simulation_run(run_id)
+
+
+def get_simulation_run(run_id: str) -> dict[str, Any]:
+    with connect() as connection:
+        row = connection.execute(
+            "SELECT * FROM simulation_runs WHERE run_id = ?", (run_id,)
+        ).fetchone()
+    if row is None:
+        raise KeyError(f"Simulation run '{run_id}' not found")
+    run = dict(row)
+    run["config"] = json.loads(run.pop("config_json"))
+    return run
+
+
+def complete_simulation_run(run_id: str) -> dict[str, Any]:
+    with connect() as connection:
+        connection.execute(
+            "UPDATE simulation_runs SET status = 'completed', completed_at = CURRENT_TIMESTAMP WHERE run_id = ?",
+            (run_id,),
+        )
+    return get_simulation_run(run_id)

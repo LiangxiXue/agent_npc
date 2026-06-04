@@ -50,6 +50,7 @@ def run_autonomous_tick(
     mode: str = "llm_constrained",
     trigger_event_id: int | None = None,
     memory_retrieval_mode: str = "hybrid",
+    run_director: bool = True,
 ) -> AutonomousTickResult:
     database.initialize_database()
     timeline = [timeline_event("tick_started", {"npc_id": npc_id, "mode": mode})]
@@ -171,7 +172,11 @@ def run_autonomous_tick(
         set_action_cooldown(npc_id, trigger_event, proposed_action)
     outcome = determine_outcome(validation, proactive_message, memory_candidate)
     timeline.append(timeline_event("tick_finished", {"outcome": outcome}))
-    arc_director = run_arc_director(use_llm=False)
+    arc_director = (
+        run_arc_director(use_llm=False)
+        if run_director
+        else {"skipped": True, "reason": "managed_by_living_world_scheduler"}
+    )
     observation_payload = {
         "npc_id": observation.npc_id,
         "trigger_event": trigger_event,

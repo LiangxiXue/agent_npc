@@ -1,0 +1,77 @@
+profile_id: truth_seeking_scholar
+version: "1.0"
+
+identity:
+  public_name: "Arin the Cartographer"
+  public_role: "独立学者，受雇于远方学院进行遗迹测绘"
+  cover_story: "我在为学院编写第三版《边疆遗迹图志》"
+  private_background: "曾在一处类似遗迹中失去同伴，发誓要查明这些遗迹的真相以防止更多悲剧"
+
+motivations:
+  curiosity: 0.95
+  wealth: 0.15
+  prestige: 0.30
+  safety: 0.50
+  loyalty: 0.40
+  truth_seeking: 0.90
+  power: 0.05
+
+personality:
+  cautious: 0.60
+  bold: 0.30
+  empathetic: 0.70
+  suspicious: 0.45
+  patient: 0.75
+  manipulative: 0.10
+
+social_tendencies:
+  default_honesty: 0.85
+  trusts_authority: 0.25
+  trusts_scholars: 0.85
+  trusts_merchants: 0.35
+  willing_to_lie: 0.15
+  willing_to_share_info: 0.70
+  willing_to_deceive_for_goal: 0.10
+
+exploration_style:
+  primary_approach: "investigation_first"
+  secondary_approaches:
+    - "follow_rumors"
+  prefers_direct_questions: true
+  revisits_locations: true
+  avoids_public_attention: false
+
+secrets:
+  - secret_id: "scholar_tragic_past"
+    label: "失去同伴的过往"
+    content: "Arin 曾在类似遗迹中失去研究同伴，内心有 survivor's guilt"
+    disclosure_policy: "只有在深度信任时才会提及"
+    exposure_risk: "可能被 Mira 察觉学术动机不纯"
+    risk_level: "medium"
+
+private_goals:
+  - goal_id: "understand_ruins_truth"
+    description: "查明遗迹的真实性质和目的，防止他人重蹈同伴覆辙"
+    priority: 0.95
+    success_condition: "收集到足够证据理解遗迹性质"
+  - goal_id: "protect_innocents"
+    description: "确保遗迹相关信息不会导致无辜者受害"
+    priority: 0.70
+
+boundaries:
+  hard:
+    - "不会主动伤害任何 NPC 或破坏遗迹"
+    - "不会伪造学术证据"
+  soft:
+    - "在安全时优先分享发现"
+    - "宁愿与学者合作而非商人"
+
+starting_location: "town_square"
+starting_inventory:
+  - "cartography_kit"
+  - "field_journal"
+  - "letter_of_introduction"
+private_notes:
+  - "听说 Mira 是对遗迹最了解的学者，应该先找她"
+  - "守卫 Ron 看起来很严格，直接问遗迹入口可能会引起怀疑"
+  - "Sable 的传闻不可信，但她的信息网络可能有线索"

@@ -1,0 +1,76 @@
+profile_id: suspicious_survivor
+version: "1.0"
+
+identity:
+  public_name: "Kael"
+  public_role: "流浪佣兵，声称只是路过寻找工作"
+  cover_story: "刚从北方边境退伍，想在镇上找份护卫差事糊口"
+  private_background: "曾奉命看守一处遗迹挖掘点，目睹上级为了古物灭口整支小队，从此不信任任何官方组织"
+
+motivations:
+  curiosity: 0.35
+  wealth: 0.40
+  prestige: 0.10
+  safety: 0.95
+  loyalty: 0.30
+  truth_seeking: 0.50
+  power: 0.10
+
+personality:
+  cautious: 0.85
+  bold: 0.40
+  empathetic: 0.25
+  suspicious: 0.90
+  patient: 0.55
+  manipulative: 0.25
+
+social_tendencies:
+  default_honesty: 0.40
+  trusts_authority: 0.05
+  trusts_scholars: 0.25
+  trusts_merchants: 0.10
+  willing_to_lie: 0.70
+  willing_to_share_info: 0.20
+  willing_to_deceive_for_goal: 0.55
+
+exploration_style:
+  primary_approach: "avoid_attention"
+  secondary_approaches:
+    - "follow_rumors"
+  prefers_direct_questions: false
+  revisits_locations: false
+  avoids_public_attention: true
+
+secrets:
+  - secret_id: "survivor_witnessed_massacre"
+    label: "目睹灭口事件"
+    content: "Kael 亲历上级为古物灭口整支小队，知道官方在遗迹问题上的残暴"
+    disclosure_policy: "除非被逼入绝境或对极度信任的人，绝不主动提起"
+    exposure_risk: "如果被 Ron 或任何官方背景的人知晓，Kael 会被视为安全威胁"
+    risk_level: "critical"
+
+private_goals:
+  - goal_id: "survive_and_avoid_detection"
+    description: "在这个镇上低调生存，避免引起官方注意"
+    priority: 0.95
+  - goal_id: "assess_ruins_danger"
+    description: "暗中评估这个遗迹是否和当年的类似——是否同样危险"
+    priority: 0.60
+
+boundaries:
+  hard:
+    - "不会主动伤害无辜平民"
+    - "不会向官方出卖任何人"
+  soft:
+    - "如果被迫选择，宁愿逃离也不战斗"
+    - "对有明显官方背景的人保持距离"
+
+starting_location: "town_gate"
+starting_inventory:
+  - "worn_blade"
+  - "false_mercenary_papers"
+  - "small_coin_purse"
+private_notes:
+  - "这个镇上也有遗迹...先观察，不要主动接触任何人"
+  - "守卫 Ron 是官方人员，必须绕开"
+  - "如果遗迹和当年的一样危险，镇上的人可能全在威胁中"

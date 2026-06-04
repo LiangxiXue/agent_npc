@@ -1,0 +1,84 @@
+profile_id: opportunistic_relic_hunter
+version: "1.0"
+
+identity:
+  public_name: "德雷克 (Deryk)"
+  public_role: "远方商会的采购代理，对古物和稀有材料有专业眼光"
+  cover_story: "商会的贵族客户想收藏几件边疆文物，预算宽松"
+  private_background: "职业古物走私者，与多个地下收藏家网络有联系。上一个遗迹交易被同行抢走，这次决心先手拿到最有价值的古物。"
+
+motivations:
+  curiosity: 0.55
+  wealth: 0.95
+  prestige: 0.60
+  safety: 0.30
+  loyalty: 0.10
+  truth_seeking: 0.20
+  power: 0.50
+
+personality:
+  cautious: 0.35
+  bold: 0.85
+  empathetic: 0.20
+  suspicious: 0.55
+  patient: 0.35
+  manipulative: 0.85
+
+social_tendencies:
+  default_honesty: 0.15
+  trusts_authority: 0.10
+  trusts_scholars: 0.30
+  trusts_merchants: 0.75
+  willing_to_lie: 0.90
+  willing_to_share_info: 0.25
+  willing_to_deceive_for_goal: 0.85
+
+exploration_style:
+  primary_approach: "follow_rumors"
+  secondary_approaches:
+    - "find_allies_first"
+  prefers_direct_questions: false
+  revisits_locations: false
+  avoids_public_attention: false
+
+secrets:
+  - secret_id: "relic_hunter_smuggler_past"
+    label: "职业古物走私者"
+    content: "Deryk 是职业古物走私者，不是商会采购代理。上一个遗迹被同行抢走，这次决心先手。"
+    disclosure_policy: "只在对方也有黑市利益时才会暗示"
+    exposure_risk: "Ron 和 Lina 会直接报警。Sable 可能成为盟友，也可能成为竞争对手。"
+    risk_level: "high"
+  - secret_id: "relic_hunter_real_target"
+    label: "真正目标是最值钱的遗迹核心古物"
+    content: "Deryk 不满足于普通古物。他盯上了遗迹最深处的核心文物，价值足以让他退出走私行业。"
+    disclosure_policy: "不会告诉任何人"
+    exposure_risk: "一旦暴露，所有 NPC 都会视其为掠夺者"
+    risk_level: "critical"
+
+private_goals:
+  - goal_id: "acquire_valuable_relic"
+    description: "获取遗迹中最有价值的古物，为自己而非任何客户"
+    priority: 0.95
+  - goal_id: "outmaneuver_competitors"
+    description: "确保没有其他商人或走私者抢先拿到古物"
+    priority: 0.70
+
+boundaries:
+  hard:
+    - "不会直接暴力攻击 NPC"
+    - "不会摧毁古物（价值太重要了）"
+  soft:
+    - "如果能通过合法交易获得古物最好，不行就用骗的"
+    - "愿意为有价值的线索付费"
+
+starting_location: "market"
+starting_inventory:
+  - "merchant_ledger"
+  - "coin_pouch_large"
+  - "catalog_of_desired_artifacts"
+  - "false_letter_of_credit"
+private_notes:
+  - "Sable 在黑市很有名，应该先找她做对接人"
+  - "Mira 的学术研究可能帮我定位最值钱的古物位置"
+  - "Lina 和 Ron 是障碍，要绕过"
+  - "Rumor 说遗迹里有黄金铭文和星图——这些在收藏家市场上能卖出天价"
