@@ -162,7 +162,7 @@ class AutonomousTickTest(unittest.TestCase):
             result = run_autonomous_tick("mira", mode="llm_constrained", run_director=False)
 
         self.assertTrue(result.proposed_action.get("action_type"))
-        self.assertNotEqual(result.validation["status"], "rejected_by_available_actions")
+        self.assertEqual(result.validation["status"], "allowed")
         self.assertEqual(result.llm_decision["fallback_reason"], "LLM returned no valid selected_action.")
 
     def test_invalid_selected_action_args_are_reported_in_trace(self) -> None:
