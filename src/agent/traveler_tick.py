@@ -598,11 +598,41 @@ def _empty_action_result(reason: str) -> dict[str, Any]:
 
 
 def _event_summary(event: dict[str, Any]) -> dict[str, Any]:
-    return {
+    summary = {
         "id": event.get("id"),
         "event_type": event.get("event_type"),
         "content": event.get("content"),
     }
+    payload = event.get("payload")
+    if isinstance(payload, dict):
+        safe_payload = _json_safe_payload(payload)
+        if safe_payload:
+            summary["payload"] = safe_payload
+    return summary
+
+
+def _json_safe_payload(payload: dict[str, Any]) -> dict[str, Any]:
+    return {
+        str(key): safe_value
+        for key, value in payload.items()
+        if (safe_value := _json_safe_value(value)) is not _UNSAFE_PAYLOAD_VALUE
+    }
+
+
+_UNSAFE_PAYLOAD_VALUE = object()
+
+
+def _json_safe_value(value: Any) -> Any:
+    if value is None or isinstance(value, (str, int, float, bool)):
+        return value
+    if isinstance(value, list):
+        safe_items = [_json_safe_value(item) for item in value]
+        if any(item is _UNSAFE_PAYLOAD_VALUE for item in safe_items):
+            return _UNSAFE_PAYLOAD_VALUE
+        return safe_items
+    if isinstance(value, dict):
+        return _json_safe_payload(value)
+    return _UNSAFE_PAYLOAD_VALUE
 
 
 def _elapsed_ms(started: float) -> float:

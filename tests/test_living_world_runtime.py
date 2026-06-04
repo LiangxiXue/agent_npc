@@ -237,6 +237,31 @@ class SchedulerTest(unittest.TestCase):
         event_ids = [event["id"] for event in round_two_recent_events if "id" in event]
         self.assertEqual(len(event_ids), len(set(event_ids)))
 
+    def test_traveler_events_preserve_arc_signal_for_scheduler_scoring(self) -> None:
+        profile = load_profile("truth_seeking_scholar")
+        traveler = TravelerActor("traveler_arc_signal", profile, use_llm=False)
+        traveler.initialize()
+
+        scheduler = LivingWorldScheduler(
+            traveler=traveler,
+            npc_adapters={},
+            arc_director=ArcDirectorActor(),
+            max_npc_ticks_per_round=0,
+            npc_routines_every_round=False,
+        )
+
+        result = scheduler.run(rounds=1)
+
+        created_events = result["rounds"][0]["traveler_tick"]["created_events"]
+        self.assertTrue(created_events)
+        self.assertTrue(
+            any(
+                isinstance(event.get("payload"), dict)
+                and event["payload"].get("arc_signal")
+                for event in created_events
+            )
+        )
+
     def test_timeline_export_renders_round_and_traveler_timings(self) -> None:
         profile = load_profile("truth_seeking_scholar")
         traveler = TravelerActor("timed_export", profile, use_llm=False)
