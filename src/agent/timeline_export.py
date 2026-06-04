@@ -99,6 +99,15 @@ def _write_markdown(result: dict[str, Any], profile: TravelerProfile, path: Path
 
         lines.append(f"- **Traveler**: `{action_type}` — {reason}")
 
+        exploration_context = traveler.get("reflection", {}).get("exploration_context", {})
+        exploration_leads = exploration_context.get("leads", [])
+        if exploration_leads:
+            lines.append("  - **Exploration leads**:")
+            for lead in exploration_leads:
+                lead_id = lead.get("lead_id", "unknown")
+                lead_reason = lead.get("reason", "no reason recorded")
+                lines.append(f"    - `{lead_id}` — {lead_reason}")
+
         traveler_timings = traveler.get("timings", {})
         if traveler_timings:
             lines.append(
@@ -125,12 +134,27 @@ def _write_markdown(result: dict[str, Any], profile: TravelerProfile, path: Path
         for nt in npc_ticks:
             pa = nt.get("proposed_action", {})
             nt_action = pa.get("action_type", "none")
-            lines.append(f"- **NPC {nt.get('npc_id', '?')}**: `{nt_action}` (outcome={nt.get('outcome', 'unknown')})")
+            validation = nt.get("validation", {})
+            validation_reason = validation.get("reason")
+            validation_suffix = ""
+            if validation_reason:
+                validation_suffix = f"; validation reason={validation_reason}"
+            lines.append(
+                f"- **NPC {nt.get('npc_id', '?')}**: `{nt_action}` "
+                f"(outcome={nt.get('outcome', 'unknown')}{validation_suffix})"
+            )
 
         # Arc
         arc = rd.get("arc_update", {})
         if arc:
-            lines.append(f"- **Arc**: phase={arc.get('phase')}, tension={arc.get('tension')}, outcome={arc.get('outcome', 'unresolved')}")
+            arc_parts = [
+                f"phase={arc.get('phase')}",
+                f"tension={arc.get('tension')}",
+                f"outcome={arc.get('outcome', 'unresolved')}",
+            ]
+            if "cumulative_total_signals" in arc:
+                arc_parts.append(f"cumulative signals={arc.get('cumulative_total_signals')}")
+            lines.append(f"- **Arc**: {', '.join(arc_parts)}")
 
         lines.append(f"")
 

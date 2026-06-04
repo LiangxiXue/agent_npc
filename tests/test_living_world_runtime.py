@@ -431,3 +431,70 @@ class SchedulerTest(unittest.TestCase):
         self.assertIn("Traveler internals", markdown)
         self.assertIn("observe", markdown)
         self.assertIn("trace log", markdown)
+
+    def test_timeline_export_explains_exploration_routing_and_arc_progress(self) -> None:
+        profile = load_profile("truth_seeking_scholar")
+        result = {
+            "rounds": [
+                {
+                    "round_number": 1,
+                    "traveler_tick": {
+                        "proposed_action": {
+                            "action_type": "move_to",
+                            "args": {"location_id": "guard_post"},
+                        },
+                        "decision": {
+                            "decision_reason": "Follow higher information-gain lead.",
+                        },
+                        "reflection": {
+                            "exploration_context": {
+                                "leads": [
+                                    {
+                                        "lead_id": "ask_ron_about_guard_ledger",
+                                        "reason": "Need external evidence.",
+                                    }
+                                ]
+                            }
+                        },
+                    },
+                    "npc_ticks": [
+                        {
+                            "npc_id": "mira",
+                            "proposed_action": {
+                                "action_type": "suggest_next_investigation",
+                            },
+                            "validation": {
+                                "status": "allowed",
+                                "reason": "NPC can advance a known lead.",
+                            },
+                            "outcome": "allowed",
+                        }
+                    ],
+                    "arc_update": {
+                        "phase": "npc_conflict",
+                        "tension": 2,
+                        "outcome": "",
+                        "cumulative_total_signals": 6,
+                    },
+                }
+            ],
+            "final_arc_phase": "npc_conflict",
+            "final_arc_outcome": "",
+            "final_tension": 2,
+            "final_traveler_location": "guard_post",
+            "final_relationships": {},
+        }
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            _, md_path = export_simulation_result(
+                result=result,
+                profile=profile,
+                output_dir=tmpdir,
+                run_id="exploration-routing-export-test",
+            )
+            markdown = md_path.read_text(encoding="utf-8")
+
+        self.assertIn("Exploration leads", markdown)
+        self.assertIn("ask_ron_about_guard_ledger", markdown)
+        self.assertIn("cumulative signals=6", markdown)
+        self.assertIn("NPC mira", markdown)
