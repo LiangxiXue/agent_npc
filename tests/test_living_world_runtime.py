@@ -244,6 +244,91 @@ class SchedulerTest(unittest.TestCase):
         }
         self.assertIn("sable", ticked_npcs)
 
+    def test_idle_npc_probes_do_not_create_arc_chaos(self) -> None:
+        profile = load_profile("truth_seeking_scholar")
+        traveler = TravelerActor("idle_arc_probe", profile, use_llm=False)
+        traveler.initialize()
+
+        scheduler = LivingWorldScheduler(
+            traveler=traveler,
+            npc_adapters={
+                "lina": NpcActorAdapter("lina"),
+                "ron": NpcActorAdapter("ron"),
+                "mira": NpcActorAdapter("mira"),
+                "sable": NpcActorAdapter("sable"),
+            },
+            arc_director=ArcDirectorActor(),
+            max_npc_ticks_per_round=4,
+            npc_routines_every_round=False,
+            idle_npc_probe_enabled=True,
+        )
+
+        result = scheduler.run(rounds=1)
+
+        traveler_chaos = sum(
+            1
+            for event in result["rounds"][0]["traveler_tick"]["created_events"]
+            if event.get("payload", {}).get("arc_signal") == "chaos"
+        )
+        non_idle_npc_triggers = sum(
+            1
+            for tick in result["rounds"][0]["npc_ticks"]
+            if tick.get("trigger_event_id") and tick.get("trigger_event_type") != "npc_idle_routine_probe"
+        )
+        self.assertEqual(
+            result["rounds"][0]["arc_update"]["scores"]["chaos"],
+            traveler_chaos + non_idle_npc_triggers,
+        )
+
+    def test_idle_npc_probes_respect_tick_budget(self) -> None:
+        profile = load_profile("truth_seeking_scholar")
+        traveler = TravelerActor("idle_budget_probe", profile, use_llm=False)
+        traveler.initialize()
+
+        scheduler = LivingWorldScheduler(
+            traveler=traveler,
+            npc_adapters={
+                "lina": NpcActorAdapter("lina"),
+                "ron": NpcActorAdapter("ron"),
+                "mira": NpcActorAdapter("mira"),
+                "sable": NpcActorAdapter("sable"),
+            },
+            arc_director=ArcDirectorActor(),
+            max_npc_ticks_per_round=2,
+            npc_routines_every_round=False,
+            idle_npc_probe_enabled=True,
+        )
+
+        result = scheduler.run(rounds=1)
+
+        self.assertLessEqual(len(result["rounds"][0]["npc_ticks"]), 2)
+
+    def test_idle_npc_probes_skip_tick_disabled_npcs(self) -> None:
+        database.upsert_npc_runtime_state("sable", "active", False)
+        profile = load_profile("truth_seeking_scholar")
+        traveler = TravelerActor("idle_disabled_probe", profile, use_llm=False)
+        traveler.initialize()
+
+        scheduler = LivingWorldScheduler(
+            traveler=traveler,
+            npc_adapters={
+                "lina": NpcActorAdapter("lina"),
+                "ron": NpcActorAdapter("ron"),
+                "mira": NpcActorAdapter("mira"),
+                "sable": NpcActorAdapter("sable"),
+            },
+            arc_director=ArcDirectorActor(),
+            max_npc_ticks_per_round=4,
+            npc_routines_every_round=False,
+            idle_npc_probe_enabled=True,
+        )
+
+        result = scheduler.run(rounds=1)
+        ticked_npcs = {tick["npc_id"] for tick in result["rounds"][0]["npc_ticks"]}
+
+        self.assertNotIn("sable", ticked_npcs)
+        self.assertEqual(database.get_npc_event_inbox("sable", include_seen=False), [])
+
     def test_scheduler_collects_round_logs(self) -> None:
         profile = load_profile("truth_seeking_scholar")
         traveler = TravelerActor("sched_rounds", profile, use_llm=False)

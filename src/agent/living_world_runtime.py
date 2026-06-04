@@ -293,6 +293,8 @@ class LivingWorldScheduler:
         # Collect NPCs with unseen inbox items
         npcs_with_inbox: list[tuple[int, str]] = []  # (priority, npc_id)
         for npc_id in self.npc_adapters:
+            if not _npc_can_tick(npc_id):
+                continue
             inbox = database.get_npc_event_inbox(npc_id, include_seen=False, limit=50)
             if not inbox:
                 continue
@@ -302,6 +304,8 @@ class LivingWorldScheduler:
                 npcs_with_inbox.append((1, npc_id))
             elif any(item.get("reason") == "public" for item in inbox):
                 npcs_with_inbox.append((2, npc_id))
+            elif all(item.get("reason") == "idle_probe" for item in inbox):
+                npcs_with_inbox.append((5, npc_id))
             else:
                 npcs_with_inbox.append((3, npc_id))
 
@@ -309,6 +313,8 @@ class LivingWorldScheduler:
             npcs_with_real_inbox = {npc_id for _, npc_id in npcs_with_inbox}
             for npc_id in self.npc_adapters:
                 if npc_id in npcs_with_real_inbox:
+                    continue
+                if not _npc_can_tick(npc_id):
                     continue
                 location = database.get_npc_location_state(npc_id)
                 event = database.create_world_event(
@@ -421,11 +427,15 @@ def _npc_tick_to_dict(result: Any) -> dict[str, Any]:
     proposed_action = result.proposed_action if isinstance(result.proposed_action, dict) else {}
     action_type = str(proposed_action.get("action_type", "")).strip()
     validation = result.validation if isinstance(result.validation, dict) else {}
+    trigger_event = result.trigger_event if isinstance(result.trigger_event, dict) else None
+    trigger_payload = trigger_event.get("payload") if trigger_event and isinstance(trigger_event.get("payload"), dict) else {}
     if not action_type and str(validation.get("status", "")).startswith("rejected"):
         return {
             "npc_id": result.npc_id,
             "outcome": "skipped_no_valid_action",
-            "trigger_event_id": result.trigger_event["id"] if result.trigger_event else None,
+            "trigger_event_id": trigger_event["id"] if trigger_event else None,
+            "trigger_event_type": trigger_event.get("event_type") if trigger_event else None,
+            "trigger_event_payload": trigger_payload,
             "proposed_action": {"action_type": "skip", "args": {}, "reason": "no valid NPC action selected"},
             "validation": validation,
             "action_result": result.action_result,
@@ -438,7 +448,9 @@ def _npc_tick_to_dict(result: Any) -> dict[str, Any]:
     return {
         "npc_id": result.npc_id,
         "outcome": result.outcome,
-        "trigger_event_id": result.trigger_event["id"] if result.trigger_event else None,
+        "trigger_event_id": trigger_event["id"] if trigger_event else None,
+        "trigger_event_type": trigger_event.get("event_type") if trigger_event else None,
+        "trigger_event_payload": trigger_payload,
         "proposed_action": proposed_action,
         "validation": validation,
         "action_result": result.action_result,
@@ -475,10 +487,20 @@ def _safe_int(value: Any) -> int:
         return 0
 
 
+def _npc_can_tick(npc_id: str) -> bool:
+    try:
+        runtime = database.get_npc_runtime_state(npc_id)
+    except Exception:
+        return True
+    return runtime.get("lifecycle_status") == "active" and bool(runtime.get("tick_enabled", True))
+
+
 def _extract_npc_events(npc_ticks: list[dict[str, Any]]) -> list[dict[str, Any]]:
     events = []
     for tick in npc_ticks:
         triggered = tick.get("trigger_event_id")
+        if tick.get("trigger_event_type") == "npc_idle_routine_probe":
+            continue
         if triggered:
             events.append({"payload": {"arc_signal": "chaos"}})
     return events
