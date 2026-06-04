@@ -229,6 +229,18 @@ class LivingWorldScheduler:
         result["timings"] = {"total_ms": _elapsed_ms(run_started)}
         return result
 
+    def run_until_outcome(self, max_rounds: int) -> dict[str, Any]:
+        """Execute rounds until the arc records an outcome or max_rounds is reached."""
+        run_started = perf_counter()
+        for round_num in range(1, max_rounds + 1):
+            round_data = self._execute_round(round_num)
+            self.round_log.append(round_data)
+            if round_data["arc_update"].get("outcome"):
+                break
+        result = self._build_final_result()
+        result["timings"] = {"total_ms": _elapsed_ms(run_started)}
+        return result
+
     def _execute_round(self, round_num: int) -> dict[str, Any]:
         round_started = perf_counter()
         timings: dict[str, float] = {}

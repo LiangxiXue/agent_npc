@@ -35,6 +35,9 @@ def main() -> None:
     parser.add_argument("--mock", action="store_true", help="Use deterministic fallback (no LLM).")
     parser.add_argument("--export-dir", default="data/traces/traveler_runs", help="Export directory.")
     parser.add_argument("--list-profiles", action="store_true", help="List available profiles and exit.")
+    parser.add_argument("--max-npc-ticks", type=int, default=2, help="Maximum NPC autonomous ticks per round.")
+    parser.add_argument("--idle-npc-probe", action="store_true", help="Tick idle NPCs with low-priority probes.")
+    parser.add_argument("--stop-on-outcome", action="store_true", help="Stop early once the arc has an outcome.")
     args = parser.parse_args()
 
     if args.list_profiles:
@@ -83,13 +86,17 @@ def main() -> None:
         traveler=traveler,
         npc_adapters=npc_adapters,
         arc_director=director,
-        max_npc_ticks_per_round=2,
+        max_npc_ticks_per_round=args.max_npc_ticks,
         npc_routines_every_round=True,
+        idle_npc_probe_enabled=args.idle_npc_probe,
     )
 
     # Run simulation
     print(f"\nRunning {args.rounds} rounds...")
-    result = scheduler.run(rounds=args.rounds)
+    if args.stop_on_outcome:
+        result = scheduler.run_until_outcome(max_rounds=args.rounds)
+    else:
+        result = scheduler.run(rounds=args.rounds)
 
     # Detect major events across all rounds
     all_major_events = []

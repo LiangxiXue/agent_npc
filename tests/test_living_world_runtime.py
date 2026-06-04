@@ -244,6 +244,33 @@ class SchedulerTest(unittest.TestCase):
         }
         self.assertIn("sable", ticked_npcs)
 
+    def test_scheduler_can_run_until_outcome(self) -> None:
+        profile = load_profile("truth_seeking_scholar")
+        traveler = TravelerActor("outcome_probe", profile, use_llm=False)
+        traveler.initialize()
+
+        scheduler = LivingWorldScheduler(
+            traveler=traveler,
+            npc_adapters={
+                "lina": NpcActorAdapter("lina"),
+                "ron": NpcActorAdapter("ron"),
+                "mira": NpcActorAdapter("mira"),
+                "sable": NpcActorAdapter("sable"),
+            },
+            arc_director=ArcDirectorActor(),
+            max_npc_ticks_per_round=4,
+            npc_routines_every_round=True,
+            idle_npc_probe_enabled=True,
+        )
+
+        result = scheduler.run_until_outcome(max_rounds=20)
+
+        self.assertLessEqual(result["total_rounds"], 20)
+        self.assertEqual(result["final_arc_phase"], "resolved")
+        self.assertNotEqual(result["final_arc_outcome"], "")
+        self.assertIn("timings", result)
+        self.assertIn("total_ms", result["timings"])
+
     def test_idle_npc_probes_do_not_create_arc_chaos(self) -> None:
         profile = load_profile("truth_seeking_scholar")
         traveler = TravelerActor("idle_arc_probe", profile, use_llm=False)

@@ -289,3 +289,18 @@ player action
 - Sable 可以制造 `sable_advantage` 倾向，但仍不能调用 `unlock_location`；
 - Ron 可以升级风险或巡逻，但不会凭空完成其他 NPC 的任务；
 - Mira 可以推动 `research_advantage`，但必须基于具体观察和笔记。
+
+## 方案 F：Traveler Living World 验收 Demo
+
+运行：
+
+```powershell
+.\.venv\Scripts\python.exe scripts\run_traveler_world_demo.py --profile truth_seeking_scholar --rounds 20 --mock --max-npc-ticks 4 --idle-npc-probe --stop-on-outcome --export-dir data/traces/living_world_acceptance
+```
+
+验收重点：
+
+- final arc phase 为 `resolved`；
+- final arc outcome 非空；
+- 导出 JSON 和 Markdown；
+- JSON 中能看到多地点探索、NPC tick 目标以及 round / Traveler 内部 timings。
