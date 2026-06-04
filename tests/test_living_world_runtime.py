@@ -113,6 +113,21 @@ class ActorAdapterTest(unittest.TestCase):
         self.assertNotEqual(result["phase"], "resolved")
         self.assertEqual(result["outcome"], "")
 
+    def test_arc_director_accumulates_scores_across_rounds_until_resolved(self) -> None:
+        director = ArcDirectorActor()
+        world_state = {"round_number": 1}
+        event = {"payload": {"arc_signal": "research"}}
+
+        first = director.tick(world_state, [event, event], [])
+        second = director.tick({"round_number": 2}, [event, event, event], [])
+        third = director.tick({"round_number": 3}, [event, event, event], [])
+
+        self.assertEqual(first["phase"], "evidence_gathering")
+        self.assertEqual(second["phase"], "npc_conflict")
+        self.assertEqual(third["phase"], "resolved")
+        self.assertNotEqual(third["outcome"], "")
+        self.assertGreaterEqual(third["cumulative_total_signals"], 8)
+
     def test_traveler_get_direct_targets(self) -> None:
         profile = load_profile("truth_seeking_scholar")
         actor = TravelerActor("test_actor3", profile, use_llm=False)

@@ -141,30 +141,38 @@ class ArcDirectorActor:
         """Evaluate arc state based on all accumulated events and NPC actions."""
         current = database.get_world_arc_state(ARC_ID)
         phase = str(current["phase"])
+        metadata = current.get("metadata", {}) if isinstance(current.get("metadata"), dict) else {}
 
-        # Count arc signals from events
+        # Count arc signals from this round, then merge with persisted arc progress.
         scores = _collect_scores_from_events((all_events or []) + _extract_npc_events(npc_ticks or []))
+        cumulative_scores = _merge_arc_scores(metadata.get("cumulative_scores", {}), scores)
 
-        # Determine if phase should advance
         total_signals = sum(scores.values())
+        cumulative_total_signals = sum(cumulative_scores.values())
         new_phase = phase
-        if phase == "rumor" and total_signals >= 2:
+        if phase == "rumor" and cumulative_total_signals >= 2:
             new_phase = "evidence_gathering"
-        elif phase == "evidence_gathering" and total_signals >= 5:
+        elif phase == "evidence_gathering" and cumulative_total_signals >= 5:
             new_phase = "npc_conflict"
-        elif phase == "npc_conflict" and total_signals >= 8:
+        elif phase == "npc_conflict" and cumulative_total_signals >= 8:
             new_phase = "resolved"
 
-        if new_phase != phase:
-            database.update_world_arc_state(
-                arc_id=ARC_ID,
-                phase=new_phase,
-                tension=min(10, int(current["tension"]) + 1),
-            )
+        metadata = {
+            **metadata,
+            "cumulative_scores": cumulative_scores,
+            "last_round_scores": scores,
+            "last_round_total_signals": total_signals,
+        }
+        database.update_world_arc_state(
+            arc_id=ARC_ID,
+            phase=new_phase,
+            tension=min(10, int(current["tension"]) + (1 if new_phase != phase else 0)),
+            metadata=metadata,
+        )
 
         # If resolved, determine outcome
         if new_phase == "resolved":
-            resolved = resolve_arc_outcome(scores)
+            resolved = resolve_arc_outcome(cumulative_scores)
             apply_arc_outcome(
                 outcome=resolved["arc_outcome"],
                 reason=f"Arc resolved after {new_phase} phase.",
@@ -180,6 +188,8 @@ class ArcDirectorActor:
             "outcome": arc_state.get("outcome", ""),
             "scores": scores,
             "total_signals": total_signals,
+            "cumulative_scores": cumulative_scores,
+            "cumulative_total_signals": cumulative_total_signals,
         }
 
 
@@ -419,6 +429,13 @@ def _collect_scores_from_events(events: list[dict[str, Any]]) -> dict[str, int]:
         if signal in scores:
             scores[signal] += 1
     return scores
+
+
+def _merge_arc_scores(existing: dict[str, Any], current: dict[str, int]) -> dict[str, int]:
+    cumulative = {"guardian": 0, "research": 0, "sable": 0, "chaos": 0}
+    for key in cumulative:
+        cumulative[key] = int(existing.get(key, 0)) + int(current.get(key, 0))
+    return cumulative
 
 
 def _extract_npc_events(npc_ticks: list[dict[str, Any]]) -> list[dict[str, Any]]:
