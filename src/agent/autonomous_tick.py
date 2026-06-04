@@ -504,8 +504,18 @@ def decision_from_selected_action(selected_action: dict[str, Any], llm_decision:
                     "args": {"content": f"Ron took a procedural safety action: {action_type}."},
                 }
             ]
-    elif action_type in {"request_field_notes", "preserve_research_record", "inspect_clue", "connect_evidence", "archive_memory", "suggest_next_investigation"}:
+    elif action_type == "request_field_notes":
         intent = "start_ancient_notes_quest"
+        social_intent = "cooperate"
+        tools = [{"name": "update_quest_status", "args": {"quest_id": "ancient_notes", "status": "in_progress"}}]
+    elif action_type in {
+        "preserve_research_record",
+        "inspect_clue",
+        "connect_evidence",
+        "archive_memory",
+        "suggest_next_investigation",
+    }:
+        intent = "general_conversation"
         social_intent = "cooperate"
     return {
         "intent": intent,

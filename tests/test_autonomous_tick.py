@@ -165,6 +165,39 @@ class AutonomousTickTest(unittest.TestCase):
         self.assertEqual(result.validation["status"], "allowed")
         self.assertEqual(result.llm_decision["fallback_reason"], "LLM returned no valid selected_action.")
 
+    def test_mira_suggest_next_investigation_does_not_require_quest_start(self) -> None:
+        from src.agent.autonomous_tick import decision_from_selected_action
+
+        decision = decision_from_selected_action(
+            {
+                "action_type": "suggest_next_investigation",
+                "args": {"message_intent": "Check the guard ledger before returning to the archive."},
+            },
+            {"reflection_summary": "Mira suggests a grounded next step."},
+        )
+
+        self.assertEqual(decision["intent"], "general_conversation")
+        self.assertEqual(decision["social_intent"], "cooperate")
+        self.assertEqual(decision["tools"], [])
+
+    def test_mira_request_field_notes_starts_ancient_notes_quest(self) -> None:
+        from src.agent.autonomous_tick import decision_from_selected_action
+
+        decision = decision_from_selected_action(
+            {
+                "action_type": "request_field_notes",
+                "args": {"message_intent": "Ask the traveler to bring field notes from the dig site."},
+            },
+            {"reflection_summary": "Mira needs field notes for the archive record."},
+        )
+
+        self.assertEqual(decision["intent"], "start_ancient_notes_quest")
+        self.assertEqual(decision["social_intent"], "cooperate")
+        self.assertEqual(
+            decision["tools"],
+            [{"name": "update_quest_status", "args": {"quest_id": "ancient_notes", "status": "in_progress"}}],
+        )
+
     def test_invalid_selected_action_args_are_reported_in_trace(self) -> None:
         from src.agent.autonomous_tick import run_autonomous_tick
 
