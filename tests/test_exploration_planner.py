@@ -148,3 +148,111 @@ def test_new_field_evidence_away_from_archive_routes_back_to_mira() -> None:
         "reason": "New field evidence should be interpreted by Mira.",
     } in context["leads"]
     assert context["action_scores"]["move_to:archive"] > context["action_scores"]["move_to:guard_post"]
+
+
+def test_guard_post_lead_hands_off_to_ron_conversation() -> None:
+    observation = {
+        "recent_events": [
+            {
+                "event_type": "traveler_talked_to_npc",
+                "source_id": "traveler",
+                "content": "Traveler talked to mira about 'ruins'.",
+                "payload": {"npc_id": "mira", "topic": "ruins"},
+            },
+            {
+                "event_type": "traveler_moved",
+                "source_id": "traveler",
+                "content": "Traveler moved to guard_post.",
+                "payload": {"location_id": "guard_post"},
+            },
+        ],
+        "traveler_state": {"current_location": "guard_post"},
+    }
+    actions = [
+        {
+            "action_type": "talk_to",
+            "args_schema": {"npc_id": "string", "topic": "string"},
+            "arg_options": {"npc_id": ["ron"]},
+        },
+        {
+            "action_type": "move_to",
+            "args_schema": {"location_id": "string"},
+            "arg_options": {"location_id": ["market", "tavern"]},
+        },
+    ]
+
+    context = build_exploration_context("traveler", observation, actions)
+
+    assert context["action_scores"]["talk_to:ron"] > context["action_scores"]["move_to:market"]
+
+
+def test_market_lead_hands_off_to_sable_conversation() -> None:
+    observation = {
+        "recent_events": [
+            {
+                "event_type": "traveler_talked_to_npc",
+                "source_id": "traveler",
+                "content": "Traveler talked to mira about 'ruins'.",
+                "payload": {"npc_id": "mira", "topic": "ruins"},
+            },
+            {
+                "event_type": "traveler_moved",
+                "source_id": "traveler",
+                "content": "Traveler moved to market.",
+                "payload": {"location_id": "market"},
+            },
+        ],
+        "traveler_state": {"current_location": "market"},
+    }
+    actions = [
+        {
+            "action_type": "talk_to",
+            "args_schema": {"npc_id": "string", "topic": "string"},
+            "arg_options": {"npc_id": ["sable"]},
+        },
+        {
+            "action_type": "move_to",
+            "args_schema": {"location_id": "string"},
+            "arg_options": {"location_id": ["guard_post", "tavern"]},
+        },
+    ]
+
+    context = build_exploration_context("traveler", observation, actions)
+
+    assert context["action_scores"]["talk_to:sable"] > context["action_scores"]["move_to:guard_post"]
+
+
+def test_recent_ron_followup_allows_next_lead() -> None:
+    observation = {
+        "recent_events": [
+            {
+                "event_type": "traveler_moved",
+                "source_id": "traveler",
+                "content": "Traveler moved to guard_post.",
+                "payload": {"location_id": "guard_post"},
+            },
+            {
+                "event_type": "traveler_talked_to_npc",
+                "source_id": "traveler",
+                "content": "Traveler talked to ron about 'guard ledger'.",
+                "payload": {"npc_id": "ron", "topic": "guard ledger"},
+            },
+        ],
+        "traveler_state": {"current_location": "guard_post"},
+    }
+    actions = [
+        {
+            "action_type": "talk_to",
+            "args_schema": {"npc_id": "string", "topic": "string"},
+            "arg_options": {"npc_id": ["ron"]},
+        },
+        {
+            "action_type": "move_to",
+            "args_schema": {"location_id": "string"},
+            "arg_options": {"location_id": ["market", "tavern"]},
+        },
+    ]
+
+    context = build_exploration_context("traveler", observation, actions)
+
+    assert context["action_scores"]["move_to:market"] > context["action_scores"]["talk_to:ron"]

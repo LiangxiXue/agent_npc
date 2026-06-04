@@ -21,7 +21,14 @@ def build_exploration_context(
 
     conversation_threads = _conversation_threads(traveler_id, recent_events)
     leads = _minimal_leads(observation, recent_events)
-    action_scores = _score_available_actions(available_actions, conversation_threads, leads, recent_events)
+    current_location = _current_location(observation)
+    action_scores = _score_available_actions(
+        available_actions,
+        conversation_threads,
+        leads,
+        recent_events,
+        current_location,
+    )
 
     return {
         "traveler_id": traveler_id,
@@ -74,11 +81,7 @@ def _conversation_threads(traveler_id: str, recent_events: list[Any]) -> list[di
 
 
 def _minimal_leads(observation: dict[str, Any], recent_events: list[Any]) -> list[dict[str, Any]]:
-    current_location = str(
-        observation.get("traveler_state", {}).get("current_location", "")
-        if isinstance(observation.get("traveler_state"), dict)
-        else ""
-    )
+    current_location = _current_location(observation)
     has_field_evidence = any(_is_evidence_event(event) for event in recent_events)
     leads = [
         {
@@ -119,6 +122,7 @@ def _score_available_actions(
     conversation_threads: list[dict[str, Any]],
     leads: list[dict[str, Any]],
     recent_events: list[Any],
+    current_location: str,
 ) -> dict[str, float]:
     scores: dict[str, float] = {}
     lead_scores = {
@@ -126,6 +130,7 @@ def _score_available_actions(
         for lead in leads
         if isinstance(lead.get("action_type"), str) and isinstance(lead.get("target"), str)
     }
+    local_followups = _local_followup_scores(current_location, recent_events)
     thread_by_npc = {thread["npc_id"]: thread for thread in conversation_threads}
 
     for action in available_actions:
@@ -140,11 +145,51 @@ def _score_available_actions(
             for npc_id in _string_options(options.get("npc_id")):
                 thread = thread_by_npc.get(npc_id.lower())
                 key = f"{action_type}:{npc_id}"
-                scores[key] = round(_conversation_score(thread, recent_events), 3)
+                scores[key] = round(
+                    max(
+                        _conversation_score(thread, recent_events),
+                        local_followups.get(key, 0.0),
+                    ),
+                    3,
+                )
         else:
             scores[action_type] = 0.35
 
     return scores
+
+
+def _current_location(observation: dict[str, Any]) -> str:
+    traveler_state = observation.get("traveler_state")
+    if not isinstance(traveler_state, dict):
+        return ""
+    return str(traveler_state.get("current_location", ""))
+
+
+def _local_followup_scores(current_location: str, recent_events: list[Any]) -> dict[str, float]:
+    if current_location == "guard_post" and not _has_recent_talk_with(recent_events, "ron"):
+        return {
+            "talk_to:ron": 0.91,
+            "ask_for_help:ron": 0.88,
+            "share_information:ron": 0.82,
+        }
+    if current_location == "market" and not _has_recent_talk_with(recent_events, "sable"):
+        return {
+            "talk_to:sable": 0.9,
+            "ask_for_help:sable": 0.86,
+            "share_information:sable": 0.82,
+        }
+    return {}
+
+
+def _has_recent_talk_with(recent_events: list[Any], npc_id: str) -> bool:
+    expected = npc_id.lower()
+    for event in recent_events[-4:]:
+        if not isinstance(event, dict) or event.get("event_type") != "traveler_talked_to_npc":
+            continue
+        payload = event.get("payload") if isinstance(event.get("payload"), dict) else {}
+        if str(payload.get("npc_id", "")).lower() == expected:
+            return True
+    return False
 
 
 def _lead_score(lead: dict[str, Any], recent_events: list[Any]) -> float:
