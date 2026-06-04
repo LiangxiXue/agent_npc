@@ -128,6 +128,19 @@ class ActorAdapterTest(unittest.TestCase):
         self.assertNotEqual(third["outcome"], "")
         self.assertGreaterEqual(third["cumulative_total_signals"], 8)
 
+    def test_arc_director_does_not_reapply_resolved_outcome(self) -> None:
+        director = ArcDirectorActor()
+        event = {"payload": {"arc_signal": "research"}}
+
+        director.tick({"round_number": 1}, [event, event], [])
+        director.tick({"round_number": 2}, [event, event, event], [])
+        resolved = director.tick({"round_number": 3}, [event, event, event], [])
+        repeated = director.tick({"round_number": 4}, [], [])
+
+        self.assertEqual(repeated["phase"], "resolved")
+        self.assertEqual(repeated["outcome"], resolved["outcome"])
+        self.assertEqual(repeated["tension"], resolved["tension"])
+
     def test_traveler_get_direct_targets(self) -> None:
         profile = load_profile("truth_seeking_scholar")
         actor = TravelerActor("test_actor3", profile, use_llm=False)

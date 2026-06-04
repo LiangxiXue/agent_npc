@@ -171,7 +171,7 @@ class ArcDirectorActor:
         )
 
         # If resolved, determine outcome
-        if new_phase == "resolved":
+        if new_phase == "resolved" and phase != "resolved":
             resolved = resolve_arc_outcome(cumulative_scores)
             apply_arc_outcome(
                 outcome=resolved["arc_outcome"],
@@ -432,10 +432,18 @@ def _collect_scores_from_events(events: list[dict[str, Any]]) -> dict[str, int]:
 
 
 def _merge_arc_scores(existing: dict[str, Any], current: dict[str, int]) -> dict[str, int]:
+    existing_scores = existing if isinstance(existing, dict) else {}
     cumulative = {"guardian": 0, "research": 0, "sable": 0, "chaos": 0}
     for key in cumulative:
-        cumulative[key] = int(existing.get(key, 0)) + int(current.get(key, 0))
+        cumulative[key] = _safe_int(existing_scores.get(key, 0)) + _safe_int(current.get(key, 0))
     return cumulative
+
+
+def _safe_int(value: Any) -> int:
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return 0
 
 
 def _extract_npc_events(npc_ticks: list[dict[str, Any]]) -> list[dict[str, Any]]:
