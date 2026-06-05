@@ -1,8 +1,12 @@
 # Memory-Driven Interactive Character Agent
 
-这是一个以文字冒险 NPC 交互为验证场景的记忆驱动角色 Agent 原型。项目重点不是制作完整游戏，而是展示角色 Agent 如何在多轮交互和可调度世界事件中读取稳定世界设定、检索长期记忆、维护主观信念和目标计划、提出受约束行动，并保存可解释的执行轨迹。
+这是一个以文字冒险世界为验证场景的 LLM-driven 角色 Agent 原型。项目重点不是制作完整游戏，而是展示大语言模型如何被放入一个可解释、可验证的 Agent 闭环中：角色会读取稳定世界设定，检索长期记忆，形成主观信念、情绪、目标和计划，再由 LLM 生成结构化决策与自然语言回复；最终行动必须经过程序规则校验，才能改变任务、地点、关系和世界状态。
 
-当前实现已经从单 NPC MVP 扩展为四 NPC、多任务、Hybrid RAG、后台记忆 worker、NPCMind、自主 NPC tick、遗迹主线 living-world runtime，以及可配置 Traveler agent。玩家可见的主回合 runtime 需要 OpenAI-compatible LLM；测试和 `--mock` 演示通过 patch / deterministic fallback 保持离线可运行。LLM 可以参与结构化 decision、最终回复润色、长期记忆候选/审查、受约束 autonomous tick 和 Traveler 决策，但世界事实、任务推进和状态变更仍由程序拥有。
+当前系统已经从单 NPC 对话原型扩展为多角色 living-world simulation：四个 NPC、任务状态机、Hybrid RAG、后台记忆 worker、NPCMind、自主 NPC tick、遗迹主线 world runtime，以及可配置 Traveler agent。系统希望验证的核心问题是：LLM 角色能否在有记忆、有目标、有约束、有世界事件的环境中持续做出一致、可追踪、不会越权改写事实的行动。
+
+一个典型 NPC 回合会经历以下流程：玩家输入或世界事件触发角色观察；系统检索 lore、近期上下文和长期记忆；NPCMind 生成 belief、emotion、active goal、active plan 和 social strategy；LLM 基于这些私有上下文输出结构化 decision；程序将 decision 转换为 NPCAction，并通过 ActionValidator 和任务状态机校验；Environment 执行合法行动，写回数据库；最后系统生成回复、记录 reflection，并把重要信息送入后台长期记忆流程。trace 会保存每一步的输入、决策、工具调用、状态变化和反思结果。
+
+Traveler agent 是 living-world simulation 中的“自动探索者”。它不是普通玩家输入，而是一个由 YAML profile 配置的角色 agent，拥有公开身份、隐藏背景、私人目标、行动边界、关系状态和起始位置。每一轮 simulation 中，Traveler 会观察世界事件和地点状态，检索相关记忆与线索，决定下一步探索、询问、等待或互动行为；这些行动同样要经过程序校验后才能影响世界。这样系统可以在没有手动玩家逐句输入的情况下，自动运行一段多角色遗迹探索过程，并观察 NPC、Traveler 和世界主线如何相互推动。
 
 ## 当前项目状态
 
@@ -358,12 +362,11 @@ Sable，我听说入口在酒馆后巷，我接受你说的先查换岗记录。
 
 - Agent 编排仍是自定义 Python workflow，没有迁移到 LangGraph。
 - 玩家可见 LLM runtime 需要 OpenAI-compatible provider 和可用 API key；测试和 `--mock` demo 通过 deterministic fallback / patch 保持离线可运行。
-- Living-world runtime 已经支持演示级多轮调度、NPC routines、Traveler tick、NPC autonomous tick、ArcDirector 和 timeline export，但仍是课程项目原型，不是完整通用游戏引擎。
+- Living-world runtime 已经支持演示级多轮调度、NPC routines、Traveler tick、NPC autonomous tick、ArcDirector 和 timeline export，但仍是研究原型，不是完整通用游戏引擎。
 - NPCMind 是确定性、可测试的第一版；belief、emotion、goal、plan、reflection、plan blockers、cooldown 和 autonomous tick 已接入，但还不是完整认知架构。
 - Traveler profile 支持 YAML 配置、hidden identity、private goals、risk level、hard boundaries 和 relationship state；目前主要用于 ruins demo 的可复现实验。
 - 后台记忆任务支持通过脚本/API 单次处理，也支持 `scripts/memory_worker.py` 常驻消费。
 - FAISS 和真实 embedding 是可选增强，不是默认依赖。
-- 课程最终报告 PDF、PPT、录屏和最终截图仍需基于当前运行结果整理。
 
 ## 后续方向
 
@@ -376,4 +379,3 @@ Sable，我听说入口在酒馆后巷，我接受你说的先查换岗记录。
 7. 增强后台 worker 的并发锁、重试策略、运行监控和服务化启动方式。
 8. 增强真实 LLM decision 的 schema 修复、失败案例记录和回归测试。
 9. 增加本地 embedding 模型、持久化 FAISS 索引或 Qdrant/Chroma backend。
-10. 完善课程交付材料：报告、PPT、截图、录屏、AI 使用说明和演示脚本。
