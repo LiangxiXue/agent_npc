@@ -7,8 +7,13 @@ from datetime import datetime, timezone
 from time import perf_counter
 from typing import Any
 
+from src.agent import decision as npc_decision
+from src.agent import response as npc_response
+from src.agent.environment import NarrativeEnvironment
 from src.agent.event_visibility import dispatch_world_event_to_inbox
 from src.agent.exploration_planner import build_exploration_context
+from src.agent.npc_mind import NPCMind, ReflectionEngine
+from src.agent.player_actions import arc_signal_for_npc, arc_signal_for_object
 from src.agent.traveler_actions import (
     ActionBias,
     compute_action_biases,
@@ -42,6 +47,7 @@ class TravelerTickResult:
     state_changes: list[dict[str, Any]]
     relationship_changes: list[dict[str, Any]]
     created_events: list[dict[str, Any]]
+    dialogue_exchange: dict[str, Any] | None
     reflection: dict[str, Any]
     deception_metadata: dict[str, Any] | None
     disclosure_metadata: dict[str, Any] | None
@@ -127,7 +133,7 @@ def run_traveler_tick(
     secret_tracker = SecretTracker()
 
     if validation["status"] == "allowed":
-        action_result, state_changes, rel_changes, created_events, deception_meta, disclosure_meta = (
+        action_result, state_changes, rel_changes, created_events, dialogue_exchange, deception_meta, disclosure_meta = (
             _execute_traveler_action(
                 traveler_id=traveler_id,
                 decision=decision,
@@ -137,17 +143,21 @@ def run_traveler_tick(
                 secret_tracker=secret_tracker,
                 round_number=round_number,
                 world_state=world_state,
+                enable_npc_dialogue=use_llm,
             )
         )
     else:
         action_result = _empty_action_result(validation.get("reason", "blocked"))
         state_changes, rel_changes = [], []
+        dialogue_exchange = None
         created_events, deception_meta, disclosure_meta = [], None, None
     timings["act_ms"] = _elapsed_ms(act_started)
 
     # 7. REFLECT
     reflect_started = perf_counter()
     reflection = _build_reflection(traveler_id, decision, action_result, exploration_context)
+    if dialogue_exchange:
+        reflection["dialogue_exchange"] = dialogue_exchange
     timings["reflect_ms"] = _elapsed_ms(reflect_started)
 
     # 8. LOG TRACE
@@ -190,6 +200,7 @@ def run_traveler_tick(
         state_changes=state_changes,
         relationship_changes=rel_changes,
         created_events=[_event_summary(e) for e in created_events],
+        dialogue_exchange=dialogue_exchange,
         reflection=reflection,
         deception_metadata=deception_meta,
         disclosure_metadata=disclosure_meta,
@@ -307,7 +318,8 @@ def _execute_traveler_action(
     secret_tracker: SecretTracker,
     round_number: int,
     world_state: dict[str, Any],
-) -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], dict[str, Any] | None, dict[str, Any] | None]:
+    enable_npc_dialogue: bool = True,
+) -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], dict[str, Any] | None, dict[str, Any] | None, dict[str, Any] | None]:
     selected = decision.get("selected_action", {})
     action_type = selected.get("action_type", "")
     args = selected.get("args", {})
@@ -315,6 +327,7 @@ def _execute_traveler_action(
     state_changes: list[dict[str, Any]] = []
     rel_changes: list[dict[str, Any]] = []
     created_events: list[dict[str, Any]] = []
+    dialogue_exchange: dict[str, Any] | None = None
     deception_meta = None
     disclosure_meta = None
 
@@ -342,6 +355,7 @@ def _execute_traveler_action(
         honesty = str(args.get("honesty_level", "full"))
 
         if npc_id:
+            before_rel = rel_mgr.get(npc_id)
             rel_mgr.set_tone(npc_id, tone)
             # Update relationship based on tone and honesty
             if tone in ("friendly", "warm"):
@@ -351,7 +365,7 @@ def _execute_traveler_action(
                 rel_mgr.update_suspicion(npc_id, 0.1)
 
             after_rel = rel_mgr.get(npc_id)
-            rel_changes = rel_mgr.snapshot_changes(npc_id, after_rel)
+            rel_changes = _relationship_changes(npc_id, before_rel, after_rel)
 
             # Handle deception
             deception_meta = _handle_deception(decision, npc_id, round_number)
@@ -364,7 +378,13 @@ def _execute_traveler_action(
                 source_id=traveler_id,
                 location_id=state_mgr.current_location,
                 round_number=round_number,
-                payload={"npc_id": npc_id, "topic": topic, "tone": tone, "honesty_level": honesty},
+                payload={
+                    "npc_id": npc_id,
+                    "topic": topic,
+                    "tone": tone,
+                    "honesty_level": honesty,
+                    "traveler_utterance": _traveler_utterance(decision, action_type, args, profile),
+                },
             )
             created_events.append(event)
 
@@ -395,69 +415,89 @@ def _execute_traveler_action(
     elif action_type == "ask_for_help":
         npc_id = str(args.get("npc_id", ""))
         if npc_id:
+            before_rel = rel_mgr.get(npc_id)
             rel_mgr.set_tone(npc_id, "requesting")
             after_rel = rel_mgr.get(npc_id)
-            rel_changes = rel_mgr.snapshot_changes(npc_id, after_rel)
+            rel_changes = _relationship_changes(npc_id, before_rel, after_rel)
             event = _create_world_event(
                 event_type="traveler_asked_help",
                 content=f"{profile.identity.public_name} asked {npc_id} for help: {args.get('request', '')}",
                 source_id=traveler_id,
                 location_id=state_mgr.current_location,
                 round_number=round_number,
-                payload={"npc_id": npc_id, "request": args.get("request", "")},
+                payload={
+                    "npc_id": npc_id,
+                    "request": args.get("request", ""),
+                    "traveler_utterance": _traveler_utterance(decision, action_type, args, profile),
+                },
             )
             created_events.append(event)
 
     elif action_type == "share_information":
         npc_id = str(args.get("npc_id", ""))
         if npc_id:
+            before_rel = rel_mgr.get(npc_id)
             rel_mgr.update_exposure(npc_id, 0.1)
             after_rel = rel_mgr.get(npc_id)
-            rel_changes = rel_mgr.snapshot_changes(npc_id, after_rel)
+            rel_changes = _relationship_changes(npc_id, before_rel, after_rel)
             event = _create_world_event(
                 event_type="traveler_shared_info",
                 content=f"{profile.identity.public_name} shared information with {npc_id}.",
                 source_id=traveler_id,
                 location_id=state_mgr.current_location,
                 round_number=round_number,
-                payload={"npc_id": npc_id, "claim": args.get("claim", "")},
+                payload={
+                    "npc_id": npc_id,
+                    "claim": args.get("claim", ""),
+                    "traveler_utterance": _traveler_utterance(decision, action_type, args, profile),
+                },
             )
             created_events.append(event)
 
     elif action_type == "trade_with":
         npc_id = str(args.get("npc_id", ""))
         if npc_id:
+            before_rel = rel_mgr.get(npc_id)
             offered = str(args.get("offered_item", ""))
             if offered and offered in state_mgr.inventory:
                 state_mgr.remove_inventory_item(offered)
                 state_changes.append({"field": "inventory", "removed": offered})
             rel_mgr.update_affinity(npc_id, 0.05)
             after_rel = rel_mgr.get(npc_id)
-            rel_changes = rel_mgr.snapshot_changes(npc_id, after_rel)
+            rel_changes = _relationship_changes(npc_id, before_rel, after_rel)
             event = _create_world_event(
                 event_type="traveler_traded",
                 content=f"{profile.identity.public_name} traded with {npc_id}.",
                 source_id=traveler_id,
                 location_id=state_mgr.current_location,
                 round_number=round_number,
-                payload={"npc_id": npc_id, "offered_item": offered},
+                payload={
+                    "npc_id": npc_id,
+                    "offered_item": offered,
+                    "traveler_utterance": _traveler_utterance(decision, action_type, args, profile),
+                },
             )
             created_events.append(event)
 
     elif action_type == "challenge_claim":
         npc_id = str(args.get("npc_id", ""))
         if npc_id:
+            before_rel = rel_mgr.get(npc_id)
             rel_mgr.update_suspicion(npc_id, -0.1)
             rel_mgr.update_trust(npc_id, -0.1)
             after_rel = rel_mgr.get(npc_id)
-            rel_changes = rel_mgr.snapshot_changes(npc_id, after_rel)
+            rel_changes = _relationship_changes(npc_id, before_rel, after_rel)
             event = _create_world_event(
                 event_type="traveler_challenged",
                 content=f"{profile.identity.public_name} challenged {npc_id}'s claim.",
                 source_id=traveler_id,
                 location_id=state_mgr.current_location,
                 round_number=round_number,
-                payload={"npc_id": npc_id, "evidence_id": args.get("evidence_id", "")},
+                payload={
+                    "npc_id": npc_id,
+                    "evidence_id": args.get("evidence_id", ""),
+                    "traveler_utterance": _traveler_utterance(decision, action_type, args, profile),
+                },
             )
             created_events.append(event)
 
@@ -488,6 +528,13 @@ def _execute_traveler_action(
         except Exception:
             pass
 
+    if enable_npc_dialogue:
+        dialogue_exchange = _build_dialogue_exchange_if_needed(
+            decision=decision,
+            profile=profile,
+            created_events=created_events,
+        )
+
     action_result = {
         "accepted": True,
         "blocked_reason": "",
@@ -497,7 +544,7 @@ def _execute_traveler_action(
         "created_event_ids": [e.get("id") for e in created_events],
     }
 
-    return action_result, state_changes, rel_changes, created_events, deception_meta, disclosure_meta
+    return action_result, state_changes, rel_changes, created_events, dialogue_exchange, deception_meta, disclosure_meta
 
 
 # ── Helpers ─────────────────────────────────────────────────────────
@@ -520,9 +567,183 @@ def _create_world_event(
         payload={
             **(payload or {}),
             "round": round_number,
-            "arc_signal": "chaos",
+            "arc_signal": _infer_arc_signal(event_type, location_id, payload or {}),
         },
     )
+
+
+def _traveler_utterance(
+    decision: dict[str, Any],
+    action_type: str,
+    args: dict[str, Any],
+    profile: TravelerProfile,
+) -> str:
+    utterance = str(decision.get("traveler_utterance", "")).strip()
+    if utterance:
+        return utterance
+    npc_id = str(args.get("npc_id", ""))
+    if action_type == "talk_to":
+        topic = str(args.get("topic", "this situation"))
+        return f"{profile.identity.public_name}: I would like to ask {npc_id} about {topic}."
+    if action_type == "ask_for_help":
+        return f"{profile.identity.public_name}: I need your help with {args.get('request', 'this matter')}."
+    if action_type == "share_information":
+        return f"{profile.identity.public_name}: I want to share this: {args.get('claim', '')}."
+    if action_type == "trade_with":
+        return f"{profile.identity.public_name}: I can offer {args.get('offered_item', 'something useful')} for information."
+    if action_type == "challenge_claim":
+        return f"{profile.identity.public_name}: I need to challenge that claim with the evidence I have."
+    return ""
+
+
+def _relationship_changes(
+    npc_id: str,
+    before: dict[str, Any],
+    after: dict[str, Any],
+) -> list[dict[str, Any]]:
+    changes = []
+    for field in ["trust", "suspicion", "affinity", "leverage", "exposure", "debt", "last_tone"]:
+        before_val = before.get(field, 0)
+        after_val = after.get(field, 0)
+        if before_val != after_val:
+            changes.append({
+                "npc_id": npc_id,
+                "field": field,
+                "before": before_val,
+                "after": after_val,
+            })
+    return changes
+
+
+def _build_dialogue_exchange_if_needed(
+    decision: dict[str, Any],
+    profile: TravelerProfile,
+    created_events: list[dict[str, Any]],
+) -> dict[str, Any] | None:
+    if decision.get("mode") != "llm":
+        return None
+    action = decision.get("selected_action", {}) if isinstance(decision.get("selected_action"), dict) else {}
+    action_type = str(action.get("action_type", ""))
+    if action_type not in {
+        "talk_to",
+        "ask_for_help",
+        "share_information",
+        "trade_with",
+        "challenge_claim",
+    }:
+        return None
+    for event in created_events:
+        payload = event.get("payload") if isinstance(event.get("payload"), dict) else {}
+        npc_id = str(payload.get("npc_id", "")).strip()
+        utterance = str(payload.get("traveler_utterance", "")).strip()
+        if npc_id and utterance:
+            return _run_direct_npc_dialogue(
+                npc_id=npc_id,
+                traveler_utterance=utterance,
+                traveler_profile=profile,
+            )
+    return None
+
+
+def _run_direct_npc_dialogue(
+    npc_id: str,
+    traveler_utterance: str,
+    traveler_profile: TravelerProfile,
+) -> dict[str, Any]:
+    environment = NarrativeEnvironment()
+    observation = environment.observe(
+        player_input=traveler_utterance,
+        npc_id=npc_id,
+        memory_retrieval_mode="hybrid",
+    )
+    mind_update = NPCMind().evaluate(observation)
+    npc_state_before = observation.npc_state
+    player_state_before = observation.player_state
+    quest_state_before = observation.quest_state
+    npc_decision_payload = npc_decision.decide_next_action(
+        player_input=traveler_utterance,
+        npc_state=npc_state_before,
+        player_state=player_state_before,
+        quest_state=quest_state_before,
+        retrieved_lore=observation.retrieved_lore,
+        retrieved_long_term_memories=observation.retrieved_memories,
+        recent_short_term_context=observation.recent_context,
+        mind_context=mind_update.trace,
+    )
+    npc_action = environment.propose_action_from_decision(npc_decision_payload, observation)
+    npc_action = environment.validate(npc_action, observation)
+    npc_action_result = environment.execute(npc_action, observation)
+    npc_reflection = ReflectionEngine().reflect(
+        observation=observation,
+        npc_action=npc_action,
+        action_result=npc_action_result,
+        mind_state=mind_update.mind_state,
+    )
+    response_text, response_generation = npc_response.generate_npc_response(
+        player_input=traveler_utterance,
+        decision=npc_action.raw_decision,
+        npc_state=database.get_npc(npc_id),
+        player_state=database.get_player_state(),
+        quest_state=database.get_primary_quest_for_npc(npc_id),
+        retrieved_lore=observation.retrieved_lore,
+        retrieved_memories=observation.retrieved_memories,
+        state_snapshot=npc_action_result.state_after,
+        recent_context=observation.recent_context,
+        tool_calls=npc_action_result.executed_tools,
+        state_changes=npc_action_result.state_changes,
+        observation=observation,
+        npc_action=npc_action,
+        action_result=npc_action_result,
+        mind_context=mind_update.trace,
+        reflection={
+            "npc_id": npc_reflection.npc_id,
+            "content": npc_reflection.content,
+            "belief_updates": npc_reflection.belief_updates,
+            "plan_updates": npc_reflection.plan_updates,
+            "emotion_updates": npc_reflection.emotion_updates,
+        },
+    )
+    return {
+        "traveler_id": traveler_profile.profile_id,
+        "traveler_name": traveler_profile.identity.public_name,
+        "npc_id": npc_id,
+        "traveler_utterance": traveler_utterance,
+        "npc_decision": npc_action.raw_decision,
+        "npc_action": asdict(npc_action),
+        "npc_action_result": asdict(npc_action_result),
+        "npc_response": response_text,
+        "response_generation": response_generation,
+        "npc_reflection": {
+            "npc_id": npc_reflection.npc_id,
+            "content": npc_reflection.content,
+            "belief_updates": npc_reflection.belief_updates,
+            "plan_updates": npc_reflection.plan_updates,
+            "emotion_updates": npc_reflection.emotion_updates,
+        },
+    }
+
+
+def _infer_arc_signal(event_type: str, location_id: str, payload: dict[str, Any]) -> str:
+    if event_type in {
+        "traveler_talked_to_npc",
+        "traveler_asked_help",
+        "traveler_shared_info",
+        "traveler_traded",
+        "traveler_challenged",
+    }:
+        npc_id = str(payload.get("npc_id", ""))
+        if npc_id:
+            return arc_signal_for_npc(npc_id)
+    if event_type == "traveler_investigated":
+        target_id = str(payload.get("target_id", ""))
+        if target_id:
+            return arc_signal_for_object(target_id)
+    return {
+        "guard_post": "guardian",
+        "tavern": "guardian",
+        "archive": "research",
+        "market": "sable",
+    }.get(location_id, "chaos")
 
 
 def _handle_deception(

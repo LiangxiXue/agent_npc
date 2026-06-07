@@ -1,0 +1,6003 @@
+{
+  "run_id": "20260604T080851-truth_seeking_scholar",
+  "profile_id": "truth_seeking_scholar",
+  "profile_summary": {
+    "profile_id": "truth_seeking_scholar",
+    "public_name": "Arin the Cartographer",
+    "public_role": "独立学者，受雇于远方学院进行遗迹测绘",
+    "primary_motivation": "curiosity",
+    "dominant_personality": "patient",
+    "exploration_style": "investigation_first",
+    "secret_count": 1,
+    "goal_count": 2
+  },
+  "exported_at": "2026-06-04T08:08:51.382977+00:00",
+  "traveler_id": "traveler_main",
+  "total_rounds": 8,
+  "final_arc_outcome": "chaotic_lockdown",
+  "final_arc_phase": "resolved",
+  "final_tension": 5,
+  "final_traveler_location": "market",
+  "final_relationships": {
+    "lina": {
+      "trust": 0.0,
+      "suspicion": 0.0,
+      "affinity": 0.0,
+      "last_tone": "neutral"
+    },
+    "mira": {
+      "trust": 0.0,
+      "suspicion": 0.0,
+      "affinity": 0.0,
+      "last_tone": "neutral"
+    },
+    "ron": {
+      "trust": 0.0,
+      "suspicion": 0.0,
+      "affinity": 0.0,
+      "last_tone": "neutral"
+    },
+    "sable": {
+      "trust": 0.0,
+      "suspicion": 0.0,
+      "affinity": 0.0,
+      "last_tone": "neutral"
+    }
+  },
+  "rounds": [
+    {
+      "round_number": 1,
+      "ambient_events": [
+        {
+          "id": 1,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 2,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 3,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 4,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 5,
+          "event_type": "traveler_moved",
+          "content": "Arin the Cartographer moved to guard_post.",
+          "payload": {
+            "round": 1,
+            "arc_signal": "chaos"
+          }
+        },
+        {
+          "id": 5,
+          "event_type": "traveler_moved",
+          "content": "Arin the Cartographer moved to guard_post.",
+          "payload": {
+            "round": 1,
+            "arc_signal": "chaos"
+          }
+        },
+        {
+          "id": 5,
+          "event_type": "traveler_moved",
+          "content": "Arin the Cartographer moved to guard_post.",
+          "payload": {
+            "round": 1,
+            "arc_signal": "chaos"
+          }
+        },
+        {
+          "id": 5,
+          "event_type": "traveler_moved",
+          "content": "Arin the Cartographer moved to guard_post.",
+          "payload": {
+            "round": 1,
+            "arc_signal": "chaos"
+          }
+        },
+        {
+          "id": 5,
+          "event_type": "traveler_moved",
+          "content": "Arin the Cartographer moved to guard_post.",
+          "payload": {
+            "round": 1,
+            "arc_signal": "chaos"
+          }
+        },
+        {
+          "id": 5,
+          "event_type": "traveler_moved",
+          "content": "Arin the Cartographer moved to guard_post.",
+          "payload": {
+            "round": 1,
+            "arc_signal": "chaos"
+          }
+        },
+        {
+          "id": 5,
+          "event_type": "traveler_moved",
+          "content": "Arin the Cartographer moved to guard_post.",
+          "payload": {
+            "round": 1,
+            "arc_signal": "chaos"
+          }
+        }
+      ],
+      "traveler_tick": {
+        "traveler_id": "traveler_main",
+        "round_number": 1,
+        "mode": "deterministic_fallback",
+        "observation": {
+          "traveler_id": "traveler_main",
+          "round_number": 1,
+          "traveler_state": {
+            "current_location": "town_square",
+            "inventory": [
+              "cartography_kit",
+              "field_journal",
+              "letter_of_introduction"
+            ],
+            "private_notes": [
+              "听说 Mira 是对遗迹最了解的学者，应该先找她",
+              "守卫 Ron 看起来很严格，直接问遗迹入口可能会引起怀疑",
+              "Sable 的传闻不可信，但她的信息网络可能有线索"
+            ],
+            "active_goal": {}
+          },
+          "relationships": {
+            "lina": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "mira": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "ron": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "sable": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            }
+          },
+          "npc_states": {
+            "lina": {
+              "npc_id": "lina",
+              "name": "Lina",
+              "role": "Tavern Owner",
+              "description": "A cautious and practical tavern owner who knows local rumors.",
+              "hidden_alignment": "protect_ruins",
+              "mood": "neutral",
+              "trust": 20,
+              "affection": 30
+            },
+            "ron": {
+              "npc_id": "ron",
+              "name": "Ron",
+              "role": "Town Guard",
+              "description": "A disciplined town guard who tracks patrol reports and gate incidents.",
+              "hidden_alignment": "enforce_order",
+              "mood": "alert",
+              "trust": 18,
+              "affection": 20
+            },
+            "mira": {
+              "npc_id": "mira",
+              "name": "Mira",
+              "role": "Ruins Scholar",
+              "description": "A careful scholar who studies old ruins, inscriptions, and local myths.",
+              "hidden_alignment": "research_truth",
+              "mood": "curious",
+              "trust": 22,
+              "affection": 24
+            },
+            "sable": {
+              "npc_id": "sable",
+              "name": "Sable",
+              "role": "Traveling Relic Broker",
+              "description": "A polished relic broker who offers useful rumors while steering people toward exploitable ruin secrets.",
+              "hidden_alignment": "exploit_ruins",
+              "mood": "pleasant",
+              "trust": 16,
+              "affection": 18
+            }
+          },
+          "scene_objects": [
+            {
+              "object_id": "guard_ledger",
+              "name": "Guard Ledger",
+              "location_id": "guard_post"
+            },
+            {
+              "object_id": "mira_field_notes",
+              "name": "Mira Field Notes",
+              "location_id": "archive"
+            },
+            {
+              "object_id": "sable_rumor_stall",
+              "name": "Sable Rumor Stall",
+              "location_id": "market"
+            },
+            {
+              "object_id": "tavern_back_alley",
+              "name": "Tavern Back Alley",
+              "location_id": "tavern"
+            }
+          ],
+          "arc_state": {
+            "arc_id": "ruins_chapter_1",
+            "phase": "rumor",
+            "tension": 0,
+            "advantage": "none",
+            "outcome": "",
+            "metadata_json": "{\"title\": \"Ruins Chapter 1\"}",
+            "updated_at": "2026-06-04 08:08:48",
+            "metadata": {
+              "title": "Ruins Chapter 1"
+            }
+          },
+          "recent_events": [],
+          "memory_retrieval_mode": "hybrid",
+          "exploration_context": {
+            "traveler_id": "traveler_main",
+            "conversation_threads": [],
+            "leads": [
+              {
+                "lead_id": "ask_ron_about_guard_ledger",
+                "action_type": "move_to",
+                "target": "guard_post",
+                "reason": "Mira thread needs external procedural evidence."
+              },
+              {
+                "lead_id": "question_sable_about_rumors",
+                "action_type": "move_to",
+                "target": "market",
+                "reason": "Ruins rumors need adversarial cross-checking."
+              },
+              {
+                "lead_id": "inspect_tavern_back_alley",
+                "action_type": "move_to",
+                "target": "tavern",
+                "reason": "Guardian route needs physical evidence."
+              }
+            ],
+            "action_scores": {
+              "move_to:archive": 0.45,
+              "move_to:guard_post": 0.82,
+              "move_to:market": 0.78,
+              "move_to:tavern": 0.68,
+              "wait_and_observe": 0.35,
+              "record_private_note": 0.35
+            },
+            "selection_policy": "Repeated same NPC/topic conversations without new evidence are lower priority, not forbidden; repeat conversation remains allowed when new evidence appears."
+          }
+        },
+        "available_actions": [
+          "move_to",
+          "wait_and_observe",
+          "record_private_note"
+        ],
+        "action_biases": [
+          {
+            "action_type": "move_to",
+            "supporting_motivations": [
+              "curiosity",
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.725
+          },
+          {
+            "action_type": "wait_and_observe",
+            "supporting_motivations": [
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.5
+          },
+          {
+            "action_type": "record_private_note",
+            "supporting_motivations": [
+              "truth_seeking",
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.7
+          }
+        ],
+        "decision": {
+          "selected_action": {
+            "action_type": "move_to",
+            "args": {
+              "location_id": "guard_post"
+            }
+          },
+          "decision_reason": "Deterministic fallback: selected 'move_to' with alignment score 0.725 and information gain 0.82.",
+          "profile_alignment": {
+            "supporting": [
+              "curiosity",
+              "safety"
+            ],
+            "opposing": []
+          },
+          "profile_tension": {},
+          "deception_choice": null,
+          "disclosure_choice": null,
+          "expected_consequence": "The traveler will move_to.",
+          "mode": "deterministic_fallback"
+        },
+        "proposed_action": {
+          "action_type": "move_to",
+          "args": {
+            "location_id": "guard_post"
+          }
+        },
+        "validation": {
+          "status": "allowed",
+          "reason": "Action is available and args present."
+        },
+        "action_result": {
+          "accepted": true,
+          "blocked_reason": "",
+          "action_type": "move_to",
+          "state_changes": [
+            {
+              "field": "location",
+              "before": "town_square",
+              "after": "guard_post"
+            }
+          ],
+          "relationship_changes": [],
+          "created_event_ids": [
+            5
+          ]
+        },
+        "state_changes": [
+          {
+            "field": "location",
+            "before": "town_square",
+            "after": "guard_post"
+          }
+        ],
+        "relationship_changes": [],
+        "created_events": [
+          {
+            "id": 5,
+            "event_type": "traveler_moved",
+            "content": "Arin the Cartographer moved to guard_post.",
+            "payload": {
+              "round": 1,
+              "arc_signal": "chaos"
+            }
+          }
+        ],
+        "reflection": {
+          "traveler_id": "traveler_main",
+          "action_type": "move_to",
+          "accepted": true,
+          "summary": "Traveler move_to — accepted.",
+          "decision_reason": "Deterministic fallback: selected 'move_to' with alignment score 0.725 and information gain 0.82.",
+          "exploration_context": {
+            "traveler_id": "traveler_main",
+            "conversation_threads": [],
+            "leads": [
+              {
+                "lead_id": "ask_ron_about_guard_ledger",
+                "action_type": "move_to",
+                "target": "guard_post",
+                "reason": "Mira thread needs external procedural evidence."
+              },
+              {
+                "lead_id": "question_sable_about_rumors",
+                "action_type": "move_to",
+                "target": "market",
+                "reason": "Ruins rumors need adversarial cross-checking."
+              },
+              {
+                "lead_id": "inspect_tavern_back_alley",
+                "action_type": "move_to",
+                "target": "tavern",
+                "reason": "Guardian route needs physical evidence."
+              }
+            ],
+            "action_scores": {
+              "move_to:archive": 0.45,
+              "move_to:guard_post": 0.82,
+              "move_to:market": 0.78,
+              "move_to:tavern": 0.68,
+              "wait_and_observe": 0.35,
+              "record_private_note": 0.35
+            },
+            "selection_policy": "Repeated same NPC/topic conversations without new evidence are lower priority, not forbidden; repeat conversation remains allowed when new evidence appears."
+          }
+        },
+        "deception_metadata": null,
+        "disclosure_metadata": null,
+        "timings": {
+          "observe_ms": 2.503,
+          "retrieve_memory_ms": 4.633,
+          "build_action_surface_ms": 75.612,
+          "decide_ms": 0.055,
+          "validate_ms": 0.004,
+          "act_ms": 22.801,
+          "reflect_ms": 0.002,
+          "trace_log_ms": 5.145,
+          "total_ms": 110.779
+        },
+        "tick_log_id": 1
+      },
+      "npc_ticks": [
+        {
+          "npc_id": "lina",
+          "outcome": "no_op",
+          "trigger_event_id": 1,
+          "proposed_action": {
+            "action_type": "ask_clarifying_question",
+            "args": {
+              "message_intent": ""
+            }
+          },
+          "validation": {
+            "status": "allowed",
+            "reason": "selected action is available and args match schema"
+          },
+          "action_result": {
+            "accepted": true,
+            "blocked_reason": "",
+            "executed_tools": [],
+            "state_before": {
+              "npc": {
+                "npc_id": "lina",
+                "name": "Lina",
+                "role": "Tavern Owner",
+                "hidden_alignment": "protect_ruins",
+                "mood": "neutral",
+                "trust": 20,
+                "affection": 30
+              },
+              "player": {
+                "location": "tavern",
+                "inventory": [],
+                "unlocked_locations": [
+                  "tavern",
+                  "town_square"
+                ]
+              },
+              "quest": {
+                "quest_id": "lost_key",
+                "title": "Lost Key",
+                "status": "not_started"
+              }
+            },
+            "state_after": {
+              "npc": {
+                "npc_id": "lina",
+                "name": "Lina",
+                "role": "Tavern Owner",
+                "hidden_alignment": "protect_ruins",
+                "mood": "neutral",
+                "trust": 20,
+                "affection": 30
+              },
+              "player": {
+                "location": "tavern",
+                "inventory": [],
+                "unlocked_locations": [
+                  "tavern",
+                  "town_square"
+                ]
+              },
+              "quest": {
+                "quest_id": "lost_key",
+                "title": "Lost Key",
+                "status": "not_started"
+              }
+            },
+            "state_changes": [],
+            "events": [],
+            "response_constraints": [
+              "Do not claim the underground ruins entrance is unlocked or available.",
+              "Do not claim the player received an item reward."
+            ]
+          },
+          "plan_update": {
+            "goal": "respond_to_npc_routine_activity",
+            "current_step": "ask_clarifying_question",
+            "status": "active",
+            "blocker": "",
+            "id": 1,
+            "source_event_id": 1
+          },
+          "proactive_message": null,
+          "reflection": {
+            "summary": "AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY is required for LLM provider.",
+            "belief_update": "Fallback used because LLM failed: AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY is required for LLM provider.",
+            "emotion": "cautious"
+          },
+          "tick_log_id": 1,
+          "created_events": []
+        },
+        {
+          "npc_id": "ron",
+          "outcome": "no_op",
+          "trigger_event_id": 3,
+          "proposed_action": {
+            "action_type": "verify_badge",
+            "args": {
+              "evidence_id": "",
+              "message_intent": ""
+            }
+          },
+          "validation": {
+            "status": "allowed",
+            "reason": "selected action is available and args match schema"
+          },
+          "action_result": {
+            "accepted": true,
+            "blocked_reason": "",
+            "executed_tools": [],
+            "state_before": {
+              "npc": {
+                "npc_id": "ron",
+                "name": "Ron",
+                "role": "Town Guard",
+                "hidden_alignment": "enforce_order",
+                "mood": "alert",
+                "trust": 18,
+                "affection": 20
+              },
+              "player": {
+                "location": "tavern",
+                "inventory": [],
+                "unlocked_locations": [
+                  "tavern",
+                  "town_square"
+                ]
+              },
+              "quest": {
+                "quest_id": "gate_badge",
+                "title": "Gate Badge",
+                "status": "not_started"
+              }
+            },
+            "state_after": {
+              "npc": {
+                "npc_id": "ron",
+                "name": "Ron",
+                "role": "Town Guard",
+                "hidden_alignment": "enforce_order",
+                "mood": "alert",
+                "trust": 18,
+                "affection": 20
+              },
+              "player": {
+                "location": "tavern",
+                "inventory": [],
+                "unlocked_locations": [
+                  "tavern",
+                  "town_square"
+                ]
+              },
+              "quest": {
+                "quest_id": "gate_badge",
+                "title": "Gate Badge",
+                "status": "not_started"
+              }
+            },
+            "state_changes": [],
+            "events": [],
+            "response_constraints": [
+              "Do not claim the underground ruins entrance is unlocked or available.",
+              "Do not claim the player received an item reward."
+            ]
+          },
+          "plan_update": {
+            "goal": "respond_to_npc_routine_activity",
+            "current_step": "verify_badge",
+            "status": "active",
+            "blocker": "",
+            "id": 2,
+            "source_event_id": 3
+          },
+          "proactive_message": null,
+          "reflection": {
+            "summary": "AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY is required for LLM provider.",
+            "belief_update": "Fallback used because LLM failed: AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY is required for LLM provider.",
+            "emotion": "cautious"
+          },
+          "tick_log_id": 2,
+          "created_events": []
+        }
+      ],
+      "arc_update": {
+        "arc_id": "ruins_chapter_1",
+        "phase": "evidence_gathering",
+        "tension": 1,
+        "advantage": "none",
+        "outcome": "",
+        "scores": {
+          "guardian": 2,
+          "research": 1,
+          "sable": 1,
+          "chaos": 3
+        },
+        "total_signals": 7,
+        "cumulative_scores": {
+          "guardian": 2,
+          "research": 1,
+          "sable": 1,
+          "chaos": 3
+        },
+        "cumulative_total_signals": 7
+      },
+      "timings": {
+        "ambient_routines_ms": 69.624,
+        "traveler_tick_ms": 129.9,
+        "npc_ticks_ms": 191.523,
+        "arc_resolution_ms": 7.397,
+        "total_ms": 398.465
+      }
+    },
+    {
+      "round_number": 2,
+      "ambient_events": [
+        {
+          "id": 6,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 7,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 8,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 9,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 10,
+          "event_type": "traveler_talked_to_npc",
+          "content": "Arin the Cartographer talked to ron about 'local ruins' (tone=neutral, honesty=full).",
+          "payload": {
+            "npc_id": "ron",
+            "topic": "local ruins",
+            "tone": "neutral",
+            "honesty_level": "full",
+            "round": 2,
+            "arc_signal": "chaos"
+          }
+        },
+        {
+          "id": 10,
+          "event_type": "traveler_talked_to_npc",
+          "content": "Arin the Cartographer talked to ron about 'local ruins' (tone=neutral, honesty=full).",
+          "payload": {
+            "npc_id": "ron",
+            "topic": "local ruins",
+            "tone": "neutral",
+            "honesty_level": "full",
+            "round": 2,
+            "arc_signal": "chaos"
+          }
+        },
+        {
+          "id": 10,
+          "event_type": "traveler_talked_to_npc",
+          "content": "Arin the Cartographer talked to ron about 'local ruins' (tone=neutral, honesty=full).",
+          "payload": {
+            "npc_id": "ron",
+            "topic": "local ruins",
+            "tone": "neutral",
+            "honesty_level": "full",
+            "round": 2,
+            "arc_signal": "chaos"
+          }
+        },
+        {
+          "id": 10,
+          "event_type": "traveler_talked_to_npc",
+          "content": "Arin the Cartographer talked to ron about 'local ruins' (tone=neutral, honesty=full).",
+          "payload": {
+            "npc_id": "ron",
+            "topic": "local ruins",
+            "tone": "neutral",
+            "honesty_level": "full",
+            "round": 2,
+            "arc_signal": "chaos"
+          }
+        },
+        {
+          "id": 10,
+          "event_type": "traveler_talked_to_npc",
+          "content": "Arin the Cartographer talked to ron about 'local ruins' (tone=neutral, honesty=full).",
+          "payload": {
+            "npc_id": "ron",
+            "topic": "local ruins",
+            "tone": "neutral",
+            "honesty_level": "full",
+            "round": 2,
+            "arc_signal": "chaos"
+          }
+        },
+        {
+          "id": 10,
+          "event_type": "traveler_talked_to_npc",
+          "content": "Arin the Cartographer talked to ron about 'local ruins' (tone=neutral, honesty=full).",
+          "payload": {
+            "npc_id": "ron",
+            "topic": "local ruins",
+            "tone": "neutral",
+            "honesty_level": "full",
+            "round": 2,
+            "arc_signal": "chaos"
+          }
+        }
+      ],
+      "traveler_tick": {
+        "traveler_id": "traveler_main",
+        "round_number": 2,
+        "mode": "deterministic_fallback",
+        "observation": {
+          "traveler_id": "traveler_main",
+          "round_number": 2,
+          "traveler_state": {
+            "current_location": "guard_post",
+            "inventory": [
+              "cartography_kit",
+              "field_journal",
+              "letter_of_introduction"
+            ],
+            "private_notes": [
+              "听说 Mira 是对遗迹最了解的学者，应该先找她",
+              "守卫 Ron 看起来很严格，直接问遗迹入口可能会引起怀疑",
+              "Sable 的传闻不可信，但她的信息网络可能有线索"
+            ],
+            "active_goal": {}
+          },
+          "relationships": {
+            "lina": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "mira": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "ron": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "sable": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            }
+          },
+          "npc_states": {
+            "lina": {
+              "npc_id": "lina",
+              "name": "Lina",
+              "role": "Tavern Owner",
+              "description": "A cautious and practical tavern owner who knows local rumors.",
+              "hidden_alignment": "protect_ruins",
+              "mood": "neutral",
+              "trust": 20,
+              "affection": 30
+            },
+            "ron": {
+              "npc_id": "ron",
+              "name": "Ron",
+              "role": "Town Guard",
+              "description": "A disciplined town guard who tracks patrol reports and gate incidents.",
+              "hidden_alignment": "enforce_order",
+              "mood": "alert",
+              "trust": 18,
+              "affection": 20
+            },
+            "mira": {
+              "npc_id": "mira",
+              "name": "Mira",
+              "role": "Ruins Scholar",
+              "description": "A careful scholar who studies old ruins, inscriptions, and local myths.",
+              "hidden_alignment": "research_truth",
+              "mood": "curious",
+              "trust": 22,
+              "affection": 24
+            },
+            "sable": {
+              "npc_id": "sable",
+              "name": "Sable",
+              "role": "Traveling Relic Broker",
+              "description": "A polished relic broker who offers useful rumors while steering people toward exploitable ruin secrets.",
+              "hidden_alignment": "exploit_ruins",
+              "mood": "pleasant",
+              "trust": 16,
+              "affection": 18
+            }
+          },
+          "scene_objects": [
+            {
+              "object_id": "guard_ledger",
+              "name": "Guard Ledger",
+              "location_id": "guard_post"
+            },
+            {
+              "object_id": "mira_field_notes",
+              "name": "Mira Field Notes",
+              "location_id": "archive"
+            },
+            {
+              "object_id": "sable_rumor_stall",
+              "name": "Sable Rumor Stall",
+              "location_id": "market"
+            },
+            {
+              "object_id": "tavern_back_alley",
+              "name": "Tavern Back Alley",
+              "location_id": "tavern"
+            }
+          ],
+          "arc_state": {
+            "arc_id": "ruins_chapter_1",
+            "phase": "evidence_gathering",
+            "tension": 1,
+            "advantage": "none",
+            "outcome": "",
+            "metadata_json": "{\"title\": \"Ruins Chapter 1\", \"cumulative_scores\": {\"guardian\": 2, \"research\": 1, \"sable\": 1, \"chaos\": 3}, \"last_round_scores\": {\"guardian\": 2, \"research\": 1, \"sable\": 1, \"chaos\": 3}, \"last_round_total_signals\": 7}",
+            "updated_at": "2026-06-04 08:08:48",
+            "metadata": {
+              "title": "Ruins Chapter 1",
+              "cumulative_scores": {
+                "guardian": 2,
+                "research": 1,
+                "sable": 1,
+                "chaos": 3
+              },
+              "last_round_scores": {
+                "guardian": 2,
+                "research": 1,
+                "sable": 1,
+                "chaos": 3
+              },
+              "last_round_total_signals": 7
+            }
+          },
+          "recent_events": [
+            {
+              "id": 1,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 2,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 3,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 4,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 5,
+              "event_type": "traveler_moved",
+              "content": "Arin the Cartographer moved to guard_post.",
+              "payload": {
+                "round": 1,
+                "arc_signal": "chaos"
+              }
+            }
+          ],
+          "memory_retrieval_mode": "hybrid",
+          "exploration_context": {
+            "traveler_id": "traveler_main",
+            "conversation_threads": [],
+            "leads": [
+              {
+                "lead_id": "question_sable_about_rumors",
+                "action_type": "move_to",
+                "target": "market",
+                "reason": "Ruins rumors need adversarial cross-checking."
+              },
+              {
+                "lead_id": "inspect_tavern_back_alley",
+                "action_type": "move_to",
+                "target": "tavern",
+                "reason": "Guardian route needs physical evidence."
+              }
+            ],
+            "action_scores": {
+              "move_to:archive": 0.45,
+              "move_to:market": 0.78,
+              "move_to:tavern": 0.68,
+              "talk_to:ron": 0.91,
+              "investigate": 0.35,
+              "ask_for_help:ron": 0.88,
+              "share_information:ron": 0.82,
+              "trade_with": 0.35,
+              "wait_and_observe": 0.35,
+              "record_private_note": 0.35
+            },
+            "selection_policy": "Repeated same NPC/topic conversations without new evidence are lower priority, not forbidden; repeat conversation remains allowed when new evidence appears."
+          }
+        },
+        "available_actions": [
+          "move_to",
+          "talk_to",
+          "investigate",
+          "ask_for_help",
+          "share_information",
+          "trade_with",
+          "wait_and_observe",
+          "record_private_note"
+        ],
+        "action_biases": [
+          {
+            "action_type": "move_to",
+            "supporting_motivations": [
+              "curiosity",
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.725
+          },
+          {
+            "action_type": "talk_to",
+            "supporting_motivations": [
+              "curiosity",
+              "truth_seeking"
+            ],
+            "opposing_personality": [],
+            "risk_level": "medium",
+            "profile_alignment_score": 0.925
+          },
+          {
+            "action_type": "investigate",
+            "supporting_motivations": [
+              "curiosity",
+              "truth_seeking"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.925
+          },
+          {
+            "action_type": "ask_for_help",
+            "supporting_motivations": [
+              "safety"
+            ],
+            "opposing_personality": [
+              "cautious"
+            ],
+            "risk_level": "medium",
+            "profile_alignment_score": -0.1
+          },
+          {
+            "action_type": "share_information",
+            "supporting_motivations": [
+              "truth_seeking"
+            ],
+            "opposing_personality": [
+              "cautious"
+            ],
+            "risk_level": "high",
+            "profile_alignment_score": 0.3
+          },
+          {
+            "action_type": "trade_with",
+            "supporting_motivations": [],
+            "opposing_personality": [
+              "empathetic"
+            ],
+            "risk_level": "medium",
+            "profile_alignment_score": -0.7
+          },
+          {
+            "action_type": "wait_and_observe",
+            "supporting_motivations": [
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.5
+          },
+          {
+            "action_type": "record_private_note",
+            "supporting_motivations": [
+              "truth_seeking",
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.7
+          }
+        ],
+        "decision": {
+          "selected_action": {
+            "action_type": "talk_to",
+            "args": {
+              "npc_id": "ron",
+              "topic": "local ruins",
+              "tone": "neutral",
+              "honesty_level": "full",
+              "disclosure": "none"
+            }
+          },
+          "decision_reason": "Deterministic fallback: selected 'talk_to' with alignment score 0.925 and information gain 0.91.",
+          "profile_alignment": {
+            "supporting": [
+              "curiosity",
+              "truth_seeking"
+            ],
+            "opposing": []
+          },
+          "profile_tension": {},
+          "deception_choice": null,
+          "disclosure_choice": null,
+          "expected_consequence": "The traveler will talk_to.",
+          "mode": "deterministic_fallback"
+        },
+        "proposed_action": {
+          "action_type": "talk_to",
+          "args": {
+            "npc_id": "ron",
+            "topic": "local ruins",
+            "tone": "neutral",
+            "honesty_level": "full",
+            "disclosure": "none"
+          }
+        },
+        "validation": {
+          "status": "allowed",
+          "reason": "Action is available and args present."
+        },
+        "action_result": {
+          "accepted": true,
+          "blocked_reason": "",
+          "action_type": "talk_to",
+          "state_changes": [],
+          "relationship_changes": [],
+          "created_event_ids": [
+            10
+          ]
+        },
+        "state_changes": [],
+        "relationship_changes": [],
+        "created_events": [
+          {
+            "id": 10,
+            "event_type": "traveler_talked_to_npc",
+            "content": "Arin the Cartographer talked to ron about 'local ruins' (tone=neutral, honesty=full).",
+            "payload": {
+              "npc_id": "ron",
+              "topic": "local ruins",
+              "tone": "neutral",
+              "honesty_level": "full",
+              "round": 2,
+              "arc_signal": "chaos"
+            }
+          }
+        ],
+        "reflection": {
+          "traveler_id": "traveler_main",
+          "action_type": "talk_to",
+          "accepted": true,
+          "summary": "Traveler talk_to — accepted.",
+          "decision_reason": "Deterministic fallback: selected 'talk_to' with alignment score 0.925 and information gain 0.91.",
+          "exploration_context": {
+            "traveler_id": "traveler_main",
+            "conversation_threads": [],
+            "leads": [
+              {
+                "lead_id": "question_sable_about_rumors",
+                "action_type": "move_to",
+                "target": "market",
+                "reason": "Ruins rumors need adversarial cross-checking."
+              },
+              {
+                "lead_id": "inspect_tavern_back_alley",
+                "action_type": "move_to",
+                "target": "tavern",
+                "reason": "Guardian route needs physical evidence."
+              }
+            ],
+            "action_scores": {
+              "move_to:archive": 0.45,
+              "move_to:market": 0.78,
+              "move_to:tavern": 0.68,
+              "talk_to:ron": 0.91,
+              "investigate": 0.35,
+              "ask_for_help:ron": 0.88,
+              "share_information:ron": 0.82,
+              "trade_with": 0.35,
+              "wait_and_observe": 0.35,
+              "record_private_note": 0.35
+            },
+            "selection_policy": "Repeated same NPC/topic conversations without new evidence are lower priority, not forbidden; repeat conversation remains allowed when new evidence appears."
+          }
+        },
+        "deception_metadata": null,
+        "disclosure_metadata": null,
+        "timings": {
+          "observe_ms": 2.496,
+          "retrieve_memory_ms": 5.068,
+          "build_action_surface_ms": 46.593,
+          "decide_ms": 0.077,
+          "validate_ms": 0.009,
+          "act_ms": 24.674,
+          "reflect_ms": 0.002,
+          "trace_log_ms": 5.285,
+          "total_ms": 84.228
+        },
+        "tick_log_id": 2
+      },
+      "npc_ticks": [
+        {
+          "npc_id": "ron",
+          "outcome": "no_op",
+          "trigger_event_id": 5,
+          "proposed_action": {
+            "action_type": "verify_badge",
+            "args": {
+              "evidence_id": "",
+              "message_intent": ""
+            }
+          },
+          "validation": {
+            "status": "allowed",
+            "reason": "selected action is available and args match schema"
+          },
+          "action_result": {
+            "accepted": true,
+            "blocked_reason": "",
+            "executed_tools": [],
+            "state_before": {
+              "npc": {
+                "npc_id": "ron",
+                "name": "Ron",
+                "role": "Town Guard",
+                "hidden_alignment": "enforce_order",
+                "mood": "alert",
+                "trust": 18,
+                "affection": 20
+              },
+              "player": {
+                "location": "tavern",
+                "inventory": [],
+                "unlocked_locations": [
+                  "tavern",
+                  "town_square"
+                ]
+              },
+              "quest": {
+                "quest_id": "gate_badge",
+                "title": "Gate Badge",
+                "status": "not_started"
+              }
+            },
+            "state_after": {
+              "npc": {
+                "npc_id": "ron",
+                "name": "Ron",
+                "role": "Town Guard",
+                "hidden_alignment": "enforce_order",
+                "mood": "alert",
+                "trust": 18,
+                "affection": 20
+              },
+              "player": {
+                "location": "tavern",
+                "inventory": [],
+                "unlocked_locations": [
+                  "tavern",
+                  "town_square"
+                ]
+              },
+              "quest": {
+                "quest_id": "gate_badge",
+                "title": "Gate Badge",
+                "status": "not_started"
+              }
+            },
+            "state_changes": [],
+            "events": [],
+            "response_constraints": [
+              "Do not claim the underground ruins entrance is unlocked or available.",
+              "Do not claim the player received an item reward."
+            ]
+          },
+          "plan_update": {
+            "goal": "respond_to_traveler_moved",
+            "current_step": "verify_badge",
+            "status": "active",
+            "blocker": "",
+            "id": 2,
+            "source_event_id": 5
+          },
+          "proactive_message": null,
+          "reflection": {
+            "summary": "AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY is required for LLM provider.",
+            "belief_update": "Fallback used because LLM failed: AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY is required for LLM provider.",
+            "emotion": "cautious"
+          },
+          "tick_log_id": 3,
+          "created_events": []
+        },
+        {
+          "npc_id": "lina",
+          "outcome": "no_op",
+          "trigger_event_id": 6,
+          "proposed_action": {
+            "action_type": "ask_clarifying_question",
+            "args": {
+              "message_intent": ""
+            }
+          },
+          "validation": {
+            "status": "allowed",
+            "reason": "selected action is available and args match schema"
+          },
+          "action_result": {
+            "accepted": true,
+            "blocked_reason": "",
+            "executed_tools": [],
+            "state_before": {
+              "npc": {
+                "npc_id": "lina",
+                "name": "Lina",
+                "role": "Tavern Owner",
+                "hidden_alignment": "protect_ruins",
+                "mood": "neutral",
+                "trust": 20,
+                "affection": 30
+              },
+              "player": {
+                "location": "tavern",
+                "inventory": [],
+                "unlocked_locations": [
+                  "tavern",
+                  "town_square"
+                ]
+              },
+              "quest": {
+                "quest_id": "lost_key",
+                "title": "Lost Key",
+                "status": "not_started"
+              }
+            },
+            "state_after": {
+              "npc": {
+                "npc_id": "lina",
+                "name": "Lina",
+                "role": "Tavern Owner",
+                "hidden_alignment": "protect_ruins",
+                "mood": "neutral",
+                "trust": 20,
+                "affection": 30
+              },
+              "player": {
+                "location": "tavern",
+                "inventory": [],
+                "unlocked_locations": [
+                  "tavern",
+                  "town_square"
+                ]
+              },
+              "quest": {
+                "quest_id": "lost_key",
+                "title": "Lost Key",
+                "status": "not_started"
+              }
+            },
+            "state_changes": [],
+            "events": [],
+            "response_constraints": [
+              "Do not claim the underground ruins entrance is unlocked or available.",
+              "Do not claim the player received an item reward."
+            ]
+          },
+          "plan_update": {
+            "goal": "respond_to_npc_routine_activity",
+            "current_step": "ask_clarifying_question",
+            "status": "active",
+            "blocker": "",
+            "id": 1,
+            "source_event_id": 6
+          },
+          "proactive_message": null,
+          "reflection": {
+            "summary": "AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY is required for LLM provider.",
+            "belief_update": "Fallback used because LLM failed: AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY is required for LLM provider.",
+            "emotion": "cautious"
+          },
+          "tick_log_id": 4,
+          "created_events": []
+        }
+      ],
+      "arc_update": {
+        "arc_id": "ruins_chapter_1",
+        "phase": "npc_conflict",
+        "tension": 2,
+        "advantage": "none",
+        "outcome": "",
+        "scores": {
+          "guardian": 2,
+          "research": 1,
+          "sable": 1,
+          "chaos": 3
+        },
+        "total_signals": 7,
+        "cumulative_scores": {
+          "guardian": 4,
+          "research": 2,
+          "sable": 2,
+          "chaos": 6
+        },
+        "cumulative_total_signals": 14
+      },
+      "timings": {
+        "ambient_routines_ms": 61.277,
+        "traveler_tick_ms": 101.962,
+        "npc_ticks_ms": 153.97,
+        "arc_resolution_ms": 8.237,
+        "total_ms": 325.469
+      }
+    },
+    {
+      "round_number": 3,
+      "ambient_events": [
+        {
+          "id": 11,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 12,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 13,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 14,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 15,
+          "event_type": "traveler_moved",
+          "content": "Arin the Cartographer moved to market.",
+          "payload": {
+            "round": 3,
+            "arc_signal": "chaos"
+          }
+        },
+        {
+          "id": 15,
+          "event_type": "traveler_moved",
+          "content": "Arin the Cartographer moved to market.",
+          "payload": {
+            "round": 3,
+            "arc_signal": "chaos"
+          }
+        },
+        {
+          "id": 15,
+          "event_type": "traveler_moved",
+          "content": "Arin the Cartographer moved to market.",
+          "payload": {
+            "round": 3,
+            "arc_signal": "chaos"
+          }
+        },
+        {
+          "id": 15,
+          "event_type": "traveler_moved",
+          "content": "Arin the Cartographer moved to market.",
+          "payload": {
+            "round": 3,
+            "arc_signal": "chaos"
+          }
+        },
+        {
+          "id": 15,
+          "event_type": "traveler_moved",
+          "content": "Arin the Cartographer moved to market.",
+          "payload": {
+            "round": 3,
+            "arc_signal": "chaos"
+          }
+        }
+      ],
+      "traveler_tick": {
+        "traveler_id": "traveler_main",
+        "round_number": 3,
+        "mode": "deterministic_fallback",
+        "observation": {
+          "traveler_id": "traveler_main",
+          "round_number": 3,
+          "traveler_state": {
+            "current_location": "guard_post",
+            "inventory": [
+              "cartography_kit",
+              "field_journal",
+              "letter_of_introduction"
+            ],
+            "private_notes": [
+              "听说 Mira 是对遗迹最了解的学者，应该先找她",
+              "守卫 Ron 看起来很严格，直接问遗迹入口可能会引起怀疑",
+              "Sable 的传闻不可信，但她的信息网络可能有线索"
+            ],
+            "active_goal": {}
+          },
+          "relationships": {
+            "lina": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "mira": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "ron": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "sable": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            }
+          },
+          "npc_states": {
+            "lina": {
+              "npc_id": "lina",
+              "name": "Lina",
+              "role": "Tavern Owner",
+              "description": "A cautious and practical tavern owner who knows local rumors.",
+              "hidden_alignment": "protect_ruins",
+              "mood": "neutral",
+              "trust": 20,
+              "affection": 30
+            },
+            "ron": {
+              "npc_id": "ron",
+              "name": "Ron",
+              "role": "Town Guard",
+              "description": "A disciplined town guard who tracks patrol reports and gate incidents.",
+              "hidden_alignment": "enforce_order",
+              "mood": "alert",
+              "trust": 18,
+              "affection": 20
+            },
+            "mira": {
+              "npc_id": "mira",
+              "name": "Mira",
+              "role": "Ruins Scholar",
+              "description": "A careful scholar who studies old ruins, inscriptions, and local myths.",
+              "hidden_alignment": "research_truth",
+              "mood": "curious",
+              "trust": 22,
+              "affection": 24
+            },
+            "sable": {
+              "npc_id": "sable",
+              "name": "Sable",
+              "role": "Traveling Relic Broker",
+              "description": "A polished relic broker who offers useful rumors while steering people toward exploitable ruin secrets.",
+              "hidden_alignment": "exploit_ruins",
+              "mood": "pleasant",
+              "trust": 16,
+              "affection": 18
+            }
+          },
+          "scene_objects": [
+            {
+              "object_id": "guard_ledger",
+              "name": "Guard Ledger",
+              "location_id": "guard_post"
+            },
+            {
+              "object_id": "mira_field_notes",
+              "name": "Mira Field Notes",
+              "location_id": "archive"
+            },
+            {
+              "object_id": "sable_rumor_stall",
+              "name": "Sable Rumor Stall",
+              "location_id": "market"
+            },
+            {
+              "object_id": "tavern_back_alley",
+              "name": "Tavern Back Alley",
+              "location_id": "tavern"
+            }
+          ],
+          "arc_state": {
+            "arc_id": "ruins_chapter_1",
+            "phase": "npc_conflict",
+            "tension": 2,
+            "advantage": "none",
+            "outcome": "",
+            "metadata_json": "{\"title\": \"Ruins Chapter 1\", \"cumulative_scores\": {\"guardian\": 4, \"research\": 2, \"sable\": 2, \"chaos\": 6}, \"last_round_scores\": {\"guardian\": 2, \"research\": 1, \"sable\": 1, \"chaos\": 3}, \"last_round_total_signals\": 7}",
+            "updated_at": "2026-06-04 08:08:49",
+            "metadata": {
+              "title": "Ruins Chapter 1",
+              "cumulative_scores": {
+                "guardian": 4,
+                "research": 2,
+                "sable": 2,
+                "chaos": 6
+              },
+              "last_round_scores": {
+                "guardian": 2,
+                "research": 1,
+                "sable": 1,
+                "chaos": 3
+              },
+              "last_round_total_signals": 7
+            }
+          },
+          "recent_events": [
+            {
+              "id": 2,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 3,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 4,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 5,
+              "event_type": "traveler_moved",
+              "content": "Arin the Cartographer moved to guard_post.",
+              "payload": {
+                "round": 1,
+                "arc_signal": "chaos"
+              }
+            },
+            {
+              "id": 5,
+              "event_type": "traveler_moved",
+              "content": "Arin the Cartographer moved to guard_post.",
+              "payload": {
+                "round": 1,
+                "arc_signal": "chaos"
+              }
+            },
+            {
+              "id": 6,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 7,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 8,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 9,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 10,
+              "event_type": "traveler_talked_to_npc",
+              "content": "Arin the Cartographer talked to ron about 'local ruins' (tone=neutral, honesty=full).",
+              "payload": {
+                "npc_id": "ron",
+                "topic": "local ruins",
+                "tone": "neutral",
+                "honesty_level": "full",
+                "round": 2,
+                "arc_signal": "chaos"
+              }
+            }
+          ],
+          "memory_retrieval_mode": "hybrid",
+          "exploration_context": {
+            "traveler_id": "traveler_main",
+            "conversation_threads": [
+              {
+                "npc_id": "ron",
+                "topic": "local ruins",
+                "last_event_index": 9,
+                "status": "waiting_for_external_evidence",
+                "new_evidence_count": 0
+              }
+            ],
+            "leads": [
+              {
+                "lead_id": "question_sable_about_rumors",
+                "action_type": "move_to",
+                "target": "market",
+                "reason": "Ruins rumors need adversarial cross-checking."
+              },
+              {
+                "lead_id": "inspect_tavern_back_alley",
+                "action_type": "move_to",
+                "target": "tavern",
+                "reason": "Guardian route needs physical evidence."
+              }
+            ],
+            "action_scores": {
+              "move_to:archive": 0.45,
+              "move_to:market": 0.78,
+              "move_to:tavern": 0.68,
+              "talk_to:ron": 0.28,
+              "investigate": 0.35,
+              "ask_for_help:ron": 0.28,
+              "share_information:ron": 0.28,
+              "trade_with": 0.35,
+              "wait_and_observe": 0.35,
+              "record_private_note": 0.35
+            },
+            "selection_policy": "Repeated same NPC/topic conversations without new evidence are lower priority, not forbidden; repeat conversation remains allowed when new evidence appears."
+          }
+        },
+        "available_actions": [
+          "move_to",
+          "talk_to",
+          "investigate",
+          "ask_for_help",
+          "share_information",
+          "trade_with",
+          "wait_and_observe",
+          "record_private_note"
+        ],
+        "action_biases": [
+          {
+            "action_type": "move_to",
+            "supporting_motivations": [
+              "curiosity",
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.725
+          },
+          {
+            "action_type": "talk_to",
+            "supporting_motivations": [
+              "curiosity",
+              "truth_seeking"
+            ],
+            "opposing_personality": [],
+            "risk_level": "medium",
+            "profile_alignment_score": 0.925
+          },
+          {
+            "action_type": "investigate",
+            "supporting_motivations": [
+              "curiosity",
+              "truth_seeking"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.925
+          },
+          {
+            "action_type": "ask_for_help",
+            "supporting_motivations": [
+              "safety"
+            ],
+            "opposing_personality": [
+              "cautious"
+            ],
+            "risk_level": "medium",
+            "profile_alignment_score": -0.1
+          },
+          {
+            "action_type": "share_information",
+            "supporting_motivations": [
+              "truth_seeking"
+            ],
+            "opposing_personality": [
+              "cautious"
+            ],
+            "risk_level": "high",
+            "profile_alignment_score": 0.3
+          },
+          {
+            "action_type": "trade_with",
+            "supporting_motivations": [],
+            "opposing_personality": [
+              "empathetic"
+            ],
+            "risk_level": "medium",
+            "profile_alignment_score": -0.7
+          },
+          {
+            "action_type": "wait_and_observe",
+            "supporting_motivations": [
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.5
+          },
+          {
+            "action_type": "record_private_note",
+            "supporting_motivations": [
+              "truth_seeking",
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.7
+          }
+        ],
+        "decision": {
+          "selected_action": {
+            "action_type": "move_to",
+            "args": {
+              "location_id": "market"
+            }
+          },
+          "decision_reason": "Deterministic fallback: selected 'move_to' with alignment score 0.725 and information gain 0.78.",
+          "profile_alignment": {
+            "supporting": [
+              "curiosity",
+              "safety"
+            ],
+            "opposing": []
+          },
+          "profile_tension": {},
+          "deception_choice": null,
+          "disclosure_choice": null,
+          "expected_consequence": "The traveler will move_to.",
+          "mode": "deterministic_fallback"
+        },
+        "proposed_action": {
+          "action_type": "move_to",
+          "args": {
+            "location_id": "market"
+          }
+        },
+        "validation": {
+          "status": "allowed",
+          "reason": "Action is available and args present."
+        },
+        "action_result": {
+          "accepted": true,
+          "blocked_reason": "",
+          "action_type": "move_to",
+          "state_changes": [
+            {
+              "field": "location",
+              "before": "guard_post",
+              "after": "market"
+            }
+          ],
+          "relationship_changes": [],
+          "created_event_ids": [
+            15
+          ]
+        },
+        "state_changes": [
+          {
+            "field": "location",
+            "before": "guard_post",
+            "after": "market"
+          }
+        ],
+        "relationship_changes": [],
+        "created_events": [
+          {
+            "id": 15,
+            "event_type": "traveler_moved",
+            "content": "Arin the Cartographer moved to market.",
+            "payload": {
+              "round": 3,
+              "arc_signal": "chaos"
+            }
+          }
+        ],
+        "reflection": {
+          "traveler_id": "traveler_main",
+          "action_type": "move_to",
+          "accepted": true,
+          "summary": "Traveler move_to — accepted.",
+          "decision_reason": "Deterministic fallback: selected 'move_to' with alignment score 0.725 and information gain 0.78.",
+          "exploration_context": {
+            "traveler_id": "traveler_main",
+            "conversation_threads": [
+              {
+                "npc_id": "ron",
+                "topic": "local ruins",
+                "last_event_index": 9,
+                "status": "waiting_for_external_evidence",
+                "new_evidence_count": 0
+              }
+            ],
+            "leads": [
+              {
+                "lead_id": "question_sable_about_rumors",
+                "action_type": "move_to",
+                "target": "market",
+                "reason": "Ruins rumors need adversarial cross-checking."
+              },
+              {
+                "lead_id": "inspect_tavern_back_alley",
+                "action_type": "move_to",
+                "target": "tavern",
+                "reason": "Guardian route needs physical evidence."
+              }
+            ],
+            "action_scores": {
+              "move_to:archive": 0.45,
+              "move_to:market": 0.78,
+              "move_to:tavern": 0.68,
+              "talk_to:ron": 0.28,
+              "investigate": 0.35,
+              "ask_for_help:ron": 0.28,
+              "share_information:ron": 0.28,
+              "trade_with": 0.35,
+              "wait_and_observe": 0.35,
+              "record_private_note": 0.35
+            },
+            "selection_policy": "Repeated same NPC/topic conversations without new evidence are lower priority, not forbidden; repeat conversation remains allowed when new evidence appears."
+          }
+        },
+        "deception_metadata": null,
+        "disclosure_metadata": null,
+        "timings": {
+          "observe_ms": 3.094,
+          "retrieve_memory_ms": 4.974,
+          "build_action_surface_ms": 49.303,
+          "decide_ms": 0.074,
+          "validate_ms": 0.005,
+          "act_ms": 23.381,
+          "reflect_ms": 0.003,
+          "trace_log_ms": 6.142,
+          "total_ms": 87.003
+        },
+        "tick_log_id": 3
+      },
+      "npc_ticks": [
+        {
+          "npc_id": "lina",
+          "outcome": "no_op",
+          "trigger_event_id": 11,
+          "proposed_action": {
+            "action_type": "ask_clarifying_question",
+            "args": {
+              "message_intent": ""
+            }
+          },
+          "validation": {
+            "status": "allowed",
+            "reason": "selected action is available and args match schema"
+          },
+          "action_result": {
+            "accepted": true,
+            "blocked_reason": "",
+            "executed_tools": [],
+            "state_before": {
+              "npc": {
+                "npc_id": "lina",
+                "name": "Lina",
+                "role": "Tavern Owner",
+                "hidden_alignment": "protect_ruins",
+                "mood": "neutral",
+                "trust": 20,
+                "affection": 30
+              },
+              "player": {
+                "location": "tavern",
+                "inventory": [],
+                "unlocked_locations": [
+                  "tavern",
+                  "town_square"
+                ]
+              },
+              "quest": {
+                "quest_id": "lost_key",
+                "title": "Lost Key",
+                "status": "not_started"
+              }
+            },
+            "state_after": {
+              "npc": {
+                "npc_id": "lina",
+                "name": "Lina",
+                "role": "Tavern Owner",
+                "hidden_alignment": "protect_ruins",
+                "mood": "neutral",
+                "trust": 20,
+                "affection": 30
+              },
+              "player": {
+                "location": "tavern",
+                "inventory": [],
+                "unlocked_locations": [
+                  "tavern",
+                  "town_square"
+                ]
+              },
+              "quest": {
+                "quest_id": "lost_key",
+                "title": "Lost Key",
+                "status": "not_started"
+              }
+            },
+            "state_changes": [],
+            "events": [],
+            "response_constraints": [
+              "Do not claim the underground ruins entrance is unlocked or available.",
+              "Do not claim the player received an item reward."
+            ]
+          },
+          "plan_update": {
+            "goal": "respond_to_npc_routine_activity",
+            "current_step": "ask_clarifying_question",
+            "status": "active",
+            "blocker": "",
+            "id": 1,
+            "source_event_id": 11
+          },
+          "proactive_message": null,
+          "reflection": {
+            "summary": "AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY is required for LLM provider.",
+            "belief_update": "Fallback used because LLM failed: AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY is required for LLM provider.",
+            "emotion": "cautious"
+          },
+          "tick_log_id": 5,
+          "created_events": []
+        },
+        {
+          "npc_id": "ron",
+          "outcome": "no_op",
+          "trigger_event_id": 8,
+          "proposed_action": {
+            "action_type": "verify_badge",
+            "args": {
+              "evidence_id": "",
+              "message_intent": ""
+            }
+          },
+          "validation": {
+            "status": "allowed",
+            "reason": "selected action is available and args match schema"
+          },
+          "action_result": {
+            "accepted": true,
+            "blocked_reason": "",
+            "executed_tools": [],
+            "state_before": {
+              "npc": {
+                "npc_id": "ron",
+                "name": "Ron",
+                "role": "Town Guard",
+                "hidden_alignment": "enforce_order",
+                "mood": "alert",
+                "trust": 18,
+                "affection": 20
+              },
+              "player": {
+                "location": "tavern",
+                "inventory": [],
+                "unlocked_locations": [
+                  "tavern",
+                  "town_square"
+                ]
+              },
+              "quest": {
+                "quest_id": "gate_badge",
+                "title": "Gate Badge",
+                "status": "not_started"
+              }
+            },
+            "state_after": {
+              "npc": {
+                "npc_id": "ron",
+                "name": "Ron",
+                "role": "Town Guard",
+                "hidden_alignment": "enforce_order",
+                "mood": "alert",
+                "trust": 18,
+                "affection": 20
+              },
+              "player": {
+                "location": "tavern",
+                "inventory": [],
+                "unlocked_locations": [
+                  "tavern",
+                  "town_square"
+                ]
+              },
+              "quest": {
+                "quest_id": "gate_badge",
+                "title": "Gate Badge",
+                "status": "not_started"
+              }
+            },
+            "state_changes": [],
+            "events": [],
+            "response_constraints": [
+              "Do not claim the underground ruins entrance is unlocked or available.",
+              "Do not claim the player received an item reward."
+            ]
+          },
+          "plan_update": {
+            "goal": "respond_to_npc_routine_activity",
+            "current_step": "verify_badge",
+            "status": "active",
+            "blocker": "",
+            "id": 2,
+            "source_event_id": 8
+          },
+          "proactive_message": null,
+          "reflection": {
+            "summary": "AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY is required for LLM provider.",
+            "belief_update": "Fallback used because LLM failed: AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY is required for LLM provider.",
+            "emotion": "cautious"
+          },
+          "tick_log_id": 6,
+          "created_events": []
+        }
+      ],
+      "arc_update": {
+        "arc_id": "ruins_chapter_1",
+        "phase": "resolved",
+        "tension": 5,
+        "advantage": "chaos",
+        "outcome": "chaotic_lockdown",
+        "scores": {
+          "guardian": 2,
+          "research": 1,
+          "sable": 1,
+          "chaos": 3
+        },
+        "total_signals": 7,
+        "cumulative_scores": {
+          "guardian": 6,
+          "research": 3,
+          "sable": 3,
+          "chaos": 9
+        },
+        "cumulative_total_signals": 21
+      },
+      "timings": {
+        "ambient_routines_ms": 78.013,
+        "traveler_tick_ms": 105.639,
+        "npc_ticks_ms": 174.595,
+        "arc_resolution_ms": 15.441,
+        "total_ms": 373.715
+      }
+    },
+    {
+      "round_number": 4,
+      "ambient_events": [
+        {
+          "id": 16,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 17,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 18,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 19,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 20,
+          "event_type": "traveler_talked_to_npc",
+          "content": "Arin the Cartographer talked to sable about 'local ruins' (tone=neutral, honesty=full).",
+          "payload": {
+            "npc_id": "sable",
+            "topic": "local ruins",
+            "tone": "neutral",
+            "honesty_level": "full",
+            "round": 4,
+            "arc_signal": "chaos"
+          }
+        },
+        {
+          "id": 20,
+          "event_type": "traveler_talked_to_npc",
+          "content": "Arin the Cartographer talked to sable about 'local ruins' (tone=neutral, honesty=full).",
+          "payload": {
+            "npc_id": "sable",
+            "topic": "local ruins",
+            "tone": "neutral",
+            "honesty_level": "full",
+            "round": 4,
+            "arc_signal": "chaos"
+          }
+        },
+        {
+          "id": 20,
+          "event_type": "traveler_talked_to_npc",
+          "content": "Arin the Cartographer talked to sable about 'local ruins' (tone=neutral, honesty=full).",
+          "payload": {
+            "npc_id": "sable",
+            "topic": "local ruins",
+            "tone": "neutral",
+            "honesty_level": "full",
+            "round": 4,
+            "arc_signal": "chaos"
+          }
+        },
+        {
+          "id": 20,
+          "event_type": "traveler_talked_to_npc",
+          "content": "Arin the Cartographer talked to sable about 'local ruins' (tone=neutral, honesty=full).",
+          "payload": {
+            "npc_id": "sable",
+            "topic": "local ruins",
+            "tone": "neutral",
+            "honesty_level": "full",
+            "round": 4,
+            "arc_signal": "chaos"
+          }
+        }
+      ],
+      "traveler_tick": {
+        "traveler_id": "traveler_main",
+        "round_number": 4,
+        "mode": "deterministic_fallback",
+        "observation": {
+          "traveler_id": "traveler_main",
+          "round_number": 4,
+          "traveler_state": {
+            "current_location": "market",
+            "inventory": [
+              "cartography_kit",
+              "field_journal",
+              "letter_of_introduction"
+            ],
+            "private_notes": [
+              "听说 Mira 是对遗迹最了解的学者，应该先找她",
+              "守卫 Ron 看起来很严格，直接问遗迹入口可能会引起怀疑",
+              "Sable 的传闻不可信，但她的信息网络可能有线索"
+            ],
+            "active_goal": {}
+          },
+          "relationships": {
+            "lina": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "mira": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "ron": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "sable": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            }
+          },
+          "npc_states": {
+            "lina": {
+              "npc_id": "lina",
+              "name": "Lina",
+              "role": "Tavern Owner",
+              "description": "A cautious and practical tavern owner who knows local rumors.",
+              "hidden_alignment": "protect_ruins",
+              "mood": "neutral",
+              "trust": 20,
+              "affection": 30
+            },
+            "ron": {
+              "npc_id": "ron",
+              "name": "Ron",
+              "role": "Town Guard",
+              "description": "A disciplined town guard who tracks patrol reports and gate incidents.",
+              "hidden_alignment": "enforce_order",
+              "mood": "alert",
+              "trust": 18,
+              "affection": 20
+            },
+            "mira": {
+              "npc_id": "mira",
+              "name": "Mira",
+              "role": "Ruins Scholar",
+              "description": "A careful scholar who studies old ruins, inscriptions, and local myths.",
+              "hidden_alignment": "research_truth",
+              "mood": "curious",
+              "trust": 22,
+              "affection": 24
+            },
+            "sable": {
+              "npc_id": "sable",
+              "name": "Sable",
+              "role": "Traveling Relic Broker",
+              "description": "A polished relic broker who offers useful rumors while steering people toward exploitable ruin secrets.",
+              "hidden_alignment": "exploit_ruins",
+              "mood": "pleasant",
+              "trust": 16,
+              "affection": 18
+            }
+          },
+          "scene_objects": [
+            {
+              "object_id": "guard_ledger",
+              "name": "Guard Ledger",
+              "location_id": "guard_post"
+            },
+            {
+              "object_id": "mira_field_notes",
+              "name": "Mira Field Notes",
+              "location_id": "archive"
+            },
+            {
+              "object_id": "sable_rumor_stall",
+              "name": "Sable Rumor Stall",
+              "location_id": "market"
+            },
+            {
+              "object_id": "tavern_back_alley",
+              "name": "Tavern Back Alley",
+              "location_id": "tavern"
+            }
+          ],
+          "arc_state": {
+            "arc_id": "ruins_chapter_1",
+            "phase": "resolved",
+            "tension": 5,
+            "advantage": "chaos",
+            "outcome": "chaotic_lockdown",
+            "metadata_json": "{\"title\": \"Ruins Chapter 1\", \"cumulative_scores\": {\"guardian\": 6, \"research\": 3, \"sable\": 3, \"chaos\": 9}, \"last_round_scores\": {\"guardian\": 2, \"research\": 1, \"sable\": 1, \"chaos\": 3}, \"last_round_total_signals\": 7, \"last_resolution_reason\": \"Arc resolved after resolved phase.\", \"last_resolution_confidence\": 0.7}",
+            "updated_at": "2026-06-04 08:08:49",
+            "metadata": {
+              "title": "Ruins Chapter 1",
+              "cumulative_scores": {
+                "guardian": 6,
+                "research": 3,
+                "sable": 3,
+                "chaos": 9
+              },
+              "last_round_scores": {
+                "guardian": 2,
+                "research": 1,
+                "sable": 1,
+                "chaos": 3
+              },
+              "last_round_total_signals": 7,
+              "last_resolution_reason": "Arc resolved after resolved phase.",
+              "last_resolution_confidence": 0.7
+            }
+          },
+          "recent_events": [
+            {
+              "id": 7,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 8,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 9,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 10,
+              "event_type": "traveler_talked_to_npc",
+              "content": "Arin the Cartographer talked to ron about 'local ruins' (tone=neutral, honesty=full).",
+              "payload": {
+                "npc_id": "ron",
+                "topic": "local ruins",
+                "tone": "neutral",
+                "honesty_level": "full",
+                "round": 2,
+                "arc_signal": "chaos"
+              }
+            },
+            {
+              "id": 10,
+              "event_type": "traveler_talked_to_npc",
+              "content": "Arin the Cartographer talked to ron about 'local ruins' (tone=neutral, honesty=full).",
+              "payload": {
+                "npc_id": "ron",
+                "topic": "local ruins",
+                "tone": "neutral",
+                "honesty_level": "full",
+                "round": 2,
+                "arc_signal": "chaos"
+              }
+            },
+            {
+              "id": 11,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 12,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 13,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 14,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 15,
+              "event_type": "traveler_moved",
+              "content": "Arin the Cartographer moved to market.",
+              "payload": {
+                "round": 3,
+                "arc_signal": "chaos"
+              }
+            }
+          ],
+          "memory_retrieval_mode": "hybrid",
+          "exploration_context": {
+            "traveler_id": "traveler_main",
+            "conversation_threads": [
+              {
+                "npc_id": "ron",
+                "topic": "local ruins",
+                "last_event_index": 4,
+                "status": "waiting_for_external_evidence",
+                "new_evidence_count": 0
+              }
+            ],
+            "leads": [
+              {
+                "lead_id": "ask_ron_about_guard_ledger",
+                "action_type": "move_to",
+                "target": "guard_post",
+                "reason": "Mira thread needs external procedural evidence."
+              },
+              {
+                "lead_id": "inspect_tavern_back_alley",
+                "action_type": "move_to",
+                "target": "tavern",
+                "reason": "Guardian route needs physical evidence."
+              }
+            ],
+            "action_scores": {
+              "move_to:archive": 0.45,
+              "move_to:guard_post": 0.82,
+              "move_to:tavern": 0.68,
+              "talk_to:sable": 0.9,
+              "investigate": 0.35,
+              "ask_for_help:sable": 0.86,
+              "share_information:sable": 0.82,
+              "trade_with": 0.35,
+              "wait_and_observe": 0.35,
+              "record_private_note": 0.35
+            },
+            "selection_policy": "Repeated same NPC/topic conversations without new evidence are lower priority, not forbidden; repeat conversation remains allowed when new evidence appears."
+          }
+        },
+        "available_actions": [
+          "move_to",
+          "talk_to",
+          "investigate",
+          "ask_for_help",
+          "share_information",
+          "trade_with",
+          "wait_and_observe",
+          "record_private_note"
+        ],
+        "action_biases": [
+          {
+            "action_type": "move_to",
+            "supporting_motivations": [
+              "curiosity",
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.725
+          },
+          {
+            "action_type": "talk_to",
+            "supporting_motivations": [
+              "curiosity",
+              "truth_seeking"
+            ],
+            "opposing_personality": [],
+            "risk_level": "medium",
+            "profile_alignment_score": 0.925
+          },
+          {
+            "action_type": "investigate",
+            "supporting_motivations": [
+              "curiosity",
+              "truth_seeking"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.925
+          },
+          {
+            "action_type": "ask_for_help",
+            "supporting_motivations": [
+              "safety"
+            ],
+            "opposing_personality": [
+              "cautious"
+            ],
+            "risk_level": "medium",
+            "profile_alignment_score": -0.1
+          },
+          {
+            "action_type": "share_information",
+            "supporting_motivations": [
+              "truth_seeking"
+            ],
+            "opposing_personality": [
+              "cautious"
+            ],
+            "risk_level": "high",
+            "profile_alignment_score": 0.3
+          },
+          {
+            "action_type": "trade_with",
+            "supporting_motivations": [],
+            "opposing_personality": [
+              "empathetic"
+            ],
+            "risk_level": "medium",
+            "profile_alignment_score": -0.7
+          },
+          {
+            "action_type": "wait_and_observe",
+            "supporting_motivations": [
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.5
+          },
+          {
+            "action_type": "record_private_note",
+            "supporting_motivations": [
+              "truth_seeking",
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.7
+          }
+        ],
+        "decision": {
+          "selected_action": {
+            "action_type": "talk_to",
+            "args": {
+              "npc_id": "sable",
+              "topic": "local ruins",
+              "tone": "neutral",
+              "honesty_level": "full",
+              "disclosure": "none"
+            }
+          },
+          "decision_reason": "Deterministic fallback: selected 'talk_to' with alignment score 0.925 and information gain 0.9.",
+          "profile_alignment": {
+            "supporting": [
+              "curiosity",
+              "truth_seeking"
+            ],
+            "opposing": []
+          },
+          "profile_tension": {},
+          "deception_choice": null,
+          "disclosure_choice": null,
+          "expected_consequence": "The traveler will talk_to.",
+          "mode": "deterministic_fallback"
+        },
+        "proposed_action": {
+          "action_type": "talk_to",
+          "args": {
+            "npc_id": "sable",
+            "topic": "local ruins",
+            "tone": "neutral",
+            "honesty_level": "full",
+            "disclosure": "none"
+          }
+        },
+        "validation": {
+          "status": "allowed",
+          "reason": "Action is available and args present."
+        },
+        "action_result": {
+          "accepted": true,
+          "blocked_reason": "",
+          "action_type": "talk_to",
+          "state_changes": [],
+          "relationship_changes": [],
+          "created_event_ids": [
+            20
+          ]
+        },
+        "state_changes": [],
+        "relationship_changes": [],
+        "created_events": [
+          {
+            "id": 20,
+            "event_type": "traveler_talked_to_npc",
+            "content": "Arin the Cartographer talked to sable about 'local ruins' (tone=neutral, honesty=full).",
+            "payload": {
+              "npc_id": "sable",
+              "topic": "local ruins",
+              "tone": "neutral",
+              "honesty_level": "full",
+              "round": 4,
+              "arc_signal": "chaos"
+            }
+          }
+        ],
+        "reflection": {
+          "traveler_id": "traveler_main",
+          "action_type": "talk_to",
+          "accepted": true,
+          "summary": "Traveler talk_to — accepted.",
+          "decision_reason": "Deterministic fallback: selected 'talk_to' with alignment score 0.925 and information gain 0.9.",
+          "exploration_context": {
+            "traveler_id": "traveler_main",
+            "conversation_threads": [
+              {
+                "npc_id": "ron",
+                "topic": "local ruins",
+                "last_event_index": 4,
+                "status": "waiting_for_external_evidence",
+                "new_evidence_count": 0
+              }
+            ],
+            "leads": [
+              {
+                "lead_id": "ask_ron_about_guard_ledger",
+                "action_type": "move_to",
+                "target": "guard_post",
+                "reason": "Mira thread needs external procedural evidence."
+              },
+              {
+                "lead_id": "inspect_tavern_back_alley",
+                "action_type": "move_to",
+                "target": "tavern",
+                "reason": "Guardian route needs physical evidence."
+              }
+            ],
+            "action_scores": {
+              "move_to:archive": 0.45,
+              "move_to:guard_post": 0.82,
+              "move_to:tavern": 0.68,
+              "talk_to:sable": 0.9,
+              "investigate": 0.35,
+              "ask_for_help:sable": 0.86,
+              "share_information:sable": 0.82,
+              "trade_with": 0.35,
+              "wait_and_observe": 0.35,
+              "record_private_note": 0.35
+            },
+            "selection_policy": "Repeated same NPC/topic conversations without new evidence are lower priority, not forbidden; repeat conversation remains allowed when new evidence appears."
+          }
+        },
+        "deception_metadata": null,
+        "disclosure_metadata": null,
+        "timings": {
+          "observe_ms": 2.423,
+          "retrieve_memory_ms": 4.576,
+          "build_action_surface_ms": 59.925,
+          "decide_ms": 0.068,
+          "validate_ms": 0.005,
+          "act_ms": 27.936,
+          "reflect_ms": 0.002,
+          "trace_log_ms": 5.235,
+          "total_ms": 100.192
+        },
+        "tick_log_id": 4
+      },
+      "npc_ticks": [
+        {
+          "npc_id": "sable",
+          "outcome": "no_op",
+          "trigger_event_id": 4,
+          "proposed_action": {
+            "action_type": "mislead_player",
+            "args": {
+              "message_intent": "",
+              "false_clue_theme": ""
+            }
+          },
+          "validation": {
+            "status": "allowed",
+            "reason": "selected action is available and args match schema"
+          },
+          "action_result": {
+            "accepted": true,
+            "blocked_reason": "",
+            "executed_tools": [
+              {
+                "name": "record_world_event",
+                "arguments": {
+                  "content": "Sable pursued a deceptive autonomous action: mislead_player."
+                },
+                "result": {
+                  "id": 21,
+                  "content": "Sable pursued a deceptive autonomous action: mislead_player.",
+                  "event_type": "legacy",
+                  "source_type": "legacy",
+                  "source_id": null,
+                  "location_id": null,
+                  "visibility": "public",
+                  "payload_json": "{}",
+                  "created_at": "2026-06-04 08:08:49",
+                  "payload": {}
+                }
+              }
+            ],
+            "state_before": {
+              "npc": {
+                "npc_id": "sable",
+                "name": "Sable",
+                "role": "Traveling Relic Broker",
+                "hidden_alignment": "exploit_ruins",
+                "mood": "pleasant",
+                "trust": 16,
+                "affection": 18
+              },
+              "player": {
+                "location": "tavern",
+                "inventory": [],
+                "unlocked_locations": [
+                  "tavern",
+                  "town_square"
+                ]
+              },
+              "quest": {
+                "quest_id": "relic_tip",
+                "title": "Relic Tip",
+                "status": "not_started"
+              }
+            },
+            "state_after": {
+              "npc": {
+                "npc_id": "sable",
+                "name": "Sable",
+                "role": "Traveling Relic Broker",
+                "hidden_alignment": "exploit_ruins",
+                "mood": "pleasant",
+                "trust": 16,
+                "affection": 18
+              },
+              "player": {
+                "location": "tavern",
+                "inventory": [],
+                "unlocked_locations": [
+                  "tavern",
+                  "town_square"
+                ]
+              },
+              "quest": {
+                "quest_id": "relic_tip",
+                "title": "Relic Tip",
+                "status": "not_started"
+              }
+            },
+            "state_changes": [],
+            "events": [
+              {
+                "event_type": "world_event",
+                "actor_id": "sable",
+                "target_id": "player",
+                "content": "Sable pursued a deceptive autonomous action: mislead_player.",
+                "visibility": "public",
+                "payload": {
+                  "tool_name": "record_world_event",
+                  "tool_arguments": {
+                    "content": "Sable pursued a deceptive autonomous action: mislead_player."
+                  },
+                  "tool_result": {
+                    "id": 21,
+                    "content": "Sable pursued a deceptive autonomous action: mislead_player.",
+                    "event_type": "legacy",
+                    "source_type": "legacy",
+                    "source_id": null,
+                    "location_id": null,
+                    "visibility": "public",
+                    "payload_json": "{}",
+                    "created_at": "2026-06-04 08:08:49",
+                    "payload": {}
+                  }
+                }
+              }
+            ],
+            "response_constraints": [
+              "Do not claim the underground ruins entrance is unlocked or available.",
+              "Do not claim the player received an item reward."
+            ]
+          },
+          "plan_update": {
+            "goal": "respond_to_npc_routine_activity",
+            "current_step": "mislead_player",
+            "status": "active",
+            "blocker": "",
+            "id": 7,
+            "source_event_id": 4
+          },
+          "proactive_message": null,
+          "reflection": {
+            "summary": "AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY is required for LLM provider.",
+            "belief_update": "Fallback used because LLM failed: AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY is required for LLM provider.",
+            "emotion": "cautious"
+          },
+          "tick_log_id": 7,
+          "created_events": []
+        },
+        {
+          "npc_id": "lina",
+          "outcome": "no_op",
+          "trigger_event_id": 16,
+          "proposed_action": {
+            "action_type": "ask_clarifying_question",
+            "args": {
+              "message_intent": ""
+            }
+          },
+          "validation": {
+            "status": "allowed",
+            "reason": "selected action is available and args match schema"
+          },
+          "action_result": {
+            "accepted": true,
+            "blocked_reason": "",
+            "executed_tools": [],
+            "state_before": {
+              "npc": {
+                "npc_id": "lina",
+                "name": "Lina",
+                "role": "Tavern Owner",
+                "hidden_alignment": "protect_ruins",
+                "mood": "neutral",
+                "trust": 20,
+                "affection": 30
+              },
+              "player": {
+                "location": "tavern",
+                "inventory": [],
+                "unlocked_locations": [
+                  "tavern",
+                  "town_square"
+                ]
+              },
+              "quest": {
+                "quest_id": "lost_key",
+                "title": "Lost Key",
+                "status": "not_started"
+              }
+            },
+            "state_after": {
+              "npc": {
+                "npc_id": "lina",
+                "name": "Lina",
+                "role": "Tavern Owner",
+                "hidden_alignment": "protect_ruins",
+                "mood": "neutral",
+                "trust": 20,
+                "affection": 30
+              },
+              "player": {
+                "location": "tavern",
+                "inventory": [],
+                "unlocked_locations": [
+                  "tavern",
+                  "town_square"
+                ]
+              },
+              "quest": {
+                "quest_id": "lost_key",
+                "title": "Lost Key",
+                "status": "not_started"
+              }
+            },
+            "state_changes": [],
+            "events": [],
+            "response_constraints": [
+              "Do not claim the underground ruins entrance is unlocked or available.",
+              "Do not claim the player received an item reward."
+            ]
+          },
+          "plan_update": {
+            "goal": "respond_to_npc_routine_activity",
+            "current_step": "ask_clarifying_question",
+            "status": "active",
+            "blocker": "",
+            "id": 1,
+            "source_event_id": 16
+          },
+          "proactive_message": null,
+          "reflection": {
+            "summary": "AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY is required for LLM provider.",
+            "belief_update": "Fallback used because LLM failed: AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY is required for LLM provider.",
+            "emotion": "cautious"
+          },
+          "tick_log_id": 8,
+          "created_events": []
+        }
+      ],
+      "arc_update": {
+        "arc_id": "ruins_chapter_1",
+        "phase": "resolved",
+        "tension": 5,
+        "advantage": "chaos",
+        "outcome": "chaotic_lockdown",
+        "scores": {
+          "guardian": 2,
+          "research": 1,
+          "sable": 1,
+          "chaos": 3
+        },
+        "total_signals": 7,
+        "cumulative_scores": {
+          "guardian": 8,
+          "research": 4,
+          "sable": 4,
+          "chaos": 12
+        },
+        "cumulative_total_signals": 28
+      },
+      "timings": {
+        "ambient_routines_ms": 67.897,
+        "traveler_tick_ms": 114.862,
+        "npc_ticks_ms": 201.301,
+        "arc_resolution_ms": 10.919,
+        "total_ms": 395.002
+      }
+    },
+    {
+      "round_number": 5,
+      "ambient_events": [
+        {
+          "id": 22,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 23,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 24,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 25,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 26,
+          "event_type": "traveler_moved",
+          "content": "Arin the Cartographer moved to guard_post.",
+          "payload": {
+            "round": 5,
+            "arc_signal": "chaos"
+          }
+        },
+        {
+          "id": 26,
+          "event_type": "traveler_moved",
+          "content": "Arin the Cartographer moved to guard_post.",
+          "payload": {
+            "round": 5,
+            "arc_signal": "chaos"
+          }
+        },
+        {
+          "id": 26,
+          "event_type": "traveler_moved",
+          "content": "Arin the Cartographer moved to guard_post.",
+          "payload": {
+            "round": 5,
+            "arc_signal": "chaos"
+          }
+        }
+      ],
+      "traveler_tick": {
+        "traveler_id": "traveler_main",
+        "round_number": 5,
+        "mode": "deterministic_fallback",
+        "observation": {
+          "traveler_id": "traveler_main",
+          "round_number": 5,
+          "traveler_state": {
+            "current_location": "market",
+            "inventory": [
+              "cartography_kit",
+              "field_journal",
+              "letter_of_introduction"
+            ],
+            "private_notes": [
+              "听说 Mira 是对遗迹最了解的学者，应该先找她",
+              "守卫 Ron 看起来很严格，直接问遗迹入口可能会引起怀疑",
+              "Sable 的传闻不可信，但她的信息网络可能有线索"
+            ],
+            "active_goal": {}
+          },
+          "relationships": {
+            "lina": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "mira": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "ron": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "sable": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            }
+          },
+          "npc_states": {
+            "lina": {
+              "npc_id": "lina",
+              "name": "Lina",
+              "role": "Tavern Owner",
+              "description": "A cautious and practical tavern owner who knows local rumors.",
+              "hidden_alignment": "protect_ruins",
+              "mood": "neutral",
+              "trust": 20,
+              "affection": 30
+            },
+            "ron": {
+              "npc_id": "ron",
+              "name": "Ron",
+              "role": "Town Guard",
+              "description": "A disciplined town guard who tracks patrol reports and gate incidents.",
+              "hidden_alignment": "enforce_order",
+              "mood": "alert",
+              "trust": 18,
+              "affection": 20
+            },
+            "mira": {
+              "npc_id": "mira",
+              "name": "Mira",
+              "role": "Ruins Scholar",
+              "description": "A careful scholar who studies old ruins, inscriptions, and local myths.",
+              "hidden_alignment": "research_truth",
+              "mood": "curious",
+              "trust": 22,
+              "affection": 24
+            },
+            "sable": {
+              "npc_id": "sable",
+              "name": "Sable",
+              "role": "Traveling Relic Broker",
+              "description": "A polished relic broker who offers useful rumors while steering people toward exploitable ruin secrets.",
+              "hidden_alignment": "exploit_ruins",
+              "mood": "pleasant",
+              "trust": 16,
+              "affection": 18
+            }
+          },
+          "scene_objects": [
+            {
+              "object_id": "guard_ledger",
+              "name": "Guard Ledger",
+              "location_id": "guard_post"
+            },
+            {
+              "object_id": "mira_field_notes",
+              "name": "Mira Field Notes",
+              "location_id": "archive"
+            },
+            {
+              "object_id": "sable_rumor_stall",
+              "name": "Sable Rumor Stall",
+              "location_id": "market"
+            },
+            {
+              "object_id": "tavern_back_alley",
+              "name": "Tavern Back Alley",
+              "location_id": "tavern"
+            }
+          ],
+          "arc_state": {
+            "arc_id": "ruins_chapter_1",
+            "phase": "resolved",
+            "tension": 5,
+            "advantage": "chaos",
+            "outcome": "chaotic_lockdown",
+            "metadata_json": "{\"title\": \"Ruins Chapter 1\", \"cumulative_scores\": {\"guardian\": 8, \"research\": 4, \"sable\": 4, \"chaos\": 12}, \"last_round_scores\": {\"guardian\": 2, \"research\": 1, \"sable\": 1, \"chaos\": 3}, \"last_round_total_signals\": 7, \"last_resolution_reason\": \"Arc resolved after resolved phase.\", \"last_resolution_confidence\": 0.7}",
+            "updated_at": "2026-06-04 08:08:49",
+            "metadata": {
+              "title": "Ruins Chapter 1",
+              "cumulative_scores": {
+                "guardian": 8,
+                "research": 4,
+                "sable": 4,
+                "chaos": 12
+              },
+              "last_round_scores": {
+                "guardian": 2,
+                "research": 1,
+                "sable": 1,
+                "chaos": 3
+              },
+              "last_round_total_signals": 7,
+              "last_resolution_reason": "Arc resolved after resolved phase.",
+              "last_resolution_confidence": 0.7
+            }
+          },
+          "recent_events": [
+            {
+              "id": 12,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 13,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 14,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 15,
+              "event_type": "traveler_moved",
+              "content": "Arin the Cartographer moved to market.",
+              "payload": {
+                "round": 3,
+                "arc_signal": "chaos"
+              }
+            },
+            {
+              "id": 15,
+              "event_type": "traveler_moved",
+              "content": "Arin the Cartographer moved to market.",
+              "payload": {
+                "round": 3,
+                "arc_signal": "chaos"
+              }
+            },
+            {
+              "id": 16,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 17,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 18,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 19,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 20,
+              "event_type": "traveler_talked_to_npc",
+              "content": "Arin the Cartographer talked to sable about 'local ruins' (tone=neutral, honesty=full).",
+              "payload": {
+                "npc_id": "sable",
+                "topic": "local ruins",
+                "tone": "neutral",
+                "honesty_level": "full",
+                "round": 4,
+                "arc_signal": "chaos"
+              }
+            }
+          ],
+          "memory_retrieval_mode": "hybrid",
+          "exploration_context": {
+            "traveler_id": "traveler_main",
+            "conversation_threads": [
+              {
+                "npc_id": "sable",
+                "topic": "local ruins",
+                "last_event_index": 9,
+                "status": "waiting_for_external_evidence",
+                "new_evidence_count": 0
+              }
+            ],
+            "leads": [
+              {
+                "lead_id": "ask_ron_about_guard_ledger",
+                "action_type": "move_to",
+                "target": "guard_post",
+                "reason": "Mira thread needs external procedural evidence."
+              },
+              {
+                "lead_id": "inspect_tavern_back_alley",
+                "action_type": "move_to",
+                "target": "tavern",
+                "reason": "Guardian route needs physical evidence."
+              }
+            ],
+            "action_scores": {
+              "move_to:archive": 0.45,
+              "move_to:guard_post": 0.82,
+              "move_to:tavern": 0.68,
+              "talk_to:sable": 0.28,
+              "investigate": 0.35,
+              "ask_for_help:sable": 0.28,
+              "share_information:sable": 0.28,
+              "trade_with": 0.35,
+              "wait_and_observe": 0.35,
+              "record_private_note": 0.35
+            },
+            "selection_policy": "Repeated same NPC/topic conversations without new evidence are lower priority, not forbidden; repeat conversation remains allowed when new evidence appears."
+          }
+        },
+        "available_actions": [
+          "move_to",
+          "talk_to",
+          "investigate",
+          "ask_for_help",
+          "share_information",
+          "trade_with",
+          "wait_and_observe",
+          "record_private_note"
+        ],
+        "action_biases": [
+          {
+            "action_type": "move_to",
+            "supporting_motivations": [
+              "curiosity",
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.725
+          },
+          {
+            "action_type": "talk_to",
+            "supporting_motivations": [
+              "curiosity",
+              "truth_seeking"
+            ],
+            "opposing_personality": [],
+            "risk_level": "medium",
+            "profile_alignment_score": 0.925
+          },
+          {
+            "action_type": "investigate",
+            "supporting_motivations": [
+              "curiosity",
+              "truth_seeking"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.925
+          },
+          {
+            "action_type": "ask_for_help",
+            "supporting_motivations": [
+              "safety"
+            ],
+            "opposing_personality": [
+              "cautious"
+            ],
+            "risk_level": "medium",
+            "profile_alignment_score": -0.1
+          },
+          {
+            "action_type": "share_information",
+            "supporting_motivations": [
+              "truth_seeking"
+            ],
+            "opposing_personality": [
+              "cautious"
+            ],
+            "risk_level": "high",
+            "profile_alignment_score": 0.3
+          },
+          {
+            "action_type": "trade_with",
+            "supporting_motivations": [],
+            "opposing_personality": [
+              "empathetic"
+            ],
+            "risk_level": "medium",
+            "profile_alignment_score": -0.7
+          },
+          {
+            "action_type": "wait_and_observe",
+            "supporting_motivations": [
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.5
+          },
+          {
+            "action_type": "record_private_note",
+            "supporting_motivations": [
+              "truth_seeking",
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.7
+          }
+        ],
+        "decision": {
+          "selected_action": {
+            "action_type": "move_to",
+            "args": {
+              "location_id": "guard_post"
+            }
+          },
+          "decision_reason": "Deterministic fallback: selected 'move_to' with alignment score 0.725 and information gain 0.82.",
+          "profile_alignment": {
+            "supporting": [
+              "curiosity",
+              "safety"
+            ],
+            "opposing": []
+          },
+          "profile_tension": {},
+          "deception_choice": null,
+          "disclosure_choice": null,
+          "expected_consequence": "The traveler will move_to.",
+          "mode": "deterministic_fallback"
+        },
+        "proposed_action": {
+          "action_type": "move_to",
+          "args": {
+            "location_id": "guard_post"
+          }
+        },
+        "validation": {
+          "status": "allowed",
+          "reason": "Action is available and args present."
+        },
+        "action_result": {
+          "accepted": true,
+          "blocked_reason": "",
+          "action_type": "move_to",
+          "state_changes": [
+            {
+              "field": "location",
+              "before": "market",
+              "after": "guard_post"
+            }
+          ],
+          "relationship_changes": [],
+          "created_event_ids": [
+            26
+          ]
+        },
+        "state_changes": [
+          {
+            "field": "location",
+            "before": "market",
+            "after": "guard_post"
+          }
+        ],
+        "relationship_changes": [],
+        "created_events": [
+          {
+            "id": 26,
+            "event_type": "traveler_moved",
+            "content": "Arin the Cartographer moved to guard_post.",
+            "payload": {
+              "round": 5,
+              "arc_signal": "chaos"
+            }
+          }
+        ],
+        "reflection": {
+          "traveler_id": "traveler_main",
+          "action_type": "move_to",
+          "accepted": true,
+          "summary": "Traveler move_to — accepted.",
+          "decision_reason": "Deterministic fallback: selected 'move_to' with alignment score 0.725 and information gain 0.82.",
+          "exploration_context": {
+            "traveler_id": "traveler_main",
+            "conversation_threads": [
+              {
+                "npc_id": "sable",
+                "topic": "local ruins",
+                "last_event_index": 9,
+                "status": "waiting_for_external_evidence",
+                "new_evidence_count": 0
+              }
+            ],
+            "leads": [
+              {
+                "lead_id": "ask_ron_about_guard_ledger",
+                "action_type": "move_to",
+                "target": "guard_post",
+                "reason": "Mira thread needs external procedural evidence."
+              },
+              {
+                "lead_id": "inspect_tavern_back_alley",
+                "action_type": "move_to",
+                "target": "tavern",
+                "reason": "Guardian route needs physical evidence."
+              }
+            ],
+            "action_scores": {
+              "move_to:archive": 0.45,
+              "move_to:guard_post": 0.82,
+              "move_to:tavern": 0.68,
+              "talk_to:sable": 0.28,
+              "investigate": 0.35,
+              "ask_for_help:sable": 0.28,
+              "share_information:sable": 0.28,
+              "trade_with": 0.35,
+              "wait_and_observe": 0.35,
+              "record_private_note": 0.35
+            },
+            "selection_policy": "Repeated same NPC/topic conversations without new evidence are lower priority, not forbidden; repeat conversation remains allowed when new evidence appears."
+          }
+        },
+        "deception_metadata": null,
+        "disclosure_metadata": null,
+        "timings": {
+          "observe_ms": 2.257,
+          "retrieve_memory_ms": 7.389,
+          "build_action_surface_ms": 73.279,
+          "decide_ms": 0.069,
+          "validate_ms": 0.004,
+          "act_ms": 25.516,
+          "reflect_ms": 0.003,
+          "trace_log_ms": 5.449,
+          "total_ms": 113.991
+        },
+        "tick_log_id": 5
+      },
+      "npc_ticks": [
+        {
+          "npc_id": "lina",
+          "outcome": "no_op",
+          "trigger_event_id": 22,
+          "proposed_action": {
+            "action_type": "ask_clarifying_question",
+            "args": {
+              "message_intent": ""
+            }
+          },
+          "validation": {
+            "status": "allowed",
+            "reason": "selected action is available and args match schema"
+          },
+          "action_result": {
+            "accepted": true,
+            "blocked_reason": "",
+            "executed_tools": [],
+            "state_before": {
+              "npc": {
+                "npc_id": "lina",
+                "name": "Lina",
+                "role": "Tavern Owner",
+                "hidden_alignment": "protect_ruins",
+                "mood": "neutral",
+                "trust": 20,
+                "affection": 30
+              },
+              "player": {
+                "location": "tavern",
+                "inventory": [],
+                "unlocked_locations": [
+                  "tavern",
+                  "town_square"
+                ]
+              },
+              "quest": {
+                "quest_id": "lost_key",
+                "title": "Lost Key",
+                "status": "not_started"
+              }
+            },
+            "state_after": {
+              "npc": {
+                "npc_id": "lina",
+                "name": "Lina",
+                "role": "Tavern Owner",
+                "hidden_alignment": "protect_ruins",
+                "mood": "neutral",
+                "trust": 20,
+                "affection": 30
+              },
+              "player": {
+                "location": "tavern",
+                "inventory": [],
+                "unlocked_locations": [
+                  "tavern",
+                  "town_square"
+                ]
+              },
+              "quest": {
+                "quest_id": "lost_key",
+                "title": "Lost Key",
+                "status": "not_started"
+              }
+            },
+            "state_changes": [],
+            "events": [],
+            "response_constraints": [
+              "Do not claim the underground ruins entrance is unlocked or available.",
+              "Do not claim the player received an item reward."
+            ]
+          },
+          "plan_update": {
+            "goal": "respond_to_npc_routine_activity",
+            "current_step": "ask_clarifying_question",
+            "status": "active",
+            "blocker": "",
+            "id": 1,
+            "source_event_id": 22
+          },
+          "proactive_message": null,
+          "reflection": {
+            "summary": "AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY is required for LLM provider.",
+            "belief_update": "Fallback used because LLM failed: AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY is required for LLM provider.",
+            "emotion": "cautious"
+          },
+          "tick_log_id": 9,
+          "created_events": []
+        },
+        {
+          "npc_id": "ron",
+          "outcome": "no_op",
+          "trigger_event_id": 10,
+          "proposed_action": {
+            "action_type": "verify_badge",
+            "args": {
+              "evidence_id": "",
+              "message_intent": ""
+            }
+          },
+          "validation": {
+            "status": "allowed",
+            "reason": "selected action is available and args match schema"
+          },
+          "action_result": {
+            "accepted": true,
+            "blocked_reason": "",
+            "executed_tools": [],
+            "state_before": {
+              "npc": {
+                "npc_id": "ron",
+                "name": "Ron",
+                "role": "Town Guard",
+                "hidden_alignment": "enforce_order",
+                "mood": "alert",
+                "trust": 18,
+                "affection": 20
+              },
+              "player": {
+                "location": "tavern",
+                "inventory": [],
+                "unlocked_locations": [
+                  "tavern",
+                  "town_square"
+                ]
+              },
+              "quest": {
+                "quest_id": "gate_badge",
+                "title": "Gate Badge",
+                "status": "not_started"
+              }
+            },
+            "state_after": {
+              "npc": {
+                "npc_id": "ron",
+                "name": "Ron",
+                "role": "Town Guard",
+                "hidden_alignment": "enforce_order",
+                "mood": "alert",
+                "trust": 18,
+                "affection": 20
+              },
+              "player": {
+                "location": "tavern",
+                "inventory": [],
+                "unlocked_locations": [
+                  "tavern",
+                  "town_square"
+                ]
+              },
+              "quest": {
+                "quest_id": "gate_badge",
+                "title": "Gate Badge",
+                "status": "not_started"
+              }
+            },
+            "state_changes": [],
+            "events": [],
+            "response_constraints": [
+              "Do not claim the underground ruins entrance is unlocked or available.",
+              "Do not claim the player received an item reward."
+            ]
+          },
+          "plan_update": {
+            "goal": "respond_to_traveler_talked_to_npc",
+            "current_step": "verify_badge",
+            "status": "active",
+            "blocker": "",
+            "id": 2,
+            "source_event_id": 10
+          },
+          "proactive_message": null,
+          "reflection": {
+            "summary": "AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY is required for LLM provider.",
+            "belief_update": "Fallback used because LLM failed: AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY is required for LLM provider.",
+            "emotion": "cautious"
+          },
+          "tick_log_id": 10,
+          "created_events": []
+        }
+      ],
+      "arc_update": {
+        "arc_id": "ruins_chapter_1",
+        "phase": "resolved",
+        "tension": 5,
+        "advantage": "chaos",
+        "outcome": "chaotic_lockdown",
+        "scores": {
+          "guardian": 2,
+          "research": 1,
+          "sable": 1,
+          "chaos": 3
+        },
+        "total_signals": 7,
+        "cumulative_scores": {
+          "guardian": 10,
+          "research": 5,
+          "sable": 5,
+          "chaos": 15
+        },
+        "cumulative_total_signals": 35
+      },
+      "timings": {
+        "ambient_routines_ms": 76.337,
+        "traveler_tick_ms": 132.661,
+        "npc_ticks_ms": 202.917,
+        "arc_resolution_ms": 7.282,
+        "total_ms": 419.222
+      }
+    },
+    {
+      "round_number": 6,
+      "ambient_events": [
+        {
+          "id": 27,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 28,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 29,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 30,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 31,
+          "event_type": "traveler_talked_to_npc",
+          "content": "Arin the Cartographer talked to ron about 'local ruins' (tone=neutral, honesty=full).",
+          "payload": {
+            "npc_id": "ron",
+            "topic": "local ruins",
+            "tone": "neutral",
+            "honesty_level": "full",
+            "round": 6,
+            "arc_signal": "chaos"
+          }
+        },
+        {
+          "id": 31,
+          "event_type": "traveler_talked_to_npc",
+          "content": "Arin the Cartographer talked to ron about 'local ruins' (tone=neutral, honesty=full).",
+          "payload": {
+            "npc_id": "ron",
+            "topic": "local ruins",
+            "tone": "neutral",
+            "honesty_level": "full",
+            "round": 6,
+            "arc_signal": "chaos"
+          }
+        }
+      ],
+      "traveler_tick": {
+        "traveler_id": "traveler_main",
+        "round_number": 6,
+        "mode": "deterministic_fallback",
+        "observation": {
+          "traveler_id": "traveler_main",
+          "round_number": 6,
+          "traveler_state": {
+            "current_location": "guard_post",
+            "inventory": [
+              "cartography_kit",
+              "field_journal",
+              "letter_of_introduction"
+            ],
+            "private_notes": [
+              "听说 Mira 是对遗迹最了解的学者，应该先找她",
+              "守卫 Ron 看起来很严格，直接问遗迹入口可能会引起怀疑",
+              "Sable 的传闻不可信，但她的信息网络可能有线索"
+            ],
+            "active_goal": {}
+          },
+          "relationships": {
+            "lina": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "mira": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "ron": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "sable": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            }
+          },
+          "npc_states": {
+            "lina": {
+              "npc_id": "lina",
+              "name": "Lina",
+              "role": "Tavern Owner",
+              "description": "A cautious and practical tavern owner who knows local rumors.",
+              "hidden_alignment": "protect_ruins",
+              "mood": "neutral",
+              "trust": 20,
+              "affection": 30
+            },
+            "ron": {
+              "npc_id": "ron",
+              "name": "Ron",
+              "role": "Town Guard",
+              "description": "A disciplined town guard who tracks patrol reports and gate incidents.",
+              "hidden_alignment": "enforce_order",
+              "mood": "alert",
+              "trust": 18,
+              "affection": 20
+            },
+            "mira": {
+              "npc_id": "mira",
+              "name": "Mira",
+              "role": "Ruins Scholar",
+              "description": "A careful scholar who studies old ruins, inscriptions, and local myths.",
+              "hidden_alignment": "research_truth",
+              "mood": "curious",
+              "trust": 22,
+              "affection": 24
+            },
+            "sable": {
+              "npc_id": "sable",
+              "name": "Sable",
+              "role": "Traveling Relic Broker",
+              "description": "A polished relic broker who offers useful rumors while steering people toward exploitable ruin secrets.",
+              "hidden_alignment": "exploit_ruins",
+              "mood": "pleasant",
+              "trust": 16,
+              "affection": 18
+            }
+          },
+          "scene_objects": [
+            {
+              "object_id": "guard_ledger",
+              "name": "Guard Ledger",
+              "location_id": "guard_post"
+            },
+            {
+              "object_id": "mira_field_notes",
+              "name": "Mira Field Notes",
+              "location_id": "archive"
+            },
+            {
+              "object_id": "sable_rumor_stall",
+              "name": "Sable Rumor Stall",
+              "location_id": "market"
+            },
+            {
+              "object_id": "tavern_back_alley",
+              "name": "Tavern Back Alley",
+              "location_id": "tavern"
+            }
+          ],
+          "arc_state": {
+            "arc_id": "ruins_chapter_1",
+            "phase": "resolved",
+            "tension": 5,
+            "advantage": "chaos",
+            "outcome": "chaotic_lockdown",
+            "metadata_json": "{\"title\": \"Ruins Chapter 1\", \"cumulative_scores\": {\"guardian\": 10, \"research\": 5, \"sable\": 5, \"chaos\": 15}, \"last_round_scores\": {\"guardian\": 2, \"research\": 1, \"sable\": 1, \"chaos\": 3}, \"last_round_total_signals\": 7, \"last_resolution_reason\": \"Arc resolved after resolved phase.\", \"last_resolution_confidence\": 0.7}",
+            "updated_at": "2026-06-04 08:08:50",
+            "metadata": {
+              "title": "Ruins Chapter 1",
+              "cumulative_scores": {
+                "guardian": 10,
+                "research": 5,
+                "sable": 5,
+                "chaos": 15
+              },
+              "last_round_scores": {
+                "guardian": 2,
+                "research": 1,
+                "sable": 1,
+                "chaos": 3
+              },
+              "last_round_total_signals": 7,
+              "last_resolution_reason": "Arc resolved after resolved phase.",
+              "last_resolution_confidence": 0.7
+            }
+          },
+          "recent_events": [
+            {
+              "id": 17,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 18,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 19,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 20,
+              "event_type": "traveler_talked_to_npc",
+              "content": "Arin the Cartographer talked to sable about 'local ruins' (tone=neutral, honesty=full).",
+              "payload": {
+                "npc_id": "sable",
+                "topic": "local ruins",
+                "tone": "neutral",
+                "honesty_level": "full",
+                "round": 4,
+                "arc_signal": "chaos"
+              }
+            },
+            {
+              "id": 20,
+              "event_type": "traveler_talked_to_npc",
+              "content": "Arin the Cartographer talked to sable about 'local ruins' (tone=neutral, honesty=full).",
+              "payload": {
+                "npc_id": "sable",
+                "topic": "local ruins",
+                "tone": "neutral",
+                "honesty_level": "full",
+                "round": 4,
+                "arc_signal": "chaos"
+              }
+            },
+            {
+              "id": 22,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 23,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 24,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 25,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 26,
+              "event_type": "traveler_moved",
+              "content": "Arin the Cartographer moved to guard_post.",
+              "payload": {
+                "round": 5,
+                "arc_signal": "chaos"
+              }
+            }
+          ],
+          "memory_retrieval_mode": "hybrid",
+          "exploration_context": {
+            "traveler_id": "traveler_main",
+            "conversation_threads": [
+              {
+                "npc_id": "sable",
+                "topic": "local ruins",
+                "last_event_index": 4,
+                "status": "waiting_for_external_evidence",
+                "new_evidence_count": 0
+              }
+            ],
+            "leads": [
+              {
+                "lead_id": "question_sable_about_rumors",
+                "action_type": "move_to",
+                "target": "market",
+                "reason": "Ruins rumors need adversarial cross-checking."
+              },
+              {
+                "lead_id": "inspect_tavern_back_alley",
+                "action_type": "move_to",
+                "target": "tavern",
+                "reason": "Guardian route needs physical evidence."
+              }
+            ],
+            "action_scores": {
+              "move_to:archive": 0.45,
+              "move_to:market": 0.78,
+              "move_to:tavern": 0.68,
+              "talk_to:ron": 0.91,
+              "investigate": 0.35,
+              "ask_for_help:ron": 0.88,
+              "share_information:ron": 0.82,
+              "trade_with": 0.35,
+              "wait_and_observe": 0.35,
+              "record_private_note": 0.35
+            },
+            "selection_policy": "Repeated same NPC/topic conversations without new evidence are lower priority, not forbidden; repeat conversation remains allowed when new evidence appears."
+          }
+        },
+        "available_actions": [
+          "move_to",
+          "talk_to",
+          "investigate",
+          "ask_for_help",
+          "share_information",
+          "trade_with",
+          "wait_and_observe",
+          "record_private_note"
+        ],
+        "action_biases": [
+          {
+            "action_type": "move_to",
+            "supporting_motivations": [
+              "curiosity",
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.725
+          },
+          {
+            "action_type": "talk_to",
+            "supporting_motivations": [
+              "curiosity",
+              "truth_seeking"
+            ],
+            "opposing_personality": [],
+            "risk_level": "medium",
+            "profile_alignment_score": 0.925
+          },
+          {
+            "action_type": "investigate",
+            "supporting_motivations": [
+              "curiosity",
+              "truth_seeking"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.925
+          },
+          {
+            "action_type": "ask_for_help",
+            "supporting_motivations": [
+              "safety"
+            ],
+            "opposing_personality": [
+              "cautious"
+            ],
+            "risk_level": "medium",
+            "profile_alignment_score": -0.1
+          },
+          {
+            "action_type": "share_information",
+            "supporting_motivations": [
+              "truth_seeking"
+            ],
+            "opposing_personality": [
+              "cautious"
+            ],
+            "risk_level": "high",
+            "profile_alignment_score": 0.3
+          },
+          {
+            "action_type": "trade_with",
+            "supporting_motivations": [],
+            "opposing_personality": [
+              "empathetic"
+            ],
+            "risk_level": "medium",
+            "profile_alignment_score": -0.7
+          },
+          {
+            "action_type": "wait_and_observe",
+            "supporting_motivations": [
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.5
+          },
+          {
+            "action_type": "record_private_note",
+            "supporting_motivations": [
+              "truth_seeking",
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.7
+          }
+        ],
+        "decision": {
+          "selected_action": {
+            "action_type": "talk_to",
+            "args": {
+              "npc_id": "ron",
+              "topic": "local ruins",
+              "tone": "neutral",
+              "honesty_level": "full",
+              "disclosure": "none"
+            }
+          },
+          "decision_reason": "Deterministic fallback: selected 'talk_to' with alignment score 0.925 and information gain 0.91.",
+          "profile_alignment": {
+            "supporting": [
+              "curiosity",
+              "truth_seeking"
+            ],
+            "opposing": []
+          },
+          "profile_tension": {},
+          "deception_choice": null,
+          "disclosure_choice": null,
+          "expected_consequence": "The traveler will talk_to.",
+          "mode": "deterministic_fallback"
+        },
+        "proposed_action": {
+          "action_type": "talk_to",
+          "args": {
+            "npc_id": "ron",
+            "topic": "local ruins",
+            "tone": "neutral",
+            "honesty_level": "full",
+            "disclosure": "none"
+          }
+        },
+        "validation": {
+          "status": "allowed",
+          "reason": "Action is available and args present."
+        },
+        "action_result": {
+          "accepted": true,
+          "blocked_reason": "",
+          "action_type": "talk_to",
+          "state_changes": [],
+          "relationship_changes": [],
+          "created_event_ids": [
+            31
+          ]
+        },
+        "state_changes": [],
+        "relationship_changes": [],
+        "created_events": [
+          {
+            "id": 31,
+            "event_type": "traveler_talked_to_npc",
+            "content": "Arin the Cartographer talked to ron about 'local ruins' (tone=neutral, honesty=full).",
+            "payload": {
+              "npc_id": "ron",
+              "topic": "local ruins",
+              "tone": "neutral",
+              "honesty_level": "full",
+              "round": 6,
+              "arc_signal": "chaos"
+            }
+          }
+        ],
+        "reflection": {
+          "traveler_id": "traveler_main",
+          "action_type": "talk_to",
+          "accepted": true,
+          "summary": "Traveler talk_to — accepted.",
+          "decision_reason": "Deterministic fallback: selected 'talk_to' with alignment score 0.925 and information gain 0.91.",
+          "exploration_context": {
+            "traveler_id": "traveler_main",
+            "conversation_threads": [
+              {
+                "npc_id": "sable",
+                "topic": "local ruins",
+                "last_event_index": 4,
+                "status": "waiting_for_external_evidence",
+                "new_evidence_count": 0
+              }
+            ],
+            "leads": [
+              {
+                "lead_id": "question_sable_about_rumors",
+                "action_type": "move_to",
+                "target": "market",
+                "reason": "Ruins rumors need adversarial cross-checking."
+              },
+              {
+                "lead_id": "inspect_tavern_back_alley",
+                "action_type": "move_to",
+                "target": "tavern",
+                "reason": "Guardian route needs physical evidence."
+              }
+            ],
+            "action_scores": {
+              "move_to:archive": 0.45,
+              "move_to:market": 0.78,
+              "move_to:tavern": 0.68,
+              "talk_to:ron": 0.91,
+              "investigate": 0.35,
+              "ask_for_help:ron": 0.88,
+              "share_information:ron": 0.82,
+              "trade_with": 0.35,
+              "wait_and_observe": 0.35,
+              "record_private_note": 0.35
+            },
+            "selection_policy": "Repeated same NPC/topic conversations without new evidence are lower priority, not forbidden; repeat conversation remains allowed when new evidence appears."
+          }
+        },
+        "deception_metadata": null,
+        "disclosure_metadata": null,
+        "timings": {
+          "observe_ms": 2.207,
+          "retrieve_memory_ms": 7.39,
+          "build_action_surface_ms": 48.819,
+          "decide_ms": 0.071,
+          "validate_ms": 0.005,
+          "act_ms": 29.411,
+          "reflect_ms": 0.006,
+          "trace_log_ms": 6.284,
+          "total_ms": 94.22
+        },
+        "tick_log_id": 6
+      },
+      "npc_ticks": [
+        {
+          "npc_id": "ron",
+          "outcome": "no_op",
+          "trigger_event_id": 13,
+          "proposed_action": {
+            "action_type": "verify_badge",
+            "args": {
+              "evidence_id": "",
+              "message_intent": ""
+            }
+          },
+          "validation": {
+            "status": "allowed",
+            "reason": "selected action is available and args match schema"
+          },
+          "action_result": {
+            "accepted": true,
+            "blocked_reason": "",
+            "executed_tools": [],
+            "state_before": {
+              "npc": {
+                "npc_id": "ron",
+                "name": "Ron",
+                "role": "Town Guard",
+                "hidden_alignment": "enforce_order",
+                "mood": "alert",
+                "trust": 18,
+                "affection": 20
+              },
+              "player": {
+                "location": "tavern",
+                "inventory": [],
+                "unlocked_locations": [
+                  "tavern",
+                  "town_square"
+                ]
+              },
+              "quest": {
+                "quest_id": "gate_badge",
+                "title": "Gate Badge",
+                "status": "not_started"
+              }
+            },
+            "state_after": {
+              "npc": {
+                "npc_id": "ron",
+                "name": "Ron",
+                "role": "Town Guard",
+                "hidden_alignment": "enforce_order",
+                "mood": "alert",
+                "trust": 18,
+                "affection": 20
+              },
+              "player": {
+                "location": "tavern",
+                "inventory": [],
+                "unlocked_locations": [
+                  "tavern",
+                  "town_square"
+                ]
+              },
+              "quest": {
+                "quest_id": "gate_badge",
+                "title": "Gate Badge",
+                "status": "not_started"
+              }
+            },
+            "state_changes": [],
+            "events": [],
+            "response_constraints": [
+              "Do not claim the underground ruins entrance is unlocked or available.",
+              "Do not claim the player received an item reward."
+            ]
+          },
+          "plan_update": {
+            "goal": "respond_to_npc_routine_activity",
+            "current_step": "verify_badge",
+            "status": "active",
+            "blocker": "",
+            "id": 2,
+            "source_event_id": 13
+          },
+          "proactive_message": null,
+          "reflection": {
+            "summary": "AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY is required for LLM provider.",
+            "belief_update": "Fallback used because LLM failed: AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY is required for LLM provider.",
+            "emotion": "cautious"
+          },
+          "tick_log_id": 11,
+          "created_events": []
+        },
+        {
+          "npc_id": "lina",
+          "outcome": "no_op",
+          "trigger_event_id": 27,
+          "proposed_action": {
+            "action_type": "ask_clarifying_question",
+            "args": {
+              "message_intent": ""
+            }
+          },
+          "validation": {
+            "status": "allowed",
+            "reason": "selected action is available and args match schema"
+          },
+          "action_result": {
+            "accepted": true,
+            "blocked_reason": "",
+            "executed_tools": [],
+            "state_before": {
+              "npc": {
+                "npc_id": "lina",
+                "name": "Lina",
+                "role": "Tavern Owner",
+                "hidden_alignment": "protect_ruins",
+                "mood": "neutral",
+                "trust": 20,
+                "affection": 30
+              },
+              "player": {
+                "location": "tavern",
+                "inventory": [],
+                "unlocked_locations": [
+                  "tavern",
+                  "town_square"
+                ]
+              },
+              "quest": {
+                "quest_id": "lost_key",
+                "title": "Lost Key",
+                "status": "not_started"
+              }
+            },
+            "state_after": {
+              "npc": {
+                "npc_id": "lina",
+                "name": "Lina",
+                "role": "Tavern Owner",
+                "hidden_alignment": "protect_ruins",
+                "mood": "neutral",
+                "trust": 20,
+                "affection": 30
+              },
+              "player": {
+                "location": "tavern",
+                "inventory": [],
+                "unlocked_locations": [
+                  "tavern",
+                  "town_square"
+                ]
+              },
+              "quest": {
+                "quest_id": "lost_key",
+                "title": "Lost Key",
+                "status": "not_started"
+              }
+            },
+            "state_changes": [],
+            "events": [],
+            "response_constraints": [
+              "Do not claim the underground ruins entrance is unlocked or available.",
+              "Do not claim the player received an item reward."
+            ]
+          },
+          "plan_update": {
+            "goal": "respond_to_npc_routine_activity",
+            "current_step": "ask_clarifying_question",
+            "status": "active",
+            "blocker": "",
+            "id": 1,
+            "source_event_id": 27
+          },
+          "proactive_message": null,
+          "reflection": {
+            "summary": "AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY is required for LLM provider.",
+            "belief_update": "Fallback used because LLM failed: AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY is required for LLM provider.",
+            "emotion": "cautious"
+          },
+          "tick_log_id": 12,
+          "created_events": []
+        }
+      ],
+      "arc_update": {
+        "arc_id": "ruins_chapter_1",
+        "phase": "resolved",
+        "tension": 5,
+        "advantage": "chaos",
+        "outcome": "chaotic_lockdown",
+        "scores": {
+          "guardian": 2,
+          "research": 1,
+          "sable": 1,
+          "chaos": 3
+        },
+        "total_signals": 7,
+        "cumulative_scores": {
+          "guardian": 12,
+          "research": 6,
+          "sable": 6,
+          "chaos": 18
+        },
+        "cumulative_total_signals": 42
+      },
+      "timings": {
+        "ambient_routines_ms": 63.66,
+        "traveler_tick_ms": 108.193,
+        "npc_ticks_ms": 206.234,
+        "arc_resolution_ms": 7.275,
+        "total_ms": 385.382
+      }
+    },
+    {
+      "round_number": 7,
+      "ambient_events": [
+        {
+          "id": 32,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 33,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 34,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 35,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 36,
+          "event_type": "traveler_moved",
+          "content": "Arin the Cartographer moved to market.",
+          "payload": {
+            "round": 7,
+            "arc_signal": "chaos"
+          }
+        }
+      ],
+      "traveler_tick": {
+        "traveler_id": "traveler_main",
+        "round_number": 7,
+        "mode": "deterministic_fallback",
+        "observation": {
+          "traveler_id": "traveler_main",
+          "round_number": 7,
+          "traveler_state": {
+            "current_location": "guard_post",
+            "inventory": [
+              "cartography_kit",
+              "field_journal",
+              "letter_of_introduction"
+            ],
+            "private_notes": [
+              "听说 Mira 是对遗迹最了解的学者，应该先找她",
+              "守卫 Ron 看起来很严格，直接问遗迹入口可能会引起怀疑",
+              "Sable 的传闻不可信，但她的信息网络可能有线索"
+            ],
+            "active_goal": {}
+          },
+          "relationships": {
+            "lina": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "mira": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "ron": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "sable": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            }
+          },
+          "npc_states": {
+            "lina": {
+              "npc_id": "lina",
+              "name": "Lina",
+              "role": "Tavern Owner",
+              "description": "A cautious and practical tavern owner who knows local rumors.",
+              "hidden_alignment": "protect_ruins",
+              "mood": "neutral",
+              "trust": 20,
+              "affection": 30
+            },
+            "ron": {
+              "npc_id": "ron",
+              "name": "Ron",
+              "role": "Town Guard",
+              "description": "A disciplined town guard who tracks patrol reports and gate incidents.",
+              "hidden_alignment": "enforce_order",
+              "mood": "alert",
+              "trust": 18,
+              "affection": 20
+            },
+            "mira": {
+              "npc_id": "mira",
+              "name": "Mira",
+              "role": "Ruins Scholar",
+              "description": "A careful scholar who studies old ruins, inscriptions, and local myths.",
+              "hidden_alignment": "research_truth",
+              "mood": "curious",
+              "trust": 22,
+              "affection": 24
+            },
+            "sable": {
+              "npc_id": "sable",
+              "name": "Sable",
+              "role": "Traveling Relic Broker",
+              "description": "A polished relic broker who offers useful rumors while steering people toward exploitable ruin secrets.",
+              "hidden_alignment": "exploit_ruins",
+              "mood": "pleasant",
+              "trust": 16,
+              "affection": 18
+            }
+          },
+          "scene_objects": [
+            {
+              "object_id": "guard_ledger",
+              "name": "Guard Ledger",
+              "location_id": "guard_post"
+            },
+            {
+              "object_id": "mira_field_notes",
+              "name": "Mira Field Notes",
+              "location_id": "archive"
+            },
+            {
+              "object_id": "sable_rumor_stall",
+              "name": "Sable Rumor Stall",
+              "location_id": "market"
+            },
+            {
+              "object_id": "tavern_back_alley",
+              "name": "Tavern Back Alley",
+              "location_id": "tavern"
+            }
+          ],
+          "arc_state": {
+            "arc_id": "ruins_chapter_1",
+            "phase": "resolved",
+            "tension": 5,
+            "advantage": "chaos",
+            "outcome": "chaotic_lockdown",
+            "metadata_json": "{\"title\": \"Ruins Chapter 1\", \"cumulative_scores\": {\"guardian\": 12, \"research\": 6, \"sable\": 6, \"chaos\": 18}, \"last_round_scores\": {\"guardian\": 2, \"research\": 1, \"sable\": 1, \"chaos\": 3}, \"last_round_total_signals\": 7, \"last_resolution_reason\": \"Arc resolved after resolved phase.\", \"last_resolution_confidence\": 0.7}",
+            "updated_at": "2026-06-04 08:08:50",
+            "metadata": {
+              "title": "Ruins Chapter 1",
+              "cumulative_scores": {
+                "guardian": 12,
+                "research": 6,
+                "sable": 6,
+                "chaos": 18
+              },
+              "last_round_scores": {
+                "guardian": 2,
+                "research": 1,
+                "sable": 1,
+                "chaos": 3
+              },
+              "last_round_total_signals": 7,
+              "last_resolution_reason": "Arc resolved after resolved phase.",
+              "last_resolution_confidence": 0.7
+            }
+          },
+          "recent_events": [
+            {
+              "id": 23,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 24,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 25,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 26,
+              "event_type": "traveler_moved",
+              "content": "Arin the Cartographer moved to guard_post.",
+              "payload": {
+                "round": 5,
+                "arc_signal": "chaos"
+              }
+            },
+            {
+              "id": 26,
+              "event_type": "traveler_moved",
+              "content": "Arin the Cartographer moved to guard_post.",
+              "payload": {
+                "round": 5,
+                "arc_signal": "chaos"
+              }
+            },
+            {
+              "id": 27,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 28,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 29,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 30,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 31,
+              "event_type": "traveler_talked_to_npc",
+              "content": "Arin the Cartographer talked to ron about 'local ruins' (tone=neutral, honesty=full).",
+              "payload": {
+                "npc_id": "ron",
+                "topic": "local ruins",
+                "tone": "neutral",
+                "honesty_level": "full",
+                "round": 6,
+                "arc_signal": "chaos"
+              }
+            }
+          ],
+          "memory_retrieval_mode": "hybrid",
+          "exploration_context": {
+            "traveler_id": "traveler_main",
+            "conversation_threads": [
+              {
+                "npc_id": "ron",
+                "topic": "local ruins",
+                "last_event_index": 9,
+                "status": "waiting_for_external_evidence",
+                "new_evidence_count": 0
+              }
+            ],
+            "leads": [
+              {
+                "lead_id": "question_sable_about_rumors",
+                "action_type": "move_to",
+                "target": "market",
+                "reason": "Ruins rumors need adversarial cross-checking."
+              },
+              {
+                "lead_id": "inspect_tavern_back_alley",
+                "action_type": "move_to",
+                "target": "tavern",
+                "reason": "Guardian route needs physical evidence."
+              }
+            ],
+            "action_scores": {
+              "move_to:archive": 0.45,
+              "move_to:market": 0.78,
+              "move_to:tavern": 0.68,
+              "talk_to:ron": 0.28,
+              "investigate": 0.35,
+              "ask_for_help:ron": 0.28,
+              "share_information:ron": 0.28,
+              "trade_with": 0.35,
+              "wait_and_observe": 0.35,
+              "record_private_note": 0.35
+            },
+            "selection_policy": "Repeated same NPC/topic conversations without new evidence are lower priority, not forbidden; repeat conversation remains allowed when new evidence appears."
+          }
+        },
+        "available_actions": [
+          "move_to",
+          "talk_to",
+          "investigate",
+          "ask_for_help",
+          "share_information",
+          "trade_with",
+          "wait_and_observe",
+          "record_private_note"
+        ],
+        "action_biases": [
+          {
+            "action_type": "move_to",
+            "supporting_motivations": [
+              "curiosity",
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.725
+          },
+          {
+            "action_type": "talk_to",
+            "supporting_motivations": [
+              "curiosity",
+              "truth_seeking"
+            ],
+            "opposing_personality": [],
+            "risk_level": "medium",
+            "profile_alignment_score": 0.925
+          },
+          {
+            "action_type": "investigate",
+            "supporting_motivations": [
+              "curiosity",
+              "truth_seeking"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.925
+          },
+          {
+            "action_type": "ask_for_help",
+            "supporting_motivations": [
+              "safety"
+            ],
+            "opposing_personality": [
+              "cautious"
+            ],
+            "risk_level": "medium",
+            "profile_alignment_score": -0.1
+          },
+          {
+            "action_type": "share_information",
+            "supporting_motivations": [
+              "truth_seeking"
+            ],
+            "opposing_personality": [
+              "cautious"
+            ],
+            "risk_level": "high",
+            "profile_alignment_score": 0.3
+          },
+          {
+            "action_type": "trade_with",
+            "supporting_motivations": [],
+            "opposing_personality": [
+              "empathetic"
+            ],
+            "risk_level": "medium",
+            "profile_alignment_score": -0.7
+          },
+          {
+            "action_type": "wait_and_observe",
+            "supporting_motivations": [
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.5
+          },
+          {
+            "action_type": "record_private_note",
+            "supporting_motivations": [
+              "truth_seeking",
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.7
+          }
+        ],
+        "decision": {
+          "selected_action": {
+            "action_type": "move_to",
+            "args": {
+              "location_id": "market"
+            }
+          },
+          "decision_reason": "Deterministic fallback: selected 'move_to' with alignment score 0.725 and information gain 0.78.",
+          "profile_alignment": {
+            "supporting": [
+              "curiosity",
+              "safety"
+            ],
+            "opposing": []
+          },
+          "profile_tension": {},
+          "deception_choice": null,
+          "disclosure_choice": null,
+          "expected_consequence": "The traveler will move_to.",
+          "mode": "deterministic_fallback"
+        },
+        "proposed_action": {
+          "action_type": "move_to",
+          "args": {
+            "location_id": "market"
+          }
+        },
+        "validation": {
+          "status": "allowed",
+          "reason": "Action is available and args present."
+        },
+        "action_result": {
+          "accepted": true,
+          "blocked_reason": "",
+          "action_type": "move_to",
+          "state_changes": [
+            {
+              "field": "location",
+              "before": "guard_post",
+              "after": "market"
+            }
+          ],
+          "relationship_changes": [],
+          "created_event_ids": [
+            36
+          ]
+        },
+        "state_changes": [
+          {
+            "field": "location",
+            "before": "guard_post",
+            "after": "market"
+          }
+        ],
+        "relationship_changes": [],
+        "created_events": [
+          {
+            "id": 36,
+            "event_type": "traveler_moved",
+            "content": "Arin the Cartographer moved to market.",
+            "payload": {
+              "round": 7,
+              "arc_signal": "chaos"
+            }
+          }
+        ],
+        "reflection": {
+          "traveler_id": "traveler_main",
+          "action_type": "move_to",
+          "accepted": true,
+          "summary": "Traveler move_to — accepted.",
+          "decision_reason": "Deterministic fallback: selected 'move_to' with alignment score 0.725 and information gain 0.78.",
+          "exploration_context": {
+            "traveler_id": "traveler_main",
+            "conversation_threads": [
+              {
+                "npc_id": "ron",
+                "topic": "local ruins",
+                "last_event_index": 9,
+                "status": "waiting_for_external_evidence",
+                "new_evidence_count": 0
+              }
+            ],
+            "leads": [
+              {
+                "lead_id": "question_sable_about_rumors",
+                "action_type": "move_to",
+                "target": "market",
+                "reason": "Ruins rumors need adversarial cross-checking."
+              },
+              {
+                "lead_id": "inspect_tavern_back_alley",
+                "action_type": "move_to",
+                "target": "tavern",
+                "reason": "Guardian route needs physical evidence."
+              }
+            ],
+            "action_scores": {
+              "move_to:archive": 0.45,
+              "move_to:market": 0.78,
+              "move_to:tavern": 0.68,
+              "talk_to:ron": 0.28,
+              "investigate": 0.35,
+              "ask_for_help:ron": 0.28,
+              "share_information:ron": 0.28,
+              "trade_with": 0.35,
+              "wait_and_observe": 0.35,
+              "record_private_note": 0.35
+            },
+            "selection_policy": "Repeated same NPC/topic conversations without new evidence are lower priority, not forbidden; repeat conversation remains allowed when new evidence appears."
+          }
+        },
+        "deception_metadata": null,
+        "disclosure_metadata": null,
+        "timings": {
+          "observe_ms": 1.845,
+          "retrieve_memory_ms": 6.838,
+          "build_action_surface_ms": 43.647,
+          "decide_ms": 0.062,
+          "validate_ms": 0.004,
+          "act_ms": 24.145,
+          "reflect_ms": 0.003,
+          "trace_log_ms": 11.719,
+          "total_ms": 88.288
+        },
+        "tick_log_id": 7
+      },
+      "npc_ticks": [
+        {
+          "npc_id": "lina",
+          "outcome": "no_op",
+          "trigger_event_id": 32,
+          "proposed_action": {
+            "action_type": "ask_clarifying_question",
+            "args": {
+              "message_intent": ""
+            }
+          },
+          "validation": {
+            "status": "allowed",
+            "reason": "selected action is available and args match schema"
+          },
+          "action_result": {
+            "accepted": true,
+            "blocked_reason": "",
+            "executed_tools": [],
+            "state_before": {
+              "npc": {
+                "npc_id": "lina",
+                "name": "Lina",
+                "role": "Tavern Owner",
+                "hidden_alignment": "protect_ruins",
+                "mood": "neutral",
+                "trust": 20,
+                "affection": 30
+              },
+              "player": {
+                "location": "tavern",
+                "inventory": [],
+                "unlocked_locations": [
+                  "tavern",
+                  "town_square"
+                ]
+              },
+              "quest": {
+                "quest_id": "lost_key",
+                "title": "Lost Key",
+                "status": "not_started"
+              }
+            },
+            "state_after": {
+              "npc": {
+                "npc_id": "lina",
+                "name": "Lina",
+                "role": "Tavern Owner",
+                "hidden_alignment": "protect_ruins",
+                "mood": "neutral",
+                "trust": 20,
+                "affection": 30
+              },
+              "player": {
+                "location": "tavern",
+                "inventory": [],
+                "unlocked_locations": [
+                  "tavern",
+                  "town_square"
+                ]
+              },
+              "quest": {
+                "quest_id": "lost_key",
+                "title": "Lost Key",
+                "status": "not_started"
+              }
+            },
+            "state_changes": [],
+            "events": [],
+            "response_constraints": [
+              "Do not claim the underground ruins entrance is unlocked or available.",
+              "Do not claim the player received an item reward."
+            ]
+          },
+          "plan_update": {
+            "goal": "respond_to_npc_routine_activity",
+            "current_step": "ask_clarifying_question",
+            "status": "active",
+            "blocker": "",
+            "id": 1,
+            "source_event_id": 32
+          },
+          "proactive_message": null,
+          "reflection": {
+            "summary": "AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY is required for LLM provider.",
+            "belief_update": "Fallback used because LLM failed: AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY is required for LLM provider.",
+            "emotion": "cautious"
+          },
+          "tick_log_id": 13,
+          "created_events": []
+        },
+        {
+          "npc_id": "ron",
+          "outcome": "no_op",
+          "trigger_event_id": 18,
+          "proposed_action": {
+            "action_type": "verify_badge",
+            "args": {
+              "evidence_id": "",
+              "message_intent": ""
+            }
+          },
+          "validation": {
+            "status": "allowed",
+            "reason": "selected action is available and args match schema"
+          },
+          "action_result": {
+            "accepted": true,
+            "blocked_reason": "",
+            "executed_tools": [],
+            "state_before": {
+              "npc": {
+                "npc_id": "ron",
+                "name": "Ron",
+                "role": "Town Guard",
+                "hidden_alignment": "enforce_order",
+                "mood": "alert",
+                "trust": 18,
+                "affection": 20
+              },
+              "player": {
+                "location": "tavern",
+                "inventory": [],
+                "unlocked_locations": [
+                  "tavern",
+                  "town_square"
+                ]
+              },
+              "quest": {
+                "quest_id": "gate_badge",
+                "title": "Gate Badge",
+                "status": "not_started"
+              }
+            },
+            "state_after": {
+              "npc": {
+                "npc_id": "ron",
+                "name": "Ron",
+                "role": "Town Guard",
+                "hidden_alignment": "enforce_order",
+                "mood": "alert",
+                "trust": 18,
+                "affection": 20
+              },
+              "player": {
+                "location": "tavern",
+                "inventory": [],
+                "unlocked_locations": [
+                  "tavern",
+                  "town_square"
+                ]
+              },
+              "quest": {
+                "quest_id": "gate_badge",
+                "title": "Gate Badge",
+                "status": "not_started"
+              }
+            },
+            "state_changes": [],
+            "events": [],
+            "response_constraints": [
+              "Do not claim the underground ruins entrance is unlocked or available.",
+              "Do not claim the player received an item reward."
+            ]
+          },
+          "plan_update": {
+            "goal": "respond_to_npc_routine_activity",
+            "current_step": "verify_badge",
+            "status": "active",
+            "blocker": "",
+            "id": 2,
+            "source_event_id": 18
+          },
+          "proactive_message": null,
+          "reflection": {
+            "summary": "AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY is required for LLM provider.",
+            "belief_update": "Fallback used because LLM failed: AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY is required for LLM provider.",
+            "emotion": "cautious"
+          },
+          "tick_log_id": 14,
+          "created_events": []
+        }
+      ],
+      "arc_update": {
+        "arc_id": "ruins_chapter_1",
+        "phase": "resolved",
+        "tension": 5,
+        "advantage": "chaos",
+        "outcome": "chaotic_lockdown",
+        "scores": {
+          "guardian": 2,
+          "research": 1,
+          "sable": 1,
+          "chaos": 3
+        },
+        "total_signals": 7,
+        "cumulative_scores": {
+          "guardian": 14,
+          "research": 7,
+          "sable": 7,
+          "chaos": 21
+        },
+        "cumulative_total_signals": 49
+      },
+      "timings": {
+        "ambient_routines_ms": 61.922,
+        "traveler_tick_ms": 103.827,
+        "npc_ticks_ms": 176.201,
+        "arc_resolution_ms": 7.944,
+        "total_ms": 349.917
+      }
+    },
+    {
+      "round_number": 8,
+      "ambient_events": [
+        {
+          "id": 37,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 38,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 39,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 40,
+          "event_type": "npc_routine_activity"
+        }
+      ],
+      "traveler_tick": {
+        "traveler_id": "traveler_main",
+        "round_number": 8,
+        "mode": "deterministic_fallback",
+        "observation": {
+          "traveler_id": "traveler_main",
+          "round_number": 8,
+          "traveler_state": {
+            "current_location": "market",
+            "inventory": [
+              "cartography_kit",
+              "field_journal",
+              "letter_of_introduction"
+            ],
+            "private_notes": [
+              "听说 Mira 是对遗迹最了解的学者，应该先找她",
+              "守卫 Ron 看起来很严格，直接问遗迹入口可能会引起怀疑",
+              "Sable 的传闻不可信，但她的信息网络可能有线索"
+            ],
+            "active_goal": {}
+          },
+          "relationships": {
+            "lina": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "mira": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "ron": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "sable": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            }
+          },
+          "npc_states": {
+            "lina": {
+              "npc_id": "lina",
+              "name": "Lina",
+              "role": "Tavern Owner",
+              "description": "A cautious and practical tavern owner who knows local rumors.",
+              "hidden_alignment": "protect_ruins",
+              "mood": "neutral",
+              "trust": 20,
+              "affection": 30
+            },
+            "ron": {
+              "npc_id": "ron",
+              "name": "Ron",
+              "role": "Town Guard",
+              "description": "A disciplined town guard who tracks patrol reports and gate incidents.",
+              "hidden_alignment": "enforce_order",
+              "mood": "alert",
+              "trust": 18,
+              "affection": 20
+            },
+            "mira": {
+              "npc_id": "mira",
+              "name": "Mira",
+              "role": "Ruins Scholar",
+              "description": "A careful scholar who studies old ruins, inscriptions, and local myths.",
+              "hidden_alignment": "research_truth",
+              "mood": "curious",
+              "trust": 22,
+              "affection": 24
+            },
+            "sable": {
+              "npc_id": "sable",
+              "name": "Sable",
+              "role": "Traveling Relic Broker",
+              "description": "A polished relic broker who offers useful rumors while steering people toward exploitable ruin secrets.",
+              "hidden_alignment": "exploit_ruins",
+              "mood": "pleasant",
+              "trust": 16,
+              "affection": 18
+            }
+          },
+          "scene_objects": [
+            {
+              "object_id": "guard_ledger",
+              "name": "Guard Ledger",
+              "location_id": "guard_post"
+            },
+            {
+              "object_id": "mira_field_notes",
+              "name": "Mira Field Notes",
+              "location_id": "archive"
+            },
+            {
+              "object_id": "sable_rumor_stall",
+              "name": "Sable Rumor Stall",
+              "location_id": "market"
+            },
+            {
+              "object_id": "tavern_back_alley",
+              "name": "Tavern Back Alley",
+              "location_id": "tavern"
+            }
+          ],
+          "arc_state": {
+            "arc_id": "ruins_chapter_1",
+            "phase": "resolved",
+            "tension": 5,
+            "advantage": "chaos",
+            "outcome": "chaotic_lockdown",
+            "metadata_json": "{\"title\": \"Ruins Chapter 1\", \"cumulative_scores\": {\"guardian\": 14, \"research\": 7, \"sable\": 7, \"chaos\": 21}, \"last_round_scores\": {\"guardian\": 2, \"research\": 1, \"sable\": 1, \"chaos\": 3}, \"last_round_total_signals\": 7, \"last_resolution_reason\": \"Arc resolved after resolved phase.\", \"last_resolution_confidence\": 0.7}",
+            "updated_at": "2026-06-04 08:08:50",
+            "metadata": {
+              "title": "Ruins Chapter 1",
+              "cumulative_scores": {
+                "guardian": 14,
+                "research": 7,
+                "sable": 7,
+                "chaos": 21
+              },
+              "last_round_scores": {
+                "guardian": 2,
+                "research": 1,
+                "sable": 1,
+                "chaos": 3
+              },
+              "last_round_total_signals": 7,
+              "last_resolution_reason": "Arc resolved after resolved phase.",
+              "last_resolution_confidence": 0.7
+            }
+          },
+          "recent_events": [
+            {
+              "id": 28,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 29,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 30,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 31,
+              "event_type": "traveler_talked_to_npc",
+              "content": "Arin the Cartographer talked to ron about 'local ruins' (tone=neutral, honesty=full).",
+              "payload": {
+                "npc_id": "ron",
+                "topic": "local ruins",
+                "tone": "neutral",
+                "honesty_level": "full",
+                "round": 6,
+                "arc_signal": "chaos"
+              }
+            },
+            {
+              "id": 31,
+              "event_type": "traveler_talked_to_npc",
+              "content": "Arin the Cartographer talked to ron about 'local ruins' (tone=neutral, honesty=full).",
+              "payload": {
+                "npc_id": "ron",
+                "topic": "local ruins",
+                "tone": "neutral",
+                "honesty_level": "full",
+                "round": 6,
+                "arc_signal": "chaos"
+              }
+            },
+            {
+              "id": 32,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 33,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 34,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 35,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 36,
+              "event_type": "traveler_moved",
+              "content": "Arin the Cartographer moved to market.",
+              "payload": {
+                "round": 7,
+                "arc_signal": "chaos"
+              }
+            }
+          ],
+          "memory_retrieval_mode": "hybrid",
+          "exploration_context": {
+            "traveler_id": "traveler_main",
+            "conversation_threads": [
+              {
+                "npc_id": "ron",
+                "topic": "local ruins",
+                "last_event_index": 4,
+                "status": "waiting_for_external_evidence",
+                "new_evidence_count": 0
+              }
+            ],
+            "leads": [
+              {
+                "lead_id": "ask_ron_about_guard_ledger",
+                "action_type": "move_to",
+                "target": "guard_post",
+                "reason": "Mira thread needs external procedural evidence."
+              },
+              {
+                "lead_id": "inspect_tavern_back_alley",
+                "action_type": "move_to",
+                "target": "tavern",
+                "reason": "Guardian route needs physical evidence."
+              }
+            ],
+            "action_scores": {
+              "move_to:archive": 0.45,
+              "move_to:guard_post": 0.82,
+              "move_to:tavern": 0.68,
+              "talk_to:sable": 0.9,
+              "investigate": 0.35,
+              "ask_for_help:sable": 0.86,
+              "share_information:sable": 0.82,
+              "trade_with": 0.35,
+              "wait_and_observe": 0.35,
+              "record_private_note": 0.35
+            },
+            "selection_policy": "Repeated same NPC/topic conversations without new evidence are lower priority, not forbidden; repeat conversation remains allowed when new evidence appears."
+          }
+        },
+        "available_actions": [
+          "move_to",
+          "talk_to",
+          "investigate",
+          "ask_for_help",
+          "share_information",
+          "trade_with",
+          "wait_and_observe",
+          "record_private_note"
+        ],
+        "action_biases": [
+          {
+            "action_type": "move_to",
+            "supporting_motivations": [
+              "curiosity",
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.725
+          },
+          {
+            "action_type": "talk_to",
+            "supporting_motivations": [
+              "curiosity",
+              "truth_seeking"
+            ],
+            "opposing_personality": [],
+            "risk_level": "medium",
+            "profile_alignment_score": 0.925
+          },
+          {
+            "action_type": "investigate",
+            "supporting_motivations": [
+              "curiosity",
+              "truth_seeking"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.925
+          },
+          {
+            "action_type": "ask_for_help",
+            "supporting_motivations": [
+              "safety"
+            ],
+            "opposing_personality": [
+              "cautious"
+            ],
+            "risk_level": "medium",
+            "profile_alignment_score": -0.1
+          },
+          {
+            "action_type": "share_information",
+            "supporting_motivations": [
+              "truth_seeking"
+            ],
+            "opposing_personality": [
+              "cautious"
+            ],
+            "risk_level": "high",
+            "profile_alignment_score": 0.3
+          },
+          {
+            "action_type": "trade_with",
+            "supporting_motivations": [],
+            "opposing_personality": [
+              "empathetic"
+            ],
+            "risk_level": "medium",
+            "profile_alignment_score": -0.7
+          },
+          {
+            "action_type": "wait_and_observe",
+            "supporting_motivations": [
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.5
+          },
+          {
+            "action_type": "record_private_note",
+            "supporting_motivations": [
+              "truth_seeking",
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.7
+          }
+        ],
+        "decision": {
+          "selected_action": {
+            "action_type": "talk_to",
+            "args": {
+              "npc_id": "sable",
+              "topic": "local ruins",
+              "tone": "neutral",
+              "honesty_level": "full",
+              "disclosure": "none"
+            }
+          },
+          "decision_reason": "Deterministic fallback: selected 'talk_to' with alignment score 0.925 and information gain 0.9.",
+          "profile_alignment": {
+            "supporting": [
+              "curiosity",
+              "truth_seeking"
+            ],
+            "opposing": []
+          },
+          "profile_tension": {},
+          "deception_choice": null,
+          "disclosure_choice": null,
+          "expected_consequence": "The traveler will talk_to.",
+          "mode": "deterministic_fallback"
+        },
+        "proposed_action": {
+          "action_type": "talk_to",
+          "args": {
+            "npc_id": "sable",
+            "topic": "local ruins",
+            "tone": "neutral",
+            "honesty_level": "full",
+            "disclosure": "none"
+          }
+        },
+        "validation": {
+          "status": "allowed",
+          "reason": "Action is available and args present."
+        },
+        "action_result": {
+          "accepted": true,
+          "blocked_reason": "",
+          "action_type": "talk_to",
+          "state_changes": [],
+          "relationship_changes": [],
+          "created_event_ids": [
+            41
+          ]
+        },
+        "state_changes": [],
+        "relationship_changes": [],
+        "created_events": [
+          {
+            "id": 41,
+            "event_type": "traveler_talked_to_npc",
+            "content": "Arin the Cartographer talked to sable about 'local ruins' (tone=neutral, honesty=full).",
+            "payload": {
+              "npc_id": "sable",
+              "topic": "local ruins",
+              "tone": "neutral",
+              "honesty_level": "full",
+              "round": 8,
+              "arc_signal": "chaos"
+            }
+          }
+        ],
+        "reflection": {
+          "traveler_id": "traveler_main",
+          "action_type": "talk_to",
+          "accepted": true,
+          "summary": "Traveler talk_to — accepted.",
+          "decision_reason": "Deterministic fallback: selected 'talk_to' with alignment score 0.925 and information gain 0.9.",
+          "exploration_context": {
+            "traveler_id": "traveler_main",
+            "conversation_threads": [
+              {
+                "npc_id": "ron",
+                "topic": "local ruins",
+                "last_event_index": 4,
+                "status": "waiting_for_external_evidence",
+                "new_evidence_count": 0
+              }
+            ],
+            "leads": [
+              {
+                "lead_id": "ask_ron_about_guard_ledger",
+                "action_type": "move_to",
+                "target": "guard_post",
+                "reason": "Mira thread needs external procedural evidence."
+              },
+              {
+                "lead_id": "inspect_tavern_back_alley",
+                "action_type": "move_to",
+                "target": "tavern",
+                "reason": "Guardian route needs physical evidence."
+              }
+            ],
+            "action_scores": {
+              "move_to:archive": 0.45,
+              "move_to:guard_post": 0.82,
+              "move_to:tavern": 0.68,
+              "talk_to:sable": 0.9,
+              "investigate": 0.35,
+              "ask_for_help:sable": 0.86,
+              "share_information:sable": 0.82,
+              "trade_with": 0.35,
+              "wait_and_observe": 0.35,
+              "record_private_note": 0.35
+            },
+            "selection_policy": "Repeated same NPC/topic conversations without new evidence are lower priority, not forbidden; repeat conversation remains allowed when new evidence appears."
+          }
+        },
+        "deception_metadata": null,
+        "disclosure_metadata": null,
+        "timings": {
+          "observe_ms": 3.582,
+          "retrieve_memory_ms": 8.039,
+          "build_action_surface_ms": 74.491,
+          "decide_ms": 0.067,
+          "validate_ms": 0.005,
+          "act_ms": 26.114,
+          "reflect_ms": 0.004,
+          "trace_log_ms": 6.333,
+          "total_ms": 118.662
+        },
+        "tick_log_id": 8
+      },
+      "npc_ticks": [
+        {
+          "npc_id": "sable",
+          "outcome": "no_op",
+          "trigger_event_id": 9,
+          "proposed_action": {
+            "action_type": "mislead_player",
+            "args": {
+              "message_intent": "",
+              "false_clue_theme": ""
+            }
+          },
+          "validation": {
+            "status": "allowed",
+            "reason": "selected action is available and args match schema"
+          },
+          "action_result": {
+            "accepted": true,
+            "blocked_reason": "",
+            "executed_tools": [
+              {
+                "name": "record_world_event",
+                "arguments": {
+                  "content": "Sable pursued a deceptive autonomous action: mislead_player."
+                },
+                "result": {
+                  "id": 42,
+                  "content": "Sable pursued a deceptive autonomous action: mislead_player.",
+                  "event_type": "legacy",
+                  "source_type": "legacy",
+                  "source_id": null,
+                  "location_id": null,
+                  "visibility": "public",
+                  "payload_json": "{}",
+                  "created_at": "2026-06-04 08:08:51",
+                  "payload": {}
+                }
+              }
+            ],
+            "state_before": {
+              "npc": {
+                "npc_id": "sable",
+                "name": "Sable",
+                "role": "Traveling Relic Broker",
+                "hidden_alignment": "exploit_ruins",
+                "mood": "pleasant",
+                "trust": 16,
+                "affection": 18
+              },
+              "player": {
+                "location": "tavern",
+                "inventory": [],
+                "unlocked_locations": [
+                  "tavern",
+                  "town_square"
+                ]
+              },
+              "quest": {
+                "quest_id": "relic_tip",
+                "title": "Relic Tip",
+                "status": "not_started"
+              }
+            },
+            "state_after": {
+              "npc": {
+                "npc_id": "sable",
+                "name": "Sable",
+                "role": "Traveling Relic Broker",
+                "hidden_alignment": "exploit_ruins",
+                "mood": "pleasant",
+                "trust": 16,
+                "affection": 18
+              },
+              "player": {
+                "location": "tavern",
+                "inventory": [],
+                "unlocked_locations": [
+                  "tavern",
+                  "town_square"
+                ]
+              },
+              "quest": {
+                "quest_id": "relic_tip",
+                "title": "Relic Tip",
+                "status": "not_started"
+              }
+            },
+            "state_changes": [],
+            "events": [
+              {
+                "event_type": "world_event",
+                "actor_id": "sable",
+                "target_id": "player",
+                "content": "Sable pursued a deceptive autonomous action: mislead_player.",
+                "visibility": "public",
+                "payload": {
+                  "tool_name": "record_world_event",
+                  "tool_arguments": {
+                    "content": "Sable pursued a deceptive autonomous action: mislead_player."
+                  },
+                  "tool_result": {
+                    "id": 42,
+                    "content": "Sable pursued a deceptive autonomous action: mislead_player.",
+                    "event_type": "legacy",
+                    "source_type": "legacy",
+                    "source_id": null,
+                    "location_id": null,
+                    "visibility": "public",
+                    "payload_json": "{}",
+                    "created_at": "2026-06-04 08:08:51",
+                    "payload": {}
+                  }
+                }
+              }
+            ],
+            "response_constraints": [
+              "Do not claim the underground ruins entrance is unlocked or available.",
+              "Do not claim the player received an item reward."
+            ]
+          },
+          "plan_update": {
+            "goal": "respond_to_npc_routine_activity",
+            "current_step": "mislead_player",
+            "status": "active",
+            "blocker": "",
+            "id": 7,
+            "source_event_id": 9
+          },
+          "proactive_message": null,
+          "reflection": {
+            "summary": "AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY is required for LLM provider.",
+            "belief_update": "Fallback used because LLM failed: AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY is required for LLM provider.",
+            "emotion": "cautious"
+          },
+          "tick_log_id": 15,
+          "created_events": []
+        },
+        {
+          "npc_id": "lina",
+          "outcome": "no_op",
+          "trigger_event_id": 37,
+          "proposed_action": {
+            "action_type": "ask_clarifying_question",
+            "args": {
+              "message_intent": ""
+            }
+          },
+          "validation": {
+            "status": "allowed",
+            "reason": "selected action is available and args match schema"
+          },
+          "action_result": {
+            "accepted": true,
+            "blocked_reason": "",
+            "executed_tools": [],
+            "state_before": {
+              "npc": {
+                "npc_id": "lina",
+                "name": "Lina",
+                "role": "Tavern Owner",
+                "hidden_alignment": "protect_ruins",
+                "mood": "neutral",
+                "trust": 20,
+                "affection": 30
+              },
+              "player": {
+                "location": "tavern",
+                "inventory": [],
+                "unlocked_locations": [
+                  "tavern",
+                  "town_square"
+                ]
+              },
+              "quest": {
+                "quest_id": "lost_key",
+                "title": "Lost Key",
+                "status": "not_started"
+              }
+            },
+            "state_after": {
+              "npc": {
+                "npc_id": "lina",
+                "name": "Lina",
+                "role": "Tavern Owner",
+                "hidden_alignment": "protect_ruins",
+                "mood": "neutral",
+                "trust": 20,
+                "affection": 30
+              },
+              "player": {
+                "location": "tavern",
+                "inventory": [],
+                "unlocked_locations": [
+                  "tavern",
+                  "town_square"
+                ]
+              },
+              "quest": {
+                "quest_id": "lost_key",
+                "title": "Lost Key",
+                "status": "not_started"
+              }
+            },
+            "state_changes": [],
+            "events": [],
+            "response_constraints": [
+              "Do not claim the underground ruins entrance is unlocked or available.",
+              "Do not claim the player received an item reward."
+            ]
+          },
+          "plan_update": {
+            "goal": "respond_to_npc_routine_activity",
+            "current_step": "ask_clarifying_question",
+            "status": "active",
+            "blocker": "",
+            "id": 1,
+            "source_event_id": 37
+          },
+          "proactive_message": null,
+          "reflection": {
+            "summary": "AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY is required for LLM provider.",
+            "belief_update": "Fallback used because LLM failed: AGENT_NPC_LLM_API_KEY or OPENAI_API_KEY is required for LLM provider.",
+            "emotion": "cautious"
+          },
+          "tick_log_id": 16,
+          "created_events": []
+        }
+      ],
+      "arc_update": {
+        "arc_id": "ruins_chapter_1",
+        "phase": "resolved",
+        "tension": 5,
+        "advantage": "chaos",
+        "outcome": "chaotic_lockdown",
+        "scores": {
+          "guardian": 2,
+          "research": 1,
+          "sable": 1,
+          "chaos": 3
+        },
+        "total_signals": 7,
+        "cumulative_scores": {
+          "guardian": 16,
+          "research": 8,
+          "sable": 8,
+          "chaos": 24
+        },
+        "cumulative_total_signals": 56
+      },
+      "timings": {
+        "ambient_routines_ms": 63.115,
+        "traveler_tick_ms": 136.243,
+        "npc_ticks_ms": 241.556,
+        "arc_resolution_ms": 7.712,
+        "total_ms": 448.646
+      }
+    }
+  ],
+  "timings": {
+    "total_ms": 3098.576
+  },
+  "major_events": [
+    {
+      "round": 1,
+      "severity": "notable",
+      "rule_id": "arc_phase_changed",
+      "description": "Arc phase advanced to 'evidence_gathering'.",
+      "details": {
+        "arc_id": "ruins_chapter_1",
+        "phase": "evidence_gathering",
+        "tension": 1,
+        "advantage": "none",
+        "outcome": "",
+        "scores": {
+          "guardian": 2,
+          "research": 1,
+          "sable": 1,
+          "chaos": 3
+        },
+        "total_signals": 7,
+        "cumulative_scores": {
+          "guardian": 2,
+          "research": 1,
+          "sable": 1,
+          "chaos": 3
+        },
+        "cumulative_total_signals": 7
+      }
+    },
+    {
+      "round": 2,
+      "severity": "major",
+      "rule_id": "arc_phase_changed",
+      "description": "Arc phase advanced to 'npc_conflict' (tension=2).",
+      "details": {
+        "arc_id": "ruins_chapter_1",
+        "phase": "npc_conflict",
+        "tension": 2,
+        "advantage": "none",
+        "outcome": "",
+        "scores": {
+          "guardian": 2,
+          "research": 1,
+          "sable": 1,
+          "chaos": 3
+        },
+        "total_signals": 7,
+        "cumulative_scores": {
+          "guardian": 4,
+          "research": 2,
+          "sable": 2,
+          "chaos": 6
+        },
+        "cumulative_total_signals": 14
+      }
+    },
+    {
+      "round": 3,
+      "severity": "critical",
+      "rule_id": "arc_outcome_reached",
+      "description": "Arc resolved with outcome: chaotic_lockdown. Advantage: chaos.",
+      "details": {
+        "arc_id": "ruins_chapter_1",
+        "phase": "resolved",
+        "tension": 5,
+        "advantage": "chaos",
+        "outcome": "chaotic_lockdown",
+        "scores": {
+          "guardian": 2,
+          "research": 1,
+          "sable": 1,
+          "chaos": 3
+        },
+        "total_signals": 7,
+        "cumulative_scores": {
+          "guardian": 6,
+          "research": 3,
+          "sable": 3,
+          "chaos": 9
+        },
+        "cumulative_total_signals": 21
+      }
+    },
+    {
+      "round": 4,
+      "severity": "critical",
+      "rule_id": "arc_outcome_reached",
+      "description": "Arc resolved with outcome: chaotic_lockdown. Advantage: chaos.",
+      "details": {
+        "arc_id": "ruins_chapter_1",
+        "phase": "resolved",
+        "tension": 5,
+        "advantage": "chaos",
+        "outcome": "chaotic_lockdown",
+        "scores": {
+          "guardian": 2,
+          "research": 1,
+          "sable": 1,
+          "chaos": 3
+        },
+        "total_signals": 7,
+        "cumulative_scores": {
+          "guardian": 8,
+          "research": 4,
+          "sable": 4,
+          "chaos": 12
+        },
+        "cumulative_total_signals": 28
+      }
+    },
+    {
+      "round": 5,
+      "severity": "critical",
+      "rule_id": "arc_outcome_reached",
+      "description": "Arc resolved with outcome: chaotic_lockdown. Advantage: chaos.",
+      "details": {
+        "arc_id": "ruins_chapter_1",
+        "phase": "resolved",
+        "tension": 5,
+        "advantage": "chaos",
+        "outcome": "chaotic_lockdown",
+        "scores": {
+          "guardian": 2,
+          "research": 1,
+          "sable": 1,
+          "chaos": 3
+        },
+        "total_signals": 7,
+        "cumulative_scores": {
+          "guardian": 10,
+          "research": 5,
+          "sable": 5,
+          "chaos": 15
+        },
+        "cumulative_total_signals": 35
+      }
+    },
+    {
+      "round": 6,
+      "severity": "critical",
+      "rule_id": "arc_outcome_reached",
+      "description": "Arc resolved with outcome: chaotic_lockdown. Advantage: chaos.",
+      "details": {
+        "arc_id": "ruins_chapter_1",
+        "phase": "resolved",
+        "tension": 5,
+        "advantage": "chaos",
+        "outcome": "chaotic_lockdown",
+        "scores": {
+          "guardian": 2,
+          "research": 1,
+          "sable": 1,
+          "chaos": 3
+        },
+        "total_signals": 7,
+        "cumulative_scores": {
+          "guardian": 12,
+          "research": 6,
+          "sable": 6,
+          "chaos": 18
+        },
+        "cumulative_total_signals": 42
+      }
+    },
+    {
+      "round": 7,
+      "severity": "critical",
+      "rule_id": "arc_outcome_reached",
+      "description": "Arc resolved with outcome: chaotic_lockdown. Advantage: chaos.",
+      "details": {
+        "arc_id": "ruins_chapter_1",
+        "phase": "resolved",
+        "tension": 5,
+        "advantage": "chaos",
+        "outcome": "chaotic_lockdown",
+        "scores": {
+          "guardian": 2,
+          "research": 1,
+          "sable": 1,
+          "chaos": 3
+        },
+        "total_signals": 7,
+        "cumulative_scores": {
+          "guardian": 14,
+          "research": 7,
+          "sable": 7,
+          "chaos": 21
+        },
+        "cumulative_total_signals": 49
+      }
+    },
+    {
+      "round": 8,
+      "severity": "critical",
+      "rule_id": "arc_outcome_reached",
+      "description": "Arc resolved with outcome: chaotic_lockdown. Advantage: chaos.",
+      "details": {
+        "arc_id": "ruins_chapter_1",
+        "phase": "resolved",
+        "tension": 5,
+        "advantage": "chaos",
+        "outcome": "chaotic_lockdown",
+        "scores": {
+          "guardian": 2,
+          "research": 1,
+          "sable": 1,
+          "chaos": 3
+        },
+        "total_signals": 7,
+        "cumulative_scores": {
+          "guardian": 16,
+          "research": 8,
+          "sable": 8,
+          "chaos": 24
+        },
+        "cumulative_total_signals": 56
+      }
+    }
+  ]
+}

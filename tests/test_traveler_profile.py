@@ -66,6 +66,17 @@ class TravelerProfileLoaderTest(unittest.TestCase):
         self.assertAlmostEqual(profile.personality.manipulative, 0.85)
         self.assertAlmostEqual(profile.social_tendencies.willing_to_lie, 0.90)
 
+    def test_loads_ambitious_patron_scholar_profile(self) -> None:
+        profile = load_profile("ambitious_patron_scholar")
+        self.assertEqual(profile.profile_id, "ambitious_patron_scholar")
+        self.assertIn("patron", profile.identity.public_role.lower())
+        self.assertNotIn("merchant", profile.identity.public_role.lower())
+        self.assertEqual(profile.starting_location, "market")
+        self.assertGreater(profile.motivations.prestige, profile.motivations.wealth)
+        self.assertGreater(profile.personality.manipulative, profile.personality.empathetic)
+        self.assertTrue(any("Sable" in note for note in profile.private_notes))
+        self.assertTrue(any("exclusive" in goal.description.lower() for goal in profile.private_goals))
+
     def test_list_available_profiles_finds_all_three(self) -> None:
         profiles = list_available_profiles()
         self.assertIn("truth_seeking_scholar", profiles)

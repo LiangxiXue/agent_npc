@@ -149,44 +149,159 @@ class ActorAdapterTest(unittest.TestCase):
     def test_arc_director_does_not_resolve_from_first_round_routine_noise(self) -> None:
         director = ArcDirectorActor()
         routine_events = [
-            {"payload": {"arc_signal": "guardian"}},
-            {"payload": {"arc_signal": "research"}},
-            {"payload": {"arc_signal": "sable"}},
-            {"payload": {"arc_signal": "chaos"}},
+            {"event_type": "npc_routine_activity", "source_type": "npc_routine", "payload": {"arc_signal": "guardian"}},
+            {"event_type": "npc_routine_activity", "source_type": "npc_routine", "payload": {"arc_signal": "research"}},
+            {"event_type": "npc_routine_activity", "source_type": "npc_routine", "payload": {"arc_signal": "sable"}},
+            {"event_type": "npc_routine_activity", "source_type": "npc_routine", "payload": {"arc_signal": "chaos"}},
         ]
 
         result = director.tick({"round_number": 1}, routine_events, [])
 
         self.assertNotEqual(result["phase"], "resolved")
         self.assertEqual(result["outcome"], "")
+        self.assertEqual(result["scores"], {"guardian": 0, "research": 0, "sable": 0, "chaos": 0})
+        self.assertEqual(result["ambient_scores"], {"guardian": 1, "research": 1, "sable": 1, "chaos": 1})
 
-    def test_arc_director_accumulates_scores_across_rounds_until_resolved(self) -> None:
+    def test_arc_director_requires_diverse_meaningful_evidence_for_conflict(self) -> None:
         director = ArcDirectorActor()
         world_state = {"round_number": 1}
-        event = {"payload": {"arc_signal": "research"}}
+        event = {
+            "event_type": "traveler_moved",
+            "source_type": "traveler",
+            "payload": {"arc_signal": "research"},
+        }
 
-        first = director.tick(world_state, [event, event], [])
-        second = director.tick({"round_number": 2}, [event, event, event], [])
-        third = director.tick({"round_number": 3}, [event, event, event], [])
+        first = director.tick(world_state, [event], [])
+        second = director.tick({"round_number": 2}, [event], [])
+        third = director.tick({"round_number": 3}, [event], [])
+
+        self.assertEqual(first["phase"], "evidence_gathering")
+        self.assertEqual(second["phase"], "evidence_gathering")
+        self.assertEqual(third["phase"], "evidence_gathering")
+        self.assertEqual(third["outcome"], "")
+        self.assertEqual(third["evidence_counts"]["traveler_action"], 3)
+        self.assertEqual(third["evidence_route_buckets"], ["research"])
+
+    def test_arc_director_resolves_after_valid_resolution_trigger(self) -> None:
+        director = ArcDirectorActor()
+        research_event = {
+            "event_type": "traveler_investigated",
+            "source_type": "traveler",
+            "payload": {"arc_signal": "research"},
+        }
+        guardian_event = {
+            "event_type": "traveler_talked_to_npc",
+            "source_type": "traveler",
+            "payload": {"arc_signal": "guardian"},
+        }
+        trigger_event = {
+            "event_type": "traveler_submitted_evidence",
+            "source_type": "traveler",
+            "payload": {"arc_signal": "research", "resolution_trigger": True},
+        }
+
+        first = director.tick({"round_number": 1}, [research_event], [])
+        second = director.tick({"round_number": 2}, [guardian_event], [])
+        third = director.tick({"round_number": 3}, [trigger_event], [])
 
         self.assertEqual(first["phase"], "evidence_gathering")
         self.assertEqual(second["phase"], "npc_conflict")
         self.assertEqual(third["phase"], "resolved")
-        self.assertNotEqual(third["outcome"], "")
-        self.assertGreaterEqual(third["cumulative_total_signals"], 8)
+        self.assertEqual(third["outcome"], "research_advantage")
+        self.assertEqual(third["evidence_counts"]["resolution_trigger"], 1)
+
+    def test_arc_director_can_resolve_after_consequential_dialogue_evidence(self) -> None:
+        director = ArcDirectorActor()
+        research_event = {
+            "event_type": "traveler_investigated",
+            "source_type": "traveler",
+            "payload": {"arc_signal": "research"},
+        }
+        guardian_event = {
+            "event_type": "traveler_moved",
+            "source_type": "traveler",
+            "payload": {"arc_signal": "guardian"},
+        }
+        dialogue_event = {
+            "event_type": "dialogue_response",
+            "source_type": "npc",
+            "evidence_class": "dialogue_response",
+            "payload": {"arc_signal": "guardian"},
+        }
+
+        director.tick({"round_number": 1}, [research_event], [])
+        director.tick({"round_number": 2}, [guardian_event], [])
+        resolved = director.tick({"round_number": 3}, [dialogue_event], [])
+
+        self.assertEqual(resolved["phase"], "resolved")
+        self.assertEqual(resolved["outcome"], "guardian_advantage")
+        self.assertEqual(resolved["evidence_counts"]["dialogue_response"], 1)
 
     def test_arc_director_does_not_reapply_resolved_outcome(self) -> None:
         director = ArcDirectorActor()
-        event = {"payload": {"arc_signal": "research"}}
+        research_event = {
+            "event_type": "traveler_investigated",
+            "source_type": "traveler",
+            "payload": {"arc_signal": "research"},
+        }
+        guardian_event = {
+            "event_type": "traveler_talked_to_npc",
+            "source_type": "traveler",
+            "payload": {"arc_signal": "guardian"},
+        }
+        trigger_event = {
+            "event_type": "traveler_submitted_evidence",
+            "source_type": "traveler",
+            "payload": {"arc_signal": "research", "resolution_trigger": True},
+        }
 
-        director.tick({"round_number": 1}, [event, event], [])
-        director.tick({"round_number": 2}, [event, event, event], [])
-        resolved = director.tick({"round_number": 3}, [event, event, event], [])
+        director.tick({"round_number": 1}, [research_event], [])
+        director.tick({"round_number": 2}, [guardian_event], [])
+        resolved = director.tick({"round_number": 3}, [trigger_event], [])
         repeated = director.tick({"round_number": 4}, [], [])
 
         self.assertEqual(repeated["phase"], "resolved")
         self.assertEqual(repeated["outcome"], resolved["outcome"])
         self.assertEqual(repeated["tension"], resolved["tension"])
+
+    def test_arc_director_refreshes_resolved_outcome_when_later_evidence_changes_advantage(self) -> None:
+        director = ArcDirectorActor()
+        sable_event = {
+            "event_type": "traveler_talked_to_npc",
+            "source_type": "traveler",
+            "payload": {"arc_signal": "sable"},
+        }
+        guardian_event = {
+            "event_type": "traveler_moved",
+            "source_type": "traveler",
+            "payload": {"arc_signal": "guardian"},
+        }
+        guardian_dialogue = {
+            "event_type": "dialogue_response",
+            "source_type": "npc",
+            "evidence_class": "dialogue_response",
+            "payload": {"arc_signal": "guardian"},
+        }
+        sable_dialogue = {
+            "event_type": "dialogue_response",
+            "source_type": "npc",
+            "evidence_class": "dialogue_response",
+            "payload": {"arc_signal": "sable"},
+        }
+
+        director.tick({"round_number": 1}, [sable_event], [])
+        director.tick({"round_number": 2}, [guardian_event], [])
+        resolved = director.tick({"round_number": 3}, [guardian_dialogue], [])
+        refreshed = director.tick({"round_number": 4}, [sable_event, sable_dialogue], [])
+        arc_state = database.get_world_arc_state("ruins_chapter_1")
+
+        self.assertEqual(resolved["phase"], "resolved")
+        self.assertEqual(resolved["outcome"], "guardian_advantage")
+        self.assertEqual(refreshed["phase"], "resolved")
+        self.assertEqual(refreshed["outcome"], "sable_advantage")
+        self.assertEqual(refreshed["advantage"], "sable")
+        self.assertEqual(refreshed["tension"], resolved["tension"])
+        self.assertEqual(arc_state["outcome"], "sable_advantage")
 
     def test_traveler_get_direct_targets(self) -> None:
         profile = load_profile("truth_seeking_scholar")
@@ -291,7 +406,7 @@ class SchedulerTest(unittest.TestCase):
         }
         self.assertIn("sable", ticked_npcs)
 
-    def test_scheduler_can_run_until_outcome(self) -> None:
+    def test_scheduler_run_until_outcome_respects_budget_without_resolution_trigger(self) -> None:
         profile = load_profile("truth_seeking_scholar")
         traveler = TravelerActor("outcome_probe", profile, use_llm=False)
         traveler.initialize()
@@ -312,9 +427,9 @@ class SchedulerTest(unittest.TestCase):
 
         result = scheduler.run_until_outcome(max_rounds=20)
 
-        self.assertLessEqual(result["total_rounds"], 20)
-        self.assertEqual(result["final_arc_phase"], "resolved")
-        self.assertNotEqual(result["final_arc_outcome"], "")
+        self.assertEqual(result["total_rounds"], 20)
+        self.assertNotEqual(result["final_arc_phase"], "resolved")
+        self.assertEqual(result["final_arc_outcome"], "")
         self.assertIn("timings", result)
         self.assertIn("total_ms", result["timings"])
 
@@ -344,14 +459,9 @@ class SchedulerTest(unittest.TestCase):
             for event in result["rounds"][0]["traveler_tick"]["created_events"]
             if event.get("payload", {}).get("arc_signal") == "chaos"
         )
-        non_idle_npc_triggers = sum(
-            1
-            for tick in result["rounds"][0]["npc_ticks"]
-            if tick.get("trigger_event_id") and tick.get("trigger_event_type") != "npc_idle_routine_probe"
-        )
         self.assertEqual(
             result["rounds"][0]["arc_update"]["scores"]["chaos"],
-            traveler_chaos + non_idle_npc_triggers,
+            traveler_chaos,
         )
 
     def test_idle_npc_probes_respect_tick_budget(self) -> None:
@@ -573,3 +683,131 @@ class SchedulerTest(unittest.TestCase):
         self.assertIn("cumulative signals=6", markdown)
         self.assertIn("NPC mira", markdown)
         self.assertIn("NPC can advance a known lead.", markdown)
+
+    def test_timeline_export_renders_dialogue_and_arc_evidence(self) -> None:
+        profile = load_profile("truth_seeking_scholar")
+        result = {
+            "rounds": [
+                {
+                    "round_number": 1,
+                    "traveler_tick": {
+                        "proposed_action": {
+                            "action_type": "talk_to",
+                            "args": {"npc_id": "ron"},
+                        },
+                        "decision": {
+                            "decision_reason": "Ask Ron through a cautious mapping pretext.",
+                        },
+                        "dialogue_exchange": {
+                            "npc_id": "ron",
+                            "traveler_utterance": "I am mapping safe roads. Which patrol routes should I avoid?",
+                            "npc_response": "Ron says the old road near the ruins is not open to strangers.",
+                            "npc_decision": {"intent": "probe_for_evidence"},
+                            "npc_action_result": {
+                                "state_changes": [
+                                    {
+                                        "field": "npc.trust",
+                                        "before": 0.0,
+                                        "after": 0.05,
+                                    }
+                                ]
+                            },
+                            "response_generation": {"mode": "llm_polish"},
+                        },
+                        "relationship_changes": [
+                            {"npc_id": "ron", "field": "trust", "before": 0.0, "after": 0.05},
+                            {"npc_id": "ron", "field": "last_tone", "before": "neutral", "after": "friendly"},
+                        ],
+                        "reflection": {"exploration_context": {"leads": []}},
+                    },
+                    "npc_ticks": [],
+                    "arc_update": {
+                        "phase": "evidence_gathering",
+                        "tension": 1,
+                        "outcome": "",
+                        "scores": {"guardian": 1, "research": 0, "sable": 0, "chaos": 0},
+                        "ambient_scores": {"guardian": 2, "research": 1, "sable": 1, "chaos": 0},
+                        "cumulative_scores": {"guardian": 1, "research": 0, "sable": 0, "chaos": 0},
+                        "cumulative_ambient_scores": {"guardian": 2, "research": 1, "sable": 1, "chaos": 0},
+                        "cumulative_total_signals": 1,
+                    },
+                }
+            ],
+            "final_arc_phase": "evidence_gathering",
+            "final_arc_outcome": "",
+            "final_tension": 1,
+            "final_traveler_location": "guard_post",
+            "final_relationships": {},
+        }
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            _, md_path = export_simulation_result(
+                result=result,
+                profile=profile,
+                output_dir=tmpdir,
+                run_id="dialogue-export-test",
+            )
+            markdown = md_path.read_text(encoding="utf-8")
+
+        self.assertIn("Traveler says", markdown)
+        self.assertIn("I am mapping safe roads", markdown)
+        self.assertIn("NPC ron replies", markdown)
+        self.assertIn("old road near the ruins", markdown)
+        self.assertIn("State changes", markdown)
+        self.assertIn("npc.trust", markdown)
+        self.assertIn("ron.trust: 0.00", markdown)
+        self.assertIn("ron.last_tone: neutral -> friendly", markdown)
+        self.assertIn("Autonomous NPC ticks**: none", markdown)
+        self.assertIn("Arc evidence", markdown)
+        self.assertIn("scores=guardian=1", markdown)
+        self.assertIn("Ambient arc signals", markdown)
+        self.assertIn("guardian=2", markdown)
+
+    def test_timeline_export_renders_ambient_vs_evidence_scores(self) -> None:
+        profile = load_profile("truth_seeking_scholar")
+        result = {
+            "rounds": [
+                {
+                    "round_number": 1,
+                    "traveler_tick": {
+                        "proposed_action": {"action_type": "move_to", "args": {"location_id": "guard_post"}},
+                        "decision": {"decision_reason": "Start with procedural evidence."},
+                        "relationship_changes": [],
+                        "reflection": {"exploration_context": {"leads": []}},
+                    },
+                    "npc_ticks": [],
+                    "arc_update": {
+                        "phase": "evidence_gathering",
+                        "tension": 1,
+                        "outcome": "",
+                        "scores": {"guardian": 1, "research": 0, "sable": 0, "chaos": 0},
+                        "ambient_scores": {"guardian": 2, "research": 1, "sable": 1, "chaos": 0},
+                        "cumulative_scores": {"guardian": 1, "research": 0, "sable": 0, "chaos": 0},
+                        "cumulative_ambient_scores": {"guardian": 2, "research": 1, "sable": 1, "chaos": 0},
+                        "cumulative_total_signals": 1,
+                    },
+                }
+            ],
+            "final_arc_phase": "evidence_gathering",
+            "final_arc_outcome": "",
+            "final_tension": 1,
+            "final_traveler_location": "guard_post",
+            "final_relationships": {},
+        }
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            _, md_path = export_simulation_result(
+                result=result,
+                profile=profile,
+                output_dir=tmpdir,
+                run_id="ambient-export-test",
+            )
+            markdown = md_path.read_text(encoding="utf-8")
+
+        self.assertIn("Arc evidence", markdown)
+        self.assertIn("scores=guardian=1", markdown)
+        self.assertIn("cumulative=guardian=1", markdown)
+        self.assertIn("Ambient arc signals", markdown)
+        self.assertIn("scores=guardian=2, research=1, sable=1, chaos=0", markdown)
+        self.assertIn("cumulative=guardian=2, research=1, sable=1, chaos=0", markdown)
+        self.assertIn("Autonomous NPC ticks**: none", markdown)

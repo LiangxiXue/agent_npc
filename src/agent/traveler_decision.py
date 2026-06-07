@@ -15,6 +15,7 @@ Return only a JSON object with exactly these keys:
 
 {
   "selected_action": {"action_type": "<one from available_actions>", "args": {<matching args_schema>}},
+  "traveler_utterance": "<exact first-person words the Traveler says if this is a social action; empty string otherwise>",
   "decision_reason": "<why you chose this action>",
   "profile_alignment": {<which profile traits support this choice>},
   "profile_tension": {<which profile traits are in tension with this choice>},
@@ -24,7 +25,7 @@ Return only a JSON object with exactly these keys:
 }
 
 CRITICAL: You MUST wrap your selected action inside the "selected_action" key.
-Example: {"selected_action": {"action_type": "talk_to", "args": {"npc_id": "mira", "topic": "ruins", "tone": "friendly", "honesty_level": "full", "disclosure": "none"}}, "decision_reason": "...", ...}
+Example: {"selected_action": {"action_type": "talk_to", "args": {"npc_id": "mira", "topic": "ruins", "tone": "friendly", "honesty_level": "full", "disclosure": "none"}}, "traveler_utterance": "Mira, I am mapping old sites and I wanted your view on these ruins.", "decision_reason": "...", ...}
 
 You may choose to lie, mislead, partially disclose, or fully disclose — but you must record
 these choices. Lies only affect dialogue and events, never canonical world facts.
@@ -196,8 +197,9 @@ def _normalize_llm_decision(
             exploration_context=exploration_context,
         )
 
-    return {
+    decision = {
         "selected_action": {"action_type": action_type, "args": args},
+        "traveler_utterance": str(raw.get("traveler_utterance", "")),
         "decision_reason": str(raw.get("decision_reason", "")),
         "profile_alignment": raw.get("profile_alignment") if isinstance(raw.get("profile_alignment"), dict) else {},
         "profile_tension": raw.get("profile_tension") if isinstance(raw.get("profile_tension"), dict) else {},
@@ -206,6 +208,7 @@ def _normalize_llm_decision(
         "expected_consequence": str(raw.get("expected_consequence", "")),
         "mode": "llm",
     }
+    return _apply_route_focus_correction(decision, available_actions, exploration_context)
 
 
 def deterministic_fallback_decision(
@@ -313,6 +316,97 @@ def _best_information_gain(action: dict[str, Any], action_scores: dict[str, floa
         for option in field_options:
             candidates.append(action_scores.get(_action_score_key(action_type, str(field), str(option)), 0.0))
     return max(candidates) if candidates else 0.0
+
+
+def _apply_route_focus_correction(
+    decision: dict[str, Any],
+    available_actions: list[dict[str, Any]],
+    exploration_context: dict[str, Any] | None,
+) -> dict[str, Any]:
+    if not isinstance(exploration_context, dict) or exploration_context.get("route_focus") != "sable":
+        return decision
+    action_scores = _exploration_action_scores(exploration_context)
+    if not action_scores:
+        return decision
+
+    selected = decision.get("selected_action") if isinstance(decision.get("selected_action"), dict) else {}
+    if _advances_first_time_key_npc_coverage(selected, exploration_context):
+        return decision
+    selected_score = _score_selected_action(selected, action_scores)
+    candidates = []
+    for action in available_actions:
+        score = _best_information_gain(action, action_scores)
+        candidate_args = _default_args_for_action(action, exploration_context=exploration_context)
+        candidate = {"action_type": action["action_type"], "args": candidate_args}
+        if _is_sable_route_action(candidate, score):
+            candidates.append((score, candidate))
+
+    if not candidates:
+        return decision
+    best_score, best_action = max(candidates, key=lambda item: item[0])
+    if best_score < 0.85 or best_score < selected_score + 0.1:
+        return decision
+
+    return {
+        **decision,
+        "selected_action": best_action,
+        "decision_adjustment": {
+            "reason": "route_focus=sable corrected a lower-scored official detour to the highest-scored Sable route action.",
+            "original_selected_action": selected,
+            "original_score": round(selected_score, 3),
+            "corrected_score": round(best_score, 3),
+        },
+    }
+
+
+def _score_selected_action(selected: dict[str, Any], action_scores: dict[str, float]) -> float:
+    action_type = str(selected.get("action_type", ""))
+    args = selected.get("args") if isinstance(selected.get("args"), dict) else {}
+    for field in ("npc_id", "location_id"):
+        value = args.get(field)
+        if value:
+            return float(action_scores.get(f"{action_type}:{value}", action_scores.get(action_type, 0.0)))
+    return float(action_scores.get(action_type, 0.0))
+
+
+def _is_sable_route_action(candidate: dict[str, Any], score: float) -> bool:
+    if score <= 0:
+        return False
+    action_type = str(candidate.get("action_type", ""))
+    args = candidate.get("args") if isinstance(candidate.get("args"), dict) else {}
+    return (
+        str(args.get("npc_id", "")).lower() == "sable"
+        or str(args.get("location_id", "")).lower() == "market"
+        or action_type in {"record_private_note"}
+    )
+
+
+def _advances_first_time_key_npc_coverage(
+    selected: dict[str, Any],
+    exploration_context: dict[str, Any],
+) -> bool:
+    coverage = exploration_context.get("conversation_coverage")
+    if not isinstance(coverage, dict):
+        return False
+    pending = {
+        str(npc_id).lower()
+        for npc_id in coverage.get("not_yet_interviewed_npcs", [])
+        if str(npc_id).strip()
+    }
+    if not pending:
+        return False
+    args = selected.get("args") if isinstance(selected.get("args"), dict) else {}
+    npc_id = str(args.get("npc_id", "")).lower()
+    if npc_id in pending:
+        return True
+    location_id = str(args.get("location_id", "")).lower()
+    location_targets = {
+        "archive": "mira",
+        "guard_post": "ron",
+        "market": "sable",
+        "tavern": "lina",
+    }
+    return location_targets.get(location_id, "") in pending
 
 
 def _best_arg_option(

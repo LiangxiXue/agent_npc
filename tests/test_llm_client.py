@@ -22,6 +22,60 @@ class _FakeResponse:
 
 
 class LLMClientTest(unittest.TestCase):
+    def test_parses_json_content_wrapped_in_markdown_fence(self) -> None:
+        settings = LLMSettings(
+            provider="openai_compatible",
+            model="test-model",
+            base_url="https://api.example.test",
+            api_key="test-key",
+            timeout_seconds=1,
+            retries=0,
+        )
+        response_payload = _FakeResponse(
+            {
+                "choices": [
+                    {
+                        "message": {
+                            "content": '```json\n{"selected_action": {"action_type": "wait_and_observe", "args": {}}}\n```'
+                        }
+                    }
+                ]
+            }
+        )
+
+        with patch("src.agent.llm_client.request.urlopen", return_value=response_payload):
+            response = call_openai_compatible_json(
+                system_prompt="Return JSON.",
+                user_payload={"input": "hello"},
+                settings=settings,
+            )
+
+        self.assertEqual(
+            response,
+            {"selected_action": {"action_type": "wait_and_observe", "args": {}}},
+        )
+
+    def test_blank_json_content_raises_clear_error(self) -> None:
+        settings = LLMSettings(
+            provider="openai_compatible",
+            model="test-model",
+            base_url="https://api.example.test",
+            api_key="test-key",
+            timeout_seconds=1,
+            retries=0,
+        )
+        response_payload = _FakeResponse({"choices": [{"message": {"content": "   "}}]})
+
+        with patch("src.agent.llm_client.request.urlopen", return_value=response_payload):
+            with self.assertRaises(RuntimeError) as ctx:
+                call_openai_compatible_json(
+                    system_prompt="Return JSON.",
+                    user_payload={"input": "hello"},
+                    settings=settings,
+                )
+
+        self.assertIn("empty JSON content", str(ctx.exception))
+
     def test_retries_url_error_before_success(self) -> None:
         settings = LLMSettings(
             provider="openai_compatible",
@@ -57,6 +111,28 @@ class LLMClientTest(unittest.TestCase):
             )
 
         self.assertEqual(response, {"npc_response": "好的，我会留意。"})
+        self.assertEqual(urlopen.call_count, 2)
+
+    def test_retries_empty_json_content_before_success(self) -> None:
+        settings = LLMSettings(
+            provider="openai_compatible",
+            model="test-model",
+            base_url="https://api.example.test",
+            api_key="test-key",
+            timeout_seconds=1,
+            retries=1,
+        )
+        blank = _FakeResponse({"choices": [{"message": {"content": "   "}}]})
+        success = _FakeResponse({"choices": [{"message": {"content": '{"ok": true}'}}]})
+
+        with patch("src.agent.llm_client.request.urlopen", side_effect=[blank, success]) as urlopen:
+            response = call_openai_compatible_json(
+                system_prompt="Return JSON.",
+                user_payload={"input": "hello"},
+                settings=settings,
+            )
+
+        self.assertEqual(response, {"ok": True})
         self.assertEqual(urlopen.call_count, 2)
 
 

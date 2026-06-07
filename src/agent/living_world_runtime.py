@@ -144,24 +144,39 @@ class ArcDirectorActor:
         phase = str(current["phase"])
         metadata = current.get("metadata", {}) if isinstance(current.get("metadata"), dict) else {}
 
-        # Count arc signals from this round, then merge with persisted arc progress.
-        scores = _collect_scores_from_events((all_events or []) + _extract_npc_events(npc_ticks or []))
+        # Count meaningful evidence separately from ambient routine signals.
+        evidence_events = _classify_arc_evidence((all_events or []), npc_ticks or [])
+        scores = _collect_scores_from_events(evidence_events["meaningful"])
+        ambient_scores = _collect_scores_from_events(evidence_events["ambient"])
         cumulative_scores = _merge_arc_scores(metadata.get("cumulative_scores", {}), scores)
+        cumulative_ambient_scores = _merge_arc_scores(
+            metadata.get("cumulative_ambient_scores", {}),
+            ambient_scores,
+        )
+        evidence_counts = _merge_count_map(
+            metadata.get("evidence_counts", {}),
+            _count_evidence_classes(evidence_events["meaningful"]),
+        )
 
         total_signals = sum(scores.values())
         cumulative_total_signals = sum(cumulative_scores.values())
+        evidence_route_buckets = _route_buckets(cumulative_scores)
         new_phase = phase
-        if phase == "rumor" and cumulative_total_signals >= 2:
+        if phase == "rumor" and _can_enter_evidence_gathering(cumulative_total_signals):
             new_phase = "evidence_gathering"
-        elif phase == "evidence_gathering" and cumulative_total_signals >= 5:
+        elif phase == "evidence_gathering" and _can_enter_npc_conflict(cumulative_total_signals, evidence_route_buckets):
             new_phase = "npc_conflict"
-        elif phase == "npc_conflict" and cumulative_total_signals >= 8:
+        elif phase == "npc_conflict" and _can_resolve_arc(cumulative_total_signals, evidence_route_buckets, evidence_counts):
             new_phase = "resolved"
 
         metadata = {
             **metadata,
             "cumulative_scores": cumulative_scores,
+            "cumulative_ambient_scores": cumulative_ambient_scores,
+            "evidence_counts": evidence_counts,
+            "evidence_route_buckets": evidence_route_buckets,
             "last_round_scores": scores,
+            "last_round_ambient_scores": ambient_scores,
             "last_round_total_signals": total_signals,
         }
         database.update_world_arc_state(
@@ -171,7 +186,9 @@ class ArcDirectorActor:
             metadata=metadata,
         )
 
-        # If resolved, determine outcome
+        # If resolved, determine outcome. A long trace can keep producing
+        # meaningful evidence after resolution, so refresh only when the
+        # cumulative advantage actually changes.
         if new_phase == "resolved" and phase != "resolved":
             resolved = resolve_arc_outcome(cumulative_scores)
             apply_arc_outcome(
@@ -179,6 +196,20 @@ class ArcDirectorActor:
                 reason=f"Arc resolved after {new_phase} phase.",
                 confidence=0.7,
             )
+        elif new_phase == "resolved":
+            arc_state = database.get_world_arc_state(ARC_ID)
+            resolved = resolve_arc_outcome(cumulative_scores)
+            if resolved["arc_outcome"] != arc_state.get("outcome"):
+                database.update_world_arc_state(
+                    arc_id=ARC_ID,
+                    advantage=resolved["advantage"],
+                    outcome=resolved["arc_outcome"],
+                    metadata={
+                        **metadata,
+                        "last_resolution_reason": "Resolved arc outcome refreshed after later evidence changed advantage.",
+                        "last_resolution_confidence": 0.65,
+                    },
+                )
 
         arc_state = database.get_world_arc_state(ARC_ID)
         return {
@@ -188,9 +219,13 @@ class ArcDirectorActor:
             "advantage": arc_state.get("advantage", "none"),
             "outcome": arc_state.get("outcome", ""),
             "scores": scores,
+            "ambient_scores": ambient_scores,
             "total_signals": total_signals,
             "cumulative_scores": cumulative_scores,
+            "cumulative_ambient_scores": cumulative_ambient_scores,
             "cumulative_total_signals": cumulative_total_signals,
+            "evidence_counts": evidence_counts,
+            "evidence_route_buckets": evidence_route_buckets,
         }
 
 
@@ -283,6 +318,7 @@ class LivingWorldScheduler:
         # ═══ Phase D: RESOLUTION ═══
         arc_started = perf_counter()
         all_events = ambient_events + traveler_result.get("created_events", [])
+        all_events.extend(_extract_dialogue_evidence(traveler_result))
         for nr in npc_results:
             all_events.extend(nr.get("created_events", []))
 
@@ -428,6 +464,7 @@ def _traveler_tick_to_dict(result: TravelerTickResult) -> dict[str, Any]:
         "state_changes": result.state_changes,
         "relationship_changes": result.relationship_changes,
         "created_events": result.created_events,
+        "dialogue_exchange": result.dialogue_exchange,
         "reflection": result.reflection,
         "deception_metadata": result.deception_metadata,
         "disclosure_metadata": result.disclosure_metadata,
@@ -485,6 +522,51 @@ def _collect_scores_from_events(events: list[dict[str, Any]]) -> dict[str, int]:
     return scores
 
 
+def _classify_arc_evidence(events: list[dict[str, Any]], npc_ticks: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+    meaningful: list[dict[str, Any]] = []
+    ambient: list[dict[str, Any]] = []
+    for event in events:
+        tagged = _tag_event_evidence(event)
+        if not tagged:
+            continue
+        if tagged.get("evidence_class") == "routine":
+            ambient.append(tagged)
+        else:
+            meaningful.append(tagged)
+    meaningful.extend(_extract_npc_evidence(npc_ticks))
+    return {"meaningful": meaningful, "ambient": ambient}
+
+
+def _tag_event_evidence(event: dict[str, Any]) -> dict[str, Any] | None:
+    payload = event.get("payload") if isinstance(event.get("payload"), dict) else {}
+    signal = str(payload.get("arc_signal", ""))
+    if signal not in {"guardian", "research", "sable", "chaos"}:
+        return None
+    event_type = str(event.get("event_type", ""))
+    source_type = str(event.get("source_type", ""))
+    tagged = {**event, "payload": payload}
+    explicit_class = str(event.get("evidence_class", ""))
+    if explicit_class in {"traveler_action", "dialogue_response", "autonomous_npc_action", "resolution_trigger"}:
+        tagged["evidence_class"] = explicit_class
+    elif event_type in {"npc_routine_activity", "npc_idle_routine_probe"} or source_type == "npc_routine":
+        tagged["evidence_class"] = "routine"
+    elif _is_resolution_trigger(event_type, payload):
+        tagged["evidence_class"] = "resolution_trigger"
+    elif event_type.startswith("traveler_") or source_type == "traveler" or not event_type:
+        tagged["evidence_class"] = "traveler_action"
+    else:
+        tagged["evidence_class"] = "traveler_action"
+    return tagged
+
+
+def _is_resolution_trigger(event_type: str, payload: dict[str, Any]) -> bool:
+    return (
+        bool(payload.get("resolution_trigger"))
+        or event_type in {"traveler_submitted_evidence", "secret_disclosed"}
+        or "lockdown" in event_type
+    )
+
+
 def _merge_arc_scores(existing: dict[str, Any], current: dict[str, int]) -> dict[str, int]:
     existing_scores = existing if isinstance(existing, dict) else {}
     cumulative = {"guardian": 0, "research": 0, "sable": 0, "chaos": 0}
@@ -500,6 +582,51 @@ def _safe_int(value: Any) -> int:
         return 0
 
 
+def _count_evidence_classes(events: list[dict[str, Any]]) -> dict[str, int]:
+    counts = {
+        "traveler_action": 0,
+        "dialogue_response": 0,
+        "autonomous_npc_action": 0,
+        "resolution_trigger": 0,
+    }
+    for event in events:
+        evidence_class = str(event.get("evidence_class", ""))
+        if evidence_class in counts:
+            counts[evidence_class] += 1
+    return counts
+
+
+def _merge_count_map(existing: dict[str, Any], current: dict[str, int]) -> dict[str, int]:
+    existing_counts = existing if isinstance(existing, dict) else {}
+    keys = ["traveler_action", "dialogue_response", "autonomous_npc_action", "resolution_trigger"]
+    return {key: _safe_int(existing_counts.get(key, 0)) + _safe_int(current.get(key, 0)) for key in keys}
+
+
+def _route_buckets(scores: dict[str, int]) -> list[str]:
+    return [key for key in ["guardian", "research", "sable", "chaos"] if int(scores.get(key, 0)) > 0]
+
+
+def _can_enter_evidence_gathering(cumulative_total_signals: int) -> bool:
+    return cumulative_total_signals >= 1
+
+
+def _can_enter_npc_conflict(cumulative_total_signals: int, evidence_route_buckets: list[str]) -> bool:
+    return cumulative_total_signals >= 2 and len(evidence_route_buckets) >= 2
+
+
+def _can_resolve_arc(
+    cumulative_total_signals: int,
+    evidence_route_buckets: list[str],
+    evidence_counts: dict[str, int],
+) -> bool:
+    if int(evidence_counts.get("resolution_trigger", 0)) >= 1:
+        return True
+    consequential_npc_evidence = int(evidence_counts.get("autonomous_npc_action", 0)) + int(
+        evidence_counts.get("dialogue_response", 0)
+    )
+    return cumulative_total_signals >= 3 and len(evidence_route_buckets) >= 2 and consequential_npc_evidence >= 1
+
+
 def _npc_can_tick(npc_id: str) -> bool:
     try:
         runtime = database.get_npc_runtime_state(npc_id)
@@ -508,14 +635,54 @@ def _npc_can_tick(npc_id: str) -> bool:
     return runtime.get("lifecycle_status") == "active" and bool(runtime.get("tick_enabled", True))
 
 
-def _extract_npc_events(npc_ticks: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def _extract_dialogue_evidence(traveler_result: dict[str, Any]) -> list[dict[str, Any]]:
+    dialogue = traveler_result.get("dialogue_exchange")
+    if not isinstance(dialogue, dict) or not dialogue:
+        return []
+    if not _dialogue_has_consequence(dialogue):
+        return []
+    npc_id = str(dialogue.get("npc_id", ""))
+    signal = arc_signal_for_npc(npc_id)
+    return [{
+        "event_type": "dialogue_response",
+        "source_type": "npc",
+        "evidence_class": "dialogue_response",
+        "payload": {"arc_signal": signal},
+    }]
+
+
+def _dialogue_has_consequence(dialogue: dict[str, Any]) -> bool:
+    action_result = dialogue.get("npc_action_result") if isinstance(dialogue.get("npc_action_result"), dict) else {}
+    if action_result.get("state_changes") or action_result.get("executed_tools"):
+        return True
+    npc_decision = dialogue.get("npc_decision") if isinstance(dialogue.get("npc_decision"), dict) else {}
+    intent = str(npc_decision.get("intent", ""))
+    if intent in {"probe_for_evidence", "withhold_ruins_entrance", "reveal_safe_hint"}:
+        return True
+    return bool(str(dialogue.get("npc_response", "")).strip())
+
+
+def _extract_npc_evidence(npc_ticks: list[dict[str, Any]]) -> list[dict[str, Any]]:
     events = []
     for tick in npc_ticks:
-        triggered = tick.get("trigger_event_id")
+        validation = tick.get("validation") if isinstance(tick.get("validation"), dict) else {}
+        status = str(validation.get("status", ""))
+        outcome = str(tick.get("outcome", ""))
         if tick.get("trigger_event_type") == "npc_idle_routine_probe":
             continue
-        if triggered:
-            events.append({"payload": {"arc_signal": "chaos"}})
+        if status and status != "allowed":
+            continue
+        if outcome in {"", "no_op", "skipped_no_valid_action"}:
+            continue
+        trigger_payload = tick.get("trigger_event_payload") if isinstance(tick.get("trigger_event_payload"), dict) else {}
+        signal = str(trigger_payload.get("arc_signal", ""))
+        if signal in {"guardian", "research", "sable", "chaos"}:
+            events.append({
+                "event_type": "autonomous_npc_action",
+                "source_type": "npc",
+                "payload": {"arc_signal": signal},
+                "evidence_class": "autonomous_npc_action",
+            })
     return events
 
 

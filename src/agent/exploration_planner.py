@@ -20,7 +20,9 @@ def build_exploration_context(
         recent_events = []
 
     conversation_threads = _conversation_threads(traveler_id, recent_events)
-    leads = _minimal_leads(observation, recent_events)
+    conversation_coverage = _conversation_coverage(observation, recent_events)
+    route_focus = _route_focus(observation)
+    leads = _minimal_leads(observation, recent_events, route_focus, conversation_coverage)
     current_location = _current_location(observation)
     action_scores = _score_available_actions(
         available_actions,
@@ -28,16 +30,20 @@ def build_exploration_context(
         leads,
         recent_events,
         current_location,
+        route_focus,
     )
 
     return {
         "traveler_id": traveler_id,
+        "route_focus": route_focus,
         "conversation_threads": conversation_threads,
+        "conversation_coverage": conversation_coverage,
         "leads": leads,
         "action_scores": action_scores,
         "selection_policy": (
             "Repeated same NPC/topic conversations without new evidence are lower priority, "
-            "not forbidden; repeat conversation remains allowed when new evidence appears."
+            "not forbidden; repeat conversation remains allowed when new evidence appears. "
+            "Use conversation_coverage as the factual source for which key NPCs have already been interviewed."
         ),
     }
 
@@ -80,7 +86,77 @@ def _conversation_threads(traveler_id: str, recent_events: list[Any]) -> list[di
     return sorted(threads_by_key.values(), key=lambda item: (item["npc_id"], item["topic"]))
 
 
-def _minimal_leads(observation: dict[str, Any], recent_events: list[Any]) -> list[dict[str, Any]]:
+def _conversation_coverage(observation: dict[str, Any], recent_events: list[Any]) -> dict[str, Any]:
+    key_npcs = _key_npc_ids(observation)
+    interviewed = set(_talked_npc_ids(recent_events))
+
+    relationships = observation.get("relationships")
+    if isinstance(relationships, dict):
+        for npc_id, rel in relationships.items():
+            if not isinstance(rel, dict):
+                continue
+            if _relationship_indicates_contact(rel):
+                interviewed.add(str(npc_id).lower())
+
+    interviewed_npcs = sorted(npc_id for npc_id in key_npcs if npc_id in interviewed)
+    not_yet_interviewed = sorted(npc_id for npc_id in key_npcs if npc_id not in interviewed)
+    return {
+        "interviewed_npcs": interviewed_npcs,
+        "not_yet_interviewed_npcs": not_yet_interviewed,
+        "all_key_npcs_interviewed": not not_yet_interviewed,
+        "guidance": "Do not claim all key NPCs have been interviewed until not_yet_interviewed_npcs is empty.",
+    }
+
+
+def _key_npc_ids(observation: dict[str, Any]) -> list[str]:
+    for field in ("relationships", "npc_states"):
+        value = observation.get(field)
+        if isinstance(value, dict) and value:
+            return sorted(str(npc_id).lower() for npc_id in value)
+    return []
+
+
+def _talked_npc_ids(recent_events: list[Any]) -> list[str]:
+    npc_ids: list[str] = []
+    for event in recent_events:
+        if not isinstance(event, dict) or event.get("event_type") != "traveler_talked_to_npc":
+            continue
+        payload = event.get("payload") if isinstance(event.get("payload"), dict) else {}
+        npc_id = str(payload.get("npc_id") or _extract_after(event.get("content", ""), "talked to")).strip()
+        if npc_id:
+            npc_ids.append(npc_id.lower())
+    return npc_ids
+
+
+def _relationship_indicates_contact(relationship: dict[str, Any]) -> bool:
+    for field in ("trust", "suspicion", "affinity", "leverage", "exposure", "debt"):
+        try:
+            if abs(float(relationship.get(field, 0.0))) > 0.0001:
+                return True
+        except (TypeError, ValueError):
+            continue
+    return str(relationship.get("last_tone", "neutral")).lower() not in {"", "neutral"}
+
+
+def _route_focus(observation: dict[str, Any]) -> str:
+    traveler_state = observation.get("traveler_state")
+    if not isinstance(traveler_state, dict):
+        return "balanced"
+    notes = traveler_state.get("private_notes")
+    if not isinstance(notes, list):
+        return "balanced"
+    text = " ".join(str(note).lower() for note in notes)
+    if "sable" in text and ("informal" in text or "unofficial" in text or "network" in text):
+        return "sable"
+    return "balanced"
+
+
+def _minimal_leads(
+    observation: dict[str, Any],
+    recent_events: list[Any],
+    route_focus: str = "balanced",
+    conversation_coverage: dict[str, Any] | None = None,
+) -> list[dict[str, Any]]:
     current_location = _current_location(observation)
     has_field_evidence = any(_is_evidence_event(event) for event in recent_events)
     leads = [
@@ -112,9 +188,43 @@ def _minimal_leads(observation: dict[str, Any], recent_events: list[Any]) -> lis
                 "reason": "New field evidence should be interpreted by Mira.",
             }
         )
+    if route_focus == "sable" and current_location != "market":
+        leads.append(
+            {
+                "lead_id": "return_to_sable_with_leads",
+                "action_type": "move_to",
+                "target": "market",
+                "reason": "Private goals favor returning unofficial leads to Sable's network.",
+            }
+        )
+    if route_focus == "sable" and current_location != "archive" and _sable_route_needs_mira_consult(conversation_coverage):
+        leads.append(
+            {
+                "lead_id": "consult_mira_discreetly",
+                "action_type": "move_to",
+                "target": "archive",
+                "reason": "Sable route still needs Mira's interpretation before the final synthesis returns to informal channels.",
+            }
+        )
     if current_location:
         leads = [lead for lead in leads if lead["target"] != current_location]
     return leads
+
+
+def _sable_route_needs_mira_consult(conversation_coverage: dict[str, Any] | None) -> bool:
+    if not isinstance(conversation_coverage, dict):
+        return False
+    interviewed = {
+        str(npc_id).lower()
+        for npc_id in conversation_coverage.get("interviewed_npcs", [])
+        if str(npc_id).strip()
+    }
+    pending = {
+        str(npc_id).lower()
+        for npc_id in conversation_coverage.get("not_yet_interviewed_npcs", [])
+        if str(npc_id).strip()
+    }
+    return "mira" in pending and {"sable", "ron", "lina"}.issubset(interviewed)
 
 
 def _score_available_actions(
@@ -123,6 +233,7 @@ def _score_available_actions(
     leads: list[dict[str, Any]],
     recent_events: list[Any],
     current_location: str,
+    route_focus: str = "balanced",
 ) -> dict[str, float]:
     scores: dict[str, float] = {}
     lead_scores = {
@@ -130,7 +241,7 @@ def _score_available_actions(
         for lead in leads
         if isinstance(lead.get("action_type"), str) and isinstance(lead.get("target"), str)
     }
-    local_followups = _local_followup_scores(current_location, recent_events)
+    local_followups = _local_followup_scores(current_location, recent_events, route_focus)
     thread_by_npc = {thread["npc_id"]: thread for thread in conversation_threads}
 
     for action in available_actions:
@@ -165,7 +276,13 @@ def _current_location(observation: dict[str, Any]) -> str:
     return str(traveler_state.get("current_location", ""))
 
 
-def _local_followup_scores(current_location: str, recent_events: list[Any]) -> dict[str, float]:
+def _local_followup_scores(current_location: str, recent_events: list[Any], route_focus: str = "balanced") -> dict[str, float]:
+    if current_location == "market" and route_focus == "sable":
+        return {
+            "talk_to:sable": 0.94,
+            "ask_for_help:sable": 0.90,
+            "share_information:sable": 0.92,
+        }
     if current_location == "guard_post" and not _has_recent_talk_with(recent_events, "ron"):
         return {
             "talk_to:ron": 0.91,
@@ -198,6 +315,8 @@ def _lead_score(lead: dict[str, Any], recent_events: list[Any]) -> float:
         "question_sable_about_rumors": 0.78,
         "inspect_tavern_back_alley": 0.68,
         "return_to_mira_with_field_notes": 0.86,
+        "return_to_sable_with_leads": 0.94,
+        "consult_mira_discreetly": 0.96,
     }
     score = base_scores.get(str(lead.get("lead_id", "")), 0.45)
     if lead.get("lead_id") != "return_to_mira_with_field_notes" and any(_is_evidence_event(event) for event in recent_events):

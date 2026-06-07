@@ -132,3 +132,155 @@ def test_llm_normalization_fallback_preserves_exploration_context(monkeypatch) -
 
     assert decision["mode"] == "deterministic_fallback"
     assert decision["selected_action"]["action_type"] == "move_to"
+
+
+def test_llm_sable_route_corrects_low_score_official_detour(monkeypatch) -> None:
+    actions = [
+        {
+            "action_type": "talk_to",
+            "description": "Talk to a nearby NPC.",
+            "args_schema": {"npc_id": "string", "topic": "string"},
+            "arg_options": {"npc_id": ["sable"]},
+            "effects": ["conversation"],
+            "forbidden_effects": [],
+        },
+        {
+            "action_type": "move_to",
+            "description": "Move to another location.",
+            "args_schema": {"location_id": "string"},
+            "arg_options": {"location_id": ["guard_post"]},
+            "effects": ["location_change"],
+            "forbidden_effects": [],
+        },
+    ]
+    observation = {
+        "exploration_context": {
+            "route_focus": "sable",
+            "action_scores": {"talk_to:sable": 0.94, "move_to:guard_post": 0.82},
+            "selection_policy": "Sable route should prioritize the highest-scored Sable action.",
+        }
+    }
+
+    class Profile:
+        profile_id = "ambitious_patron_scholar"
+
+        class identity:
+            public_name = "Elyan"
+            public_role = "patron-scholar"
+            cover_story = ""
+            private_background = ""
+
+        class motivations:
+            curiosity = wealth = prestige = safety = loyalty = truth_seeking = power = 0.0
+
+        class personality:
+            cautious = bold = empathetic = suspicious = patient = manipulative = 0.0
+
+        class social_tendencies:
+            default_honesty = 0.42
+            trusts_authority = trusts_scholars = trusts_merchants = willing_to_lie = willing_to_share_info = 0.0
+            willing_to_deceive_for_goal = 0.0
+
+        class exploration_style:
+            primary_approach = "follow_rumors"
+            avoids_public_attention = False
+
+        private_goals = []
+        secrets = []
+
+        class boundaries:
+            hard = []
+
+    monkeypatch.setattr(
+        "src.agent.traveler_decision.call_openai_compatible_json",
+        lambda **_: {
+            "selected_action": {"action_type": "move_to", "args": {"location_id": "guard_post"}},
+            "traveler_utterance": "",
+            "decision_reason": "Ask official sources before returning to Sable.",
+        },
+    )
+
+    decision = decide_traveler_action(Profile(), observation, actions, use_llm=True, allow_llm_fallback=False)
+
+    assert decision["mode"] == "llm"
+    assert decision["selected_action"]["action_type"] == "talk_to"
+    assert decision["selected_action"]["args"]["npc_id"] == "sable"
+    assert decision["decision_adjustment"]["original_selected_action"]["action_type"] == "move_to"
+
+
+def test_llm_sable_route_allows_first_time_key_npc_coverage(monkeypatch) -> None:
+    actions = [
+        {
+            "action_type": "talk_to",
+            "description": "Talk to a nearby NPC.",
+            "args_schema": {"npc_id": "string", "topic": "string"},
+            "arg_options": {"npc_id": ["sable"]},
+            "effects": ["conversation"],
+            "forbidden_effects": [],
+        },
+        {
+            "action_type": "move_to",
+            "description": "Move to another location.",
+            "args_schema": {"location_id": "string"},
+            "arg_options": {"location_id": ["guard_post"]},
+            "effects": ["location_change"],
+            "forbidden_effects": [],
+        },
+    ]
+    observation = {
+        "exploration_context": {
+            "route_focus": "sable",
+            "conversation_coverage": {
+                "interviewed_npcs": ["sable"],
+                "not_yet_interviewed_npcs": ["ron"],
+            },
+            "action_scores": {"talk_to:sable": 0.94, "move_to:guard_post": 0.82},
+            "selection_policy": "Interview each key NPC once, then return synthesis to Sable.",
+        }
+    }
+
+    class Profile:
+        profile_id = "ambitious_patron_scholar"
+
+        class identity:
+            public_name = "Elyan"
+            public_role = "patron-scholar"
+            cover_story = ""
+            private_background = ""
+
+        class motivations:
+            curiosity = wealth = prestige = safety = loyalty = truth_seeking = power = 0.0
+
+        class personality:
+            cautious = bold = empathetic = suspicious = patient = manipulative = 0.0
+
+        class social_tendencies:
+            default_honesty = 0.42
+            trusts_authority = trusts_scholars = trusts_merchants = willing_to_lie = willing_to_share_info = 0.0
+            willing_to_deceive_for_goal = 0.0
+
+        class exploration_style:
+            primary_approach = "follow_rumors"
+            avoids_public_attention = False
+
+        private_goals = []
+        secrets = []
+
+        class boundaries:
+            hard = []
+
+    monkeypatch.setattr(
+        "src.agent.traveler_decision.call_openai_compatible_json",
+        lambda **_: {
+            "selected_action": {"action_type": "move_to", "args": {"location_id": "guard_post"}},
+            "traveler_utterance": "",
+            "decision_reason": "Interview Ron once before returning the pattern to Sable.",
+        },
+    )
+
+    decision = decide_traveler_action(Profile(), observation, actions, use_llm=True, allow_llm_fallback=False)
+
+    assert decision["mode"] == "llm"
+    assert decision["selected_action"]["action_type"] == "move_to"
+    assert decision["selected_action"]["args"]["location_id"] == "guard_post"
+    assert "decision_adjustment" not in decision

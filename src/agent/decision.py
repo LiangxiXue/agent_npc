@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from copy import deepcopy
 from typing import Any
 
 from src.agent.llm_client import call_openai_compatible_json, get_llm_settings
@@ -159,13 +160,15 @@ def decide_next_action(
             },
             settings=settings,
         )
+        validated, repaired = validate_decision_with_safe_tool_repair(decision)
         routed = apply_task_state_machine(
-            validate_decision(decision),
+            validated,
             player_input=player_input,
             npc_state=npc_state,
             quest_state=quest_state,
         )
-        return annotate_decision_route(routed, "llm_assisted", classification)
+        route = "llm_assisted_repaired" if repaired else "llm_assisted"
+        return annotate_decision_route(routed, route, classification)
     except Exception as exc:
         raise RuntimeError(f"LLM decision failed: {exc}") from exc
 
@@ -182,6 +185,37 @@ def annotate_decision_route(
         "reason": classification.reason,
     }
     return decision
+
+
+def validate_decision_with_safe_tool_repair(decision: dict[str, Any]) -> tuple[dict[str, Any], bool]:
+    candidate = deepcopy(decision)
+    repaired = False
+    for _ in range(8):
+        try:
+            return validate_decision(candidate), repaired
+        except ValueError as exc:
+            forbidden_tool = _forbidden_tool_from_error(str(exc))
+            if not forbidden_tool:
+                raise
+            original_tools = candidate.get("tools", [])
+            if not isinstance(original_tools, list):
+                raise
+            filtered_tools = [
+                tool for tool in original_tools
+                if isinstance(tool, dict) and tool.get("name") != forbidden_tool
+            ]
+            if len(filtered_tools) == len(original_tools):
+                raise
+            candidate["tools"] = filtered_tools
+            repaired = True
+    return validate_decision(candidate), repaired
+
+
+def _forbidden_tool_from_error(message: str) -> str:
+    marker = " must not call "
+    if marker not in message:
+        return ""
+    return message.split(marker, 1)[1].rstrip(".").strip()
 
 
 def mock_decide_next_action(

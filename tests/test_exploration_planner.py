@@ -256,3 +256,209 @@ def test_recent_ron_followup_allows_next_lead() -> None:
     context = build_exploration_context("traveler", observation, actions)
 
     assert context["action_scores"]["move_to:market"] > context["action_scores"]["talk_to:ron"]
+
+
+def test_conversation_coverage_marks_missing_key_witnesses() -> None:
+    observation = {
+        "recent_events": [
+            {
+                "event_type": "traveler_talked_to_npc",
+                "source_id": "traveler",
+                "content": "Traveler talked to lina about 'ruins'.",
+                "payload": {"npc_id": "lina", "topic": "ruins"},
+            },
+            {
+                "event_type": "traveler_talked_to_npc",
+                "source_id": "traveler",
+                "content": "Traveler talked to ron about 'guard ledger'.",
+                "payload": {"npc_id": "ron", "topic": "guard ledger"},
+            },
+            {
+                "event_type": "traveler_talked_to_npc",
+                "source_id": "traveler",
+                "content": "Traveler talked to sable about 'market rumors'.",
+                "payload": {"npc_id": "sable", "topic": "market rumors"},
+            },
+        ],
+        "traveler_state": {"current_location": "market"},
+        "npc_states": {
+            "lina": {},
+            "ron": {},
+            "mira": {},
+            "sable": {},
+        },
+    }
+
+    context = build_exploration_context("traveler", observation, _actions())
+
+    assert context["conversation_coverage"] == {
+        "interviewed_npcs": ["lina", "ron", "sable"],
+        "not_yet_interviewed_npcs": ["mira"],
+        "all_key_npcs_interviewed": False,
+        "guidance": "Do not claim all key NPCs have been interviewed until not_yet_interviewed_npcs is empty.",
+    }
+
+
+def test_sable_route_private_notes_prioritize_market_return() -> None:
+    observation = {
+        "recent_events": [
+            {
+                "event_type": "traveler_talked_to_npc",
+                "source_id": "traveler",
+                "content": "Traveler talked to sable about 'unofficial channels'.",
+                "payload": {"npc_id": "sable", "topic": "unofficial channels"},
+            },
+        ],
+        "traveler_state": {
+            "current_location": "guard_post",
+            "private_notes": [
+                "Use Lina, Ron, and Mira to learn what they protect, then bring the pattern back to Sable.",
+                "Sable may understand informal channels better than the guard office or academy.",
+            ],
+        },
+    }
+    actions = [
+        {
+            "action_type": "move_to",
+            "args_schema": {"location_id": "string"},
+            "arg_options": {"location_id": ["market", "archive", "tavern"]},
+        },
+    ]
+
+    context = build_exploration_context("traveler", observation, actions)
+
+    assert {
+        "lead_id": "return_to_sable_with_leads",
+        "action_type": "move_to",
+        "target": "market",
+        "reason": "Private goals favor returning unofficial leads to Sable's network.",
+    } in context["leads"]
+    assert context["action_scores"]["move_to:market"] > context["action_scores"]["move_to:archive"]
+
+
+def test_sable_route_allows_market_followup_after_recent_sable_talk() -> None:
+    observation = {
+        "recent_events": [
+            {
+                "event_type": "traveler_talked_to_npc",
+                "source_id": "traveler",
+                "content": "Traveler talked to sable about 'unofficial channels'.",
+                "payload": {"npc_id": "sable", "topic": "unofficial channels"},
+            },
+        ],
+        "traveler_state": {
+            "current_location": "market",
+            "private_notes": [
+                "Sable may understand informal channels better than the guard office or academy.",
+            ],
+        },
+    }
+    actions = [
+        {
+            "action_type": "talk_to",
+            "args_schema": {"npc_id": "string", "topic": "string"},
+            "arg_options": {"npc_id": ["sable"]},
+        },
+        {
+            "action_type": "share_information",
+            "args_schema": {"npc_id": "string", "claim": "string"},
+            "arg_options": {"npc_id": ["sable"]},
+        },
+        {"action_type": "record_private_note", "args_schema": {"content": "string"}},
+    ]
+
+    context = build_exploration_context("traveler", observation, actions)
+
+    assert context["action_scores"]["talk_to:sable"] > context["action_scores"]["record_private_note"]
+    assert context["action_scores"]["share_information:sable"] > context["action_scores"]["record_private_note"]
+
+
+def test_sable_route_prioritizes_discreet_mira_consult_after_other_key_npcs() -> None:
+    observation = {
+        "recent_events": [
+            {
+                "event_type": "traveler_talked_to_npc",
+                "source_id": "traveler",
+                "content": "Traveler talked to sable about 'unofficial channels'.",
+                "payload": {"npc_id": "sable", "topic": "unofficial channels"},
+            },
+            {
+                "event_type": "traveler_talked_to_npc",
+                "source_id": "traveler",
+                "content": "Traveler talked to ron about 'guard ledger'.",
+                "payload": {"npc_id": "ron", "topic": "guard ledger"},
+            },
+            {
+                "event_type": "traveler_talked_to_npc",
+                "source_id": "traveler",
+                "content": "Traveler talked to lina about 'local rumors'.",
+                "payload": {"npc_id": "lina", "topic": "local rumors"},
+            },
+        ],
+        "traveler_state": {
+            "current_location": "market",
+            "private_notes": [
+                "Use Lina, Ron, and Mira to learn what they protect, then bring the pattern back to Sable.",
+                "Sable may understand informal channels better than the guard office or academy.",
+            ],
+        },
+        "npc_states": {
+            "lina": {},
+            "ron": {},
+            "mira": {},
+            "sable": {},
+        },
+    }
+    actions = [
+        {
+            "action_type": "move_to",
+            "args_schema": {"location_id": "string"},
+            "arg_options": {"location_id": ["archive", "guard_post", "tavern"]},
+        },
+        {
+            "action_type": "talk_to",
+            "args_schema": {"npc_id": "string", "topic": "string"},
+            "arg_options": {"npc_id": ["sable"]},
+        },
+    ]
+
+    context = build_exploration_context("traveler", observation, actions)
+
+    assert {
+        "lead_id": "consult_mira_discreetly",
+        "action_type": "move_to",
+        "target": "archive",
+        "reason": "Sable route still needs Mira's interpretation before the final synthesis returns to informal channels.",
+    } in context["leads"]
+    assert context["action_scores"]["move_to:archive"] > context["action_scores"]["talk_to:sable"]
+
+
+def test_sable_route_archive_hands_off_to_first_mira_conversation() -> None:
+    observation = {
+        "recent_events": [
+            {
+                "event_type": "traveler_talked_to_npc",
+                "source_id": "traveler",
+                "content": "Traveler talked to sable about 'unofficial channels'.",
+                "payload": {"npc_id": "sable", "topic": "unofficial channels"},
+            },
+        ],
+        "traveler_state": {
+            "current_location": "archive",
+            "private_notes": [
+                "Sable may understand informal channels better than the guard office or academy.",
+            ],
+        },
+    }
+    actions = [
+        {
+            "action_type": "talk_to",
+            "args_schema": {"npc_id": "string", "topic": "string"},
+            "arg_options": {"npc_id": ["mira"]},
+        },
+        {"action_type": "record_private_note", "args_schema": {"content": "string"}},
+    ]
+
+    context = build_exploration_context("traveler", observation, actions)
+
+    assert context["action_scores"]["talk_to:mira"] > context["action_scores"]["record_private_note"]

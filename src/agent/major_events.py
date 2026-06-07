@@ -41,8 +41,11 @@ def detect_major_events(
         for change in rel_changes:
             npc_id = change.get("npc_id", "unknown")
             field = change.get("field", "")
-            before = float(change.get("before", 0))
-            after = float(change.get("after", 0))
+            try:
+                before = float(change.get("before", 0))
+                after = float(change.get("after", 0))
+            except (TypeError, ValueError):
+                continue
             delta = abs(after - before)
 
             if delta >= 0.5 and field in ("trust", "affinity"):

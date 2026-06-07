@@ -2,6 +2,7 @@
 
 import os
 import unittest
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 from unittest.mock import patch
@@ -49,6 +50,32 @@ class TravelerTickTest(unittest.TestCase):
             "arc_state": database.get_world_arc_state("ruins_chapter_1"),
             "world_events_since_last_round": [],
         }
+
+    @contextmanager
+    def _patched_npc_dialogue(self):
+        npc_decision = {
+            "intent": "general_conversation",
+            "reasoning": "NPC gives a cautious in-character reply.",
+            "memory_policy": "Store the exchange as low-importance context.",
+            "response_style": "natural_in_character_chat",
+            "response_keywords": ["cautious reply"],
+            "tools": [],
+            "social_intent": "cooperate",
+            "social_stance": {
+                "target": "player",
+                "attitude": "cautious",
+                "intensity": 0.3,
+                "reason": "Direct Traveler dialogue test.",
+            },
+        }
+        with (
+            patch("src.agent.decision.decide_next_action", return_value=npc_decision),
+            patch(
+                "src.agent.response.generate_npc_response",
+                return_value=("The NPC answers cautiously.", {"mode": "llm_polish"}),
+            ),
+        ):
+            yield
 
     def test_tick_completes_with_deterministic_fallback(self) -> None:
         """A tick should complete using deterministic fallback (no LLM)."""
@@ -151,7 +178,10 @@ class TravelerTickTest(unittest.TestCase):
             "mode": "llm",
         }
 
-        with patch("src.agent.traveler_decision.call_openai_compatible_json", return_value=talk_decision):
+        with (
+            patch("src.agent.traveler_decision.call_openai_compatible_json", return_value=talk_decision),
+            self._patched_npc_dialogue(),
+        ):
             result = run_traveler_tick(
                 traveler_id=self.traveler_id,
                 round_number=1,
@@ -163,6 +193,103 @@ class TravelerTickTest(unittest.TestCase):
         self.assertTrue(result.action_result["accepted"])
         # Should create at least one event (talk)
         self.assertTrue(len(result.created_events) > 0)
+        self.assertTrue(result.relationship_changes)
+        changed_fields = {change["field"] for change in result.relationship_changes}
+        self.assertIn("trust", changed_fields)
+        self.assertIn("affinity", changed_fields)
+
+    def test_tick_talk_to_records_traveler_utterance(self) -> None:
+        """A talk_to tick should preserve the exact Traveler utterance."""
+        talk_decision = {
+            "selected_action": {"action_type": "talk_to", "args": {
+                "npc_id": "lina", "topic": "local ruins rumors",
+                "tone": "friendly", "honesty_level": "full", "disclosure": "none",
+            }},
+            "traveler_utterance": "Lina, I am mapping old foundations. Have you heard anything reliable about the ruins?",
+            "decision_reason": "Ask the nearby tavern keeper for local context.",
+            "profile_alignment": {},
+            "profile_tension": {},
+            "deception_choice": None,
+            "disclosure_choice": None,
+            "expected_consequence": "Lina may share a cautious local lead.",
+            "mode": "llm",
+        }
+
+        with (
+            patch("src.agent.traveler_decision.call_openai_compatible_json", return_value=talk_decision),
+            self._patched_npc_dialogue(),
+        ):
+            result = run_traveler_tick(
+                traveler_id=self.traveler_id,
+                round_number=1,
+                profile=self.profile,
+                world_state=self._world_state(),
+                use_llm=True,
+            )
+
+        talk_events = [
+            event for event in result.created_events
+            if event.get("event_type") == "traveler_talked_to_npc"
+        ]
+        self.assertTrue(talk_events)
+        self.assertEqual(
+            talk_events[0]["payload"]["traveler_utterance"],
+            talk_decision["traveler_utterance"],
+        )
+
+    def test_tick_talk_to_records_npc_dialogue_response(self) -> None:
+        """A talk_to tick should record the direct NPC LLM decision and reply."""
+        talk_decision = {
+            "selected_action": {"action_type": "talk_to", "args": {
+                "npc_id": "lina", "topic": "local ruins rumors",
+                "tone": "friendly", "honesty_level": "full", "disclosure": "none",
+            }},
+            "traveler_utterance": "Lina, I am mapping old foundations. What should I know before I approach the ruins?",
+            "decision_reason": "Ask the nearby tavern keeper for local context.",
+            "profile_alignment": {},
+            "profile_tension": {},
+            "deception_choice": None,
+            "disclosure_choice": None,
+            "expected_consequence": "Lina may share a cautious local lead.",
+            "mode": "llm",
+        }
+        npc_decision = {
+            "intent": "withhold_ruins_entrance",
+            "reasoning": "Lina is cautious around ruins inquiries.",
+            "memory_policy": "Remember that the traveler asked cautiously about ruins access.",
+            "response_style": "cautious",
+            "response_keywords": ["ruins", "caution"],
+            "tools": [],
+            "social_intent": "probe",
+            "social_stance": {
+                "target": "player",
+                "attitude": "cautious",
+                "intensity": 0.4,
+                "reason": "The traveler is asking about dangerous ruins.",
+            },
+        }
+
+        with (
+            patch("src.agent.traveler_decision.call_openai_compatible_json", return_value=talk_decision),
+            patch("src.agent.decision.decide_next_action", return_value=npc_decision),
+            patch(
+                "src.agent.response.generate_npc_response",
+                return_value=("Lina lowers her voice: stay on the main road and do not trust market rumors.", {"mode": "llm_polish"}),
+            ),
+        ):
+            result = run_traveler_tick(
+                traveler_id=self.traveler_id,
+                round_number=1,
+                profile=self.profile,
+                world_state=self._world_state(),
+                use_llm=True,
+            )
+
+        self.assertEqual(result.dialogue_exchange["npc_id"], "lina")
+        self.assertEqual(result.dialogue_exchange["traveler_utterance"], talk_decision["traveler_utterance"])
+        self.assertIn("stay on the main road", result.dialogue_exchange["npc_response"])
+        self.assertEqual(result.dialogue_exchange["npc_decision"]["intent"], "withhold_ruins_entrance")
+        self.assertEqual(result.dialogue_exchange["response_generation"]["mode"], "llm_polish")
 
     def test_tick_investigate_creates_world_event(self) -> None:
         """Investigating a scene object should create a world event."""
@@ -190,6 +317,77 @@ class TravelerTickTest(unittest.TestCase):
 
         self.assertTrue(result.action_result["accepted"])
         self.assertTrue(len(result.created_events) > 0)
+
+    def test_tick_created_events_use_domain_arc_signal(self) -> None:
+        """Traveler events should contribute to the matching arc route."""
+        cases = [
+            (
+                "move_guard",
+                "town_square",
+                {"action_type": "move_to", "args": {"location_id": "guard_post"}},
+                "guardian",
+            ),
+            (
+                "talk_mira",
+                "archive",
+                {"action_type": "talk_to", "args": {
+                    "npc_id": "mira", "topic": "field notes",
+                    "tone": "friendly", "honesty_level": "full", "disclosure": "none",
+                }},
+                "research",
+            ),
+            (
+                "inspect_sable",
+                "market",
+                {"action_type": "investigate", "args": {
+                    "target_id": "sable_rumor_stall", "method": "compare rumors",
+                }},
+                "sable",
+            ),
+        ]
+
+        for label, starting_location, selected_action, expected_signal in cases:
+            with self.subTest(label=label):
+                database.reset_database()
+                traveler_id = f"signal_{label}"
+                state_mgr = TravelerStateManager(traveler_id)
+                state_mgr.initialize(
+                    self.profile.profile_id,
+                    starting_location=starting_location,
+                    inventory=list(self.profile.starting_inventory),
+                )
+                rel_mgr = TravelerRelationshipManager(traveler_id)
+                for npc_id in ["lina", "ron", "mira", "sable"]:
+                    rel_mgr.initialize_for_npc(npc_id)
+
+                decision = {
+                    "selected_action": selected_action,
+                    "decision_reason": "Exercise arc signal routing.",
+                    "profile_alignment": {},
+                    "profile_tension": {},
+                    "deception_choice": None,
+                    "disclosure_choice": None,
+                    "expected_consequence": "Create a scored event.",
+                    "mode": "llm",
+                }
+
+                with (
+                    patch("src.agent.traveler_decision.call_openai_compatible_json", return_value=decision),
+                    self._patched_npc_dialogue(),
+                ):
+                    result = run_traveler_tick(
+                        traveler_id=traveler_id,
+                        round_number=1,
+                        profile=self.profile,
+                        world_state=self._world_state(),
+                        use_llm=True,
+                    )
+
+                signals = [
+                    event.get("payload", {}).get("arc_signal")
+                    for event in result.created_events
+                ]
+                self.assertIn(expected_signal, signals)
 
     def test_tick_record_private_note(self) -> None:
         """Recording a private note should not create public events."""

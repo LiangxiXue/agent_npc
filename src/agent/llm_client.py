@@ -132,11 +132,13 @@ def call_openai_compatible_json(
         try:
             with request.urlopen(http_request, timeout=active_settings.timeout_seconds) as response:
                 raw = response.read().decode("utf-8")
-            break
+            payload = json.loads(raw)
+            content = payload["choices"][0]["message"]["content"]
+            return _parse_json_object_content(content)
         except error.HTTPError as exc:
             error_body = exc.read().decode("utf-8", errors="replace")
             raise RuntimeError(f"HTTP Error {exc.code}: {error_body}") from exc
-        except (TimeoutError, socket.timeout, error.URLError, ssl.SSLError) as exc:
+        except (TimeoutError, socket.timeout, error.URLError, ssl.SSLError, RuntimeError, json.JSONDecodeError, KeyError, IndexError) as exc:
             last_retryable_error = exc
             if attempt == attempts:
                 if isinstance(exc, (TimeoutError, socket.timeout)):
@@ -150,9 +152,36 @@ def call_openai_compatible_json(
                 ) from exc
             time.sleep(0.5 * attempt)
 
-    if last_retryable_error is not None and "raw" not in locals():
-        raise RuntimeError(f"LLM request failed with a retryable network error: {last_retryable_error}")
+    raise RuntimeError(f"LLM request failed after {attempts} attempt(s): {last_retryable_error}")
 
-    payload = json.loads(raw)
-    content = payload["choices"][0]["message"]["content"]
-    return json.loads(content)
+
+def _parse_json_object_content(content: Any) -> dict[str, Any]:
+    """Parse a JSON object from model message content.
+
+    Some OpenAI-compatible providers occasionally wrap an otherwise valid JSON
+    object in Markdown fences despite response_format=json_object.
+    """
+    if not isinstance(content, str) or not content.strip():
+        raise RuntimeError("LLM returned empty JSON content.")
+
+    text = content.strip()
+    try:
+        parsed = json.loads(text)
+    except json.JSONDecodeError as original_error:
+        candidate = _extract_json_object_text(text)
+        if candidate is None:
+            preview = text[:160].replace("\n", "\\n")
+            raise RuntimeError(f"LLM returned invalid JSON content: {preview}") from original_error
+        parsed = json.loads(candidate)
+
+    if not isinstance(parsed, dict):
+        raise RuntimeError(f"LLM returned JSON {type(parsed).__name__}, expected object.")
+    return parsed
+
+
+def _extract_json_object_text(text: str) -> str | None:
+    start = text.find("{")
+    end = text.rfind("}")
+    if start == -1 or end == -1 or end <= start:
+        return None
+    return text[start:end + 1]

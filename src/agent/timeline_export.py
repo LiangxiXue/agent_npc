@@ -99,6 +99,33 @@ def _write_markdown(result: dict[str, Any], profile: TravelerProfile, path: Path
 
         lines.append(f"- **Traveler**: `{action_type}` — {reason}")
 
+        dialogue = traveler.get("dialogue_exchange")
+        if isinstance(dialogue, dict) and dialogue:
+            utterance = str(dialogue.get("traveler_utterance", "")).strip()
+            npc_id = str(dialogue.get("npc_id", "?")).strip() or "?"
+            npc_reply = str(dialogue.get("npc_response", "")).strip()
+            npc_decision = dialogue.get("npc_decision") if isinstance(dialogue.get("npc_decision"), dict) else {}
+            response_generation = (
+                dialogue.get("response_generation")
+                if isinstance(dialogue.get("response_generation"), dict)
+                else {}
+            )
+            if utterance:
+                lines.append(f"  - **Traveler says**: {utterance}")
+            if npc_reply:
+                lines.append(f"  - **NPC {npc_id} replies**: {npc_reply}")
+            if npc_decision:
+                lines.append(
+                    "  - NPC decision: "
+                    f"intent={npc_decision.get('intent', 'unknown')}; "
+                    f"mode={response_generation.get('mode', 'unknown')}"
+                )
+            state_changes = _dialogue_state_changes(dialogue)
+            if state_changes:
+                lines.append("  - **State changes**:")
+                for change in state_changes:
+                    lines.append(f"    - {_format_state_change(change)}")
+
         exploration_context = traveler.get("reflection", {}).get("exploration_context", {})
         exploration_leads = exploration_context.get("leads", [])
         if exploration_leads:
@@ -125,24 +152,26 @@ def _write_markdown(result: dict[str, Any], profile: TravelerProfile, path: Path
         # Relationship changes
         rel_changes = traveler.get("relationship_changes", [])
         for rc in rel_changes:
-            before = rc.get("before", 0)
-            after = rc.get("after", 0)
-            lines.append(f"  - {rc['npc_id']}.{rc['field']}: {before:.2f} → {after:.2f}")
+            lines.append(f"  - {_format_relationship_change(rc)}")
 
         # NPC ticks
         npc_ticks = rd.get("npc_ticks", [])
-        for nt in npc_ticks:
-            pa = nt.get("proposed_action", {})
-            nt_action = pa.get("action_type", "none")
-            validation = nt.get("validation", {})
-            validation_reason = validation.get("reason")
-            validation_suffix = ""
-            if validation_reason:
-                validation_suffix = f"; validation reason={validation_reason}"
-            lines.append(
-                f"- **NPC {nt.get('npc_id', '?')}**: `{nt_action}` "
-                f"(outcome={nt.get('outcome', 'unknown')}{validation_suffix})"
-            )
+        if npc_ticks:
+            for nt in npc_ticks:
+                pa = nt.get("proposed_action", {})
+                nt_action = pa.get("action_type", "none")
+                validation = nt.get("validation", {})
+                validation_reason = validation.get("reason")
+                validation_status = validation.get("status", nt.get("outcome", "unknown"))
+                validation_suffix = ""
+                if validation_reason:
+                    validation_suffix = f"; validation reason={validation_reason}"
+                lines.append(
+                    f"- **Autonomous NPC {nt.get('npc_id', '?')}**: `{nt_action}` "
+                    f"(outcome={validation_status}{validation_suffix})"
+                )
+        else:
+            lines.append("- **Autonomous NPC ticks**: none")
 
         # Arc
         arc = rd.get("arc_update", {})
@@ -155,6 +184,17 @@ def _write_markdown(result: dict[str, Any], profile: TravelerProfile, path: Path
             if "cumulative_total_signals" in arc:
                 arc_parts.append(f"cumulative signals={arc.get('cumulative_total_signals')}")
             lines.append(f"- **Arc**: {', '.join(arc_parts)}")
+            lines.append(
+                "- **Arc evidence**: "
+                f"scores={_format_scores(arc.get('scores'))}; "
+                f"cumulative={_format_scores(arc.get('cumulative_scores'))}"
+            )
+            if isinstance(arc.get("ambient_scores"), dict) or isinstance(arc.get("cumulative_ambient_scores"), dict):
+                lines.append(
+                    "- **Ambient arc signals**: "
+                    f"scores={_format_scores(arc.get('ambient_scores'))}; "
+                    f"cumulative={_format_scores(arc.get('cumulative_ambient_scores'))}"
+                )
 
         lines.append(f"")
 
@@ -208,3 +248,40 @@ def _format_ms(value: Any) -> str:
     if isinstance(value, (int, float)):
         return f"{float(value):.3f} ms"
     return "n/a"
+
+
+def _dialogue_state_changes(dialogue: dict[str, Any]) -> list[dict[str, Any]]:
+    action_result = dialogue.get("npc_action_result")
+    if not isinstance(action_result, dict):
+        return []
+    changes = action_result.get("state_changes")
+    return changes if isinstance(changes, list) else []
+
+
+def _format_state_change(change: Any) -> str:
+    if not isinstance(change, dict):
+        return str(change)
+    field = change.get("field", "unknown")
+    if "before" in change or "after" in change:
+        return f"{field}: {change.get('before')} -> {change.get('after')}"
+    if "change" in change:
+        return f"{field}: {change.get('change')}"
+    return json.dumps(change, ensure_ascii=False)
+
+
+def _format_relationship_change(change: dict[str, Any]) -> str:
+    npc_id = change.get("npc_id", "?")
+    field = change.get("field", "unknown")
+    before = change.get("before", 0)
+    after = change.get("after", 0)
+    if isinstance(before, (int, float)) and isinstance(after, (int, float)):
+        return f"{npc_id}.{field}: {float(before):.2f} → {float(after):.2f}"
+    return f"{npc_id}.{field}: {before} -> {after}"
+
+
+def _format_scores(scores: Any) -> str:
+    if not isinstance(scores, dict):
+        return "n/a"
+    keys = ["guardian", "research", "sable", "chaos"]
+    parts = [f"{key}={scores.get(key, 0)}" for key in keys if key in scores]
+    return ", ".join(parts) if parts else "n/a"

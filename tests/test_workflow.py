@@ -1186,6 +1186,45 @@ class AgentWorkflowTest(unittest.TestCase):
         self.assertEqual(run.tool_calls, [])
         self.assertEqual(database.get_quest("gate_badge")["status"], "not_started")
 
+    def test_decision_repairs_forbidden_tool_for_probe_intent(self) -> None:
+        os.environ["AGENT_NPC_LLM_PROVIDER"] = "openai_compatible"
+        os.environ["AGENT_NPC_LLM_API_KEY"] = "test-key"
+
+        with patch(
+            "src.agent.decision.call_openai_compatible_json",
+            return_value={
+                "intent": "probe_for_evidence",
+                "reasoning": "Ron probes rather than accepting a vague route question.",
+                "memory_policy": "Do not write a long-term memory yet.",
+                "social_intent": "probe",
+                "social_stance": {
+                    "target": "player",
+                    "attitude": "cautious",
+                    "intensity": 0.5,
+                    "reason": "The player has not shown proof.",
+                },
+                "response_style": "formal_suspicion",
+                "response_keywords": ["证件", "巡逻路线", "不能透露"],
+                "tools": [
+                    {
+                        "name": "record_world_event",
+                        "args": {"content": "Ron asked for proof before sharing routes."},
+                    }
+                ],
+            },
+        ):
+            decision = decide_next_action(
+                player_input="我是制图师，想问附近安全路线。",
+                npc_state=database.get_npc("ron"),
+                player_state=database.get_player_state(),
+                quest_state=database.get_primary_quest_for_npc("ron"),
+                retrieved_long_term_memories=[],
+            )
+
+        self.assertEqual(decision["intent"], "probe_for_evidence")
+        self.assertEqual(decision["tools"], [])
+        self.assertEqual(decision["decision_route"], "llm_assisted_repaired")
+
     def test_task_state_machine_blocks_cross_npc_quest_update(self) -> None:
         os.environ["AGENT_NPC_LLM_PROVIDER"] = "openai_compatible"
         os.environ["AGENT_NPC_LLM_API_KEY"] = "test-key"

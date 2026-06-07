@@ -1,0 +1,1492 @@
+{
+  "run_id": "20260605T092553-truth_seeking_scholar",
+  "profile_id": "truth_seeking_scholar",
+  "profile_summary": {
+    "profile_id": "truth_seeking_scholar",
+    "public_name": "Arin the Cartographer",
+    "public_role": "独立学者，受雇于远方学院进行遗迹测绘",
+    "primary_motivation": "curiosity",
+    "dominant_personality": "patient",
+    "exploration_style": "investigation_first",
+    "secret_count": 1,
+    "goal_count": 2
+  },
+  "exported_at": "2026-06-05T09:25:53.277156+00:00",
+  "traveler_id": "traveler_main",
+  "total_rounds": 3,
+  "final_arc_outcome": "chaotic_lockdown",
+  "final_arc_phase": "resolved",
+  "final_tension": 5,
+  "final_traveler_location": "market",
+  "final_relationships": {
+    "lina": {
+      "trust": 0.0,
+      "suspicion": 0.0,
+      "affinity": 0.0,
+      "last_tone": "neutral"
+    },
+    "mira": {
+      "trust": 0.0,
+      "suspicion": 0.0,
+      "affinity": 0.0,
+      "last_tone": "neutral"
+    },
+    "ron": {
+      "trust": 0.05,
+      "suspicion": 0.0,
+      "affinity": 0.1,
+      "last_tone": "friendly"
+    },
+    "sable": {
+      "trust": 0.0,
+      "suspicion": 0.0,
+      "affinity": 0.0,
+      "last_tone": "neutral"
+    }
+  },
+  "rounds": [
+    {
+      "round_number": 1,
+      "ambient_events": [
+        {
+          "id": 1,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 2,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 3,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 4,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 5,
+          "event_type": "traveler_moved",
+          "content": "Arin the Cartographer moved to guard_post.",
+          "payload": {
+            "round": 1,
+            "arc_signal": "chaos"
+          }
+        },
+        {
+          "id": 5,
+          "event_type": "traveler_moved",
+          "content": "Arin the Cartographer moved to guard_post.",
+          "payload": {
+            "round": 1,
+            "arc_signal": "chaos"
+          }
+        }
+      ],
+      "traveler_tick": {
+        "traveler_id": "traveler_main",
+        "round_number": 1,
+        "mode": "llm",
+        "observation": {
+          "traveler_id": "traveler_main",
+          "round_number": 1,
+          "traveler_state": {
+            "current_location": "town_square",
+            "inventory": [
+              "cartography_kit",
+              "field_journal",
+              "letter_of_introduction"
+            ],
+            "private_notes": [
+              "听说 Mira 是对遗迹最了解的学者，应该先找她",
+              "守卫 Ron 看起来很严格，直接问遗迹入口可能会引起怀疑",
+              "Sable 的传闻不可信，但她的信息网络可能有线索"
+            ],
+            "active_goal": {}
+          },
+          "relationships": {
+            "lina": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "mira": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "ron": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "sable": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            }
+          },
+          "npc_states": {
+            "lina": {
+              "npc_id": "lina",
+              "name": "Lina",
+              "role": "Tavern Owner",
+              "description": "A cautious and practical tavern owner who knows local rumors.",
+              "hidden_alignment": "protect_ruins",
+              "mood": "neutral",
+              "trust": 20,
+              "affection": 30
+            },
+            "ron": {
+              "npc_id": "ron",
+              "name": "Ron",
+              "role": "Town Guard",
+              "description": "A disciplined town guard who tracks patrol reports and gate incidents.",
+              "hidden_alignment": "enforce_order",
+              "mood": "alert",
+              "trust": 18,
+              "affection": 20
+            },
+            "mira": {
+              "npc_id": "mira",
+              "name": "Mira",
+              "role": "Ruins Scholar",
+              "description": "A careful scholar who studies old ruins, inscriptions, and local myths.",
+              "hidden_alignment": "research_truth",
+              "mood": "curious",
+              "trust": 22,
+              "affection": 24
+            },
+            "sable": {
+              "npc_id": "sable",
+              "name": "Sable",
+              "role": "Traveling Relic Broker",
+              "description": "A polished relic broker who offers useful rumors while steering people toward exploitable ruin secrets.",
+              "hidden_alignment": "exploit_ruins",
+              "mood": "pleasant",
+              "trust": 16,
+              "affection": 18
+            }
+          },
+          "scene_objects": [
+            {
+              "object_id": "guard_ledger",
+              "name": "Guard Ledger",
+              "location_id": "guard_post"
+            },
+            {
+              "object_id": "mira_field_notes",
+              "name": "Mira Field Notes",
+              "location_id": "archive"
+            },
+            {
+              "object_id": "sable_rumor_stall",
+              "name": "Sable Rumor Stall",
+              "location_id": "market"
+            },
+            {
+              "object_id": "tavern_back_alley",
+              "name": "Tavern Back Alley",
+              "location_id": "tavern"
+            }
+          ],
+          "arc_state": {
+            "arc_id": "ruins_chapter_1",
+            "phase": "rumor",
+            "tension": 0,
+            "advantage": "none",
+            "outcome": "",
+            "metadata_json": "{\"title\": \"Ruins Chapter 1\"}",
+            "updated_at": "2026-06-05 09:24:39",
+            "metadata": {
+              "title": "Ruins Chapter 1"
+            }
+          },
+          "recent_events": [],
+          "memory_retrieval_mode": "hybrid",
+          "exploration_context": {
+            "traveler_id": "traveler_main",
+            "conversation_threads": [],
+            "leads": [
+              {
+                "lead_id": "ask_ron_about_guard_ledger",
+                "action_type": "move_to",
+                "target": "guard_post",
+                "reason": "Mira thread needs external procedural evidence."
+              },
+              {
+                "lead_id": "question_sable_about_rumors",
+                "action_type": "move_to",
+                "target": "market",
+                "reason": "Ruins rumors need adversarial cross-checking."
+              },
+              {
+                "lead_id": "inspect_tavern_back_alley",
+                "action_type": "move_to",
+                "target": "tavern",
+                "reason": "Guardian route needs physical evidence."
+              }
+            ],
+            "action_scores": {
+              "move_to:archive": 0.45,
+              "move_to:guard_post": 0.82,
+              "move_to:market": 0.78,
+              "move_to:tavern": 0.68,
+              "wait_and_observe": 0.35,
+              "record_private_note": 0.35
+            },
+            "selection_policy": "Repeated same NPC/topic conversations without new evidence are lower priority, not forbidden; repeat conversation remains allowed when new evidence appears."
+          }
+        },
+        "available_actions": [
+          "move_to",
+          "wait_and_observe",
+          "record_private_note"
+        ],
+        "action_biases": [
+          {
+            "action_type": "move_to",
+            "supporting_motivations": [
+              "curiosity",
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.725
+          },
+          {
+            "action_type": "wait_and_observe",
+            "supporting_motivations": [
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.5
+          },
+          {
+            "action_type": "record_private_note",
+            "supporting_motivations": [
+              "truth_seeking",
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.7
+          }
+        ],
+        "decision": {
+          "selected_action": {
+            "action_type": "move_to",
+            "args": {
+              "location_id": "guard_post"
+            }
+          },
+          "decision_reason": "Following the highest-scoring lead to gather external evidence from Ron's guard ledger, which may support Mira's scholarly research and my truth-seeking mission.",
+          "profile_alignment": {
+            "curiosity": 0.9,
+            "truth_seeking": 0.9,
+            "cautious": 0.6
+          },
+          "profile_tension": {
+            "trusts_authority": 0.25
+          },
+          "deception_choice": null,
+          "disclosure_choice": null,
+          "expected_consequence": "Arrive at guard post, likely encounter Ron, and gain opportunity to investigate or converse about the ledger.",
+          "mode": "llm"
+        },
+        "proposed_action": {
+          "action_type": "move_to",
+          "args": {
+            "location_id": "guard_post"
+          }
+        },
+        "validation": {
+          "status": "allowed",
+          "reason": "Action is available and args present."
+        },
+        "action_result": {
+          "accepted": true,
+          "blocked_reason": "",
+          "action_type": "move_to",
+          "state_changes": [
+            {
+              "field": "location",
+              "before": "town_square",
+              "after": "guard_post"
+            }
+          ],
+          "relationship_changes": [],
+          "created_event_ids": [
+            5
+          ]
+        },
+        "state_changes": [
+          {
+            "field": "location",
+            "before": "town_square",
+            "after": "guard_post"
+          }
+        ],
+        "relationship_changes": [],
+        "created_events": [
+          {
+            "id": 5,
+            "event_type": "traveler_moved",
+            "content": "Arin the Cartographer moved to guard_post.",
+            "payload": {
+              "round": 1,
+              "arc_signal": "chaos"
+            }
+          }
+        ],
+        "reflection": {
+          "traveler_id": "traveler_main",
+          "action_type": "move_to",
+          "accepted": true,
+          "summary": "Traveler move_to — accepted.",
+          "decision_reason": "Following the highest-scoring lead to gather external evidence from Ron's guard ledger, which may support Mira's scholarly research and my truth-seeking mission.",
+          "exploration_context": {
+            "traveler_id": "traveler_main",
+            "conversation_threads": [],
+            "leads": [
+              {
+                "lead_id": "ask_ron_about_guard_ledger",
+                "action_type": "move_to",
+                "target": "guard_post",
+                "reason": "Mira thread needs external procedural evidence."
+              },
+              {
+                "lead_id": "question_sable_about_rumors",
+                "action_type": "move_to",
+                "target": "market",
+                "reason": "Ruins rumors need adversarial cross-checking."
+              },
+              {
+                "lead_id": "inspect_tavern_back_alley",
+                "action_type": "move_to",
+                "target": "tavern",
+                "reason": "Guardian route needs physical evidence."
+              }
+            ],
+            "action_scores": {
+              "move_to:archive": 0.45,
+              "move_to:guard_post": 0.82,
+              "move_to:market": 0.78,
+              "move_to:tavern": 0.68,
+              "wait_and_observe": 0.35,
+              "record_private_note": 0.35
+            },
+            "selection_policy": "Repeated same NPC/topic conversations without new evidence are lower priority, not forbidden; repeat conversation remains allowed when new evidence appears."
+          }
+        },
+        "deception_metadata": null,
+        "disclosure_metadata": null,
+        "timings": {
+          "observe_ms": 3.081,
+          "retrieve_memory_ms": 1658.48,
+          "build_action_surface_ms": 61.386,
+          "decide_ms": 25767.622,
+          "validate_ms": 0.028,
+          "act_ms": 101.699,
+          "reflect_ms": 0.007,
+          "trace_log_ms": 40.808,
+          "total_ms": 27633.175
+        },
+        "tick_log_id": 1
+      },
+      "npc_ticks": [],
+      "arc_update": {
+        "arc_id": "ruins_chapter_1",
+        "phase": "evidence_gathering",
+        "tension": 1,
+        "advantage": "none",
+        "outcome": "",
+        "scores": {
+          "guardian": 2,
+          "research": 1,
+          "sable": 1,
+          "chaos": 1
+        },
+        "total_signals": 5,
+        "cumulative_scores": {
+          "guardian": 2,
+          "research": 1,
+          "sable": 1,
+          "chaos": 1
+        },
+        "cumulative_total_signals": 5
+      },
+      "timings": {
+        "ambient_routines_ms": 130.43,
+        "traveler_tick_ms": 27684.226,
+        "npc_ticks_ms": 58.2,
+        "arc_resolution_ms": 39.584,
+        "total_ms": 27912.487
+      }
+    },
+    {
+      "round_number": 2,
+      "ambient_events": [
+        {
+          "id": 6,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 7,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 8,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 9,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 10,
+          "event_type": "traveler_talked_to_npc",
+          "content": "Arin the Cartographer talked to ron about 'I've heard there are some old ruins in this region. As a guard, have you noticed anything unusual around them?' (tone=friendly, honesty=full).",
+          "payload": {
+            "npc_id": "ron",
+            "topic": "I've heard there are some old ruins in this region. As a guard, have you noticed anything unusual around them?",
+            "tone": "friendly",
+            "honesty_level": "full",
+            "round": 2,
+            "arc_signal": "chaos"
+          }
+        }
+      ],
+      "traveler_tick": {
+        "traveler_id": "traveler_main",
+        "round_number": 2,
+        "mode": "llm",
+        "observation": {
+          "traveler_id": "traveler_main",
+          "round_number": 2,
+          "traveler_state": {
+            "current_location": "guard_post",
+            "inventory": [
+              "cartography_kit",
+              "field_journal",
+              "letter_of_introduction"
+            ],
+            "private_notes": [
+              "听说 Mira 是对遗迹最了解的学者，应该先找她",
+              "守卫 Ron 看起来很严格，直接问遗迹入口可能会引起怀疑",
+              "Sable 的传闻不可信，但她的信息网络可能有线索"
+            ],
+            "active_goal": {}
+          },
+          "relationships": {
+            "lina": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "mira": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "ron": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "sable": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            }
+          },
+          "npc_states": {
+            "lina": {
+              "npc_id": "lina",
+              "name": "Lina",
+              "role": "Tavern Owner",
+              "description": "A cautious and practical tavern owner who knows local rumors.",
+              "hidden_alignment": "protect_ruins",
+              "mood": "neutral",
+              "trust": 20,
+              "affection": 30
+            },
+            "ron": {
+              "npc_id": "ron",
+              "name": "Ron",
+              "role": "Town Guard",
+              "description": "A disciplined town guard who tracks patrol reports and gate incidents.",
+              "hidden_alignment": "enforce_order",
+              "mood": "alert",
+              "trust": 18,
+              "affection": 20
+            },
+            "mira": {
+              "npc_id": "mira",
+              "name": "Mira",
+              "role": "Ruins Scholar",
+              "description": "A careful scholar who studies old ruins, inscriptions, and local myths.",
+              "hidden_alignment": "research_truth",
+              "mood": "curious",
+              "trust": 22,
+              "affection": 24
+            },
+            "sable": {
+              "npc_id": "sable",
+              "name": "Sable",
+              "role": "Traveling Relic Broker",
+              "description": "A polished relic broker who offers useful rumors while steering people toward exploitable ruin secrets.",
+              "hidden_alignment": "exploit_ruins",
+              "mood": "pleasant",
+              "trust": 16,
+              "affection": 18
+            }
+          },
+          "scene_objects": [
+            {
+              "object_id": "guard_ledger",
+              "name": "Guard Ledger",
+              "location_id": "guard_post"
+            },
+            {
+              "object_id": "mira_field_notes",
+              "name": "Mira Field Notes",
+              "location_id": "archive"
+            },
+            {
+              "object_id": "sable_rumor_stall",
+              "name": "Sable Rumor Stall",
+              "location_id": "market"
+            },
+            {
+              "object_id": "tavern_back_alley",
+              "name": "Tavern Back Alley",
+              "location_id": "tavern"
+            }
+          ],
+          "arc_state": {
+            "arc_id": "ruins_chapter_1",
+            "phase": "evidence_gathering",
+            "tension": 1,
+            "advantage": "none",
+            "outcome": "",
+            "metadata_json": "{\"title\": \"Ruins Chapter 1\", \"cumulative_scores\": {\"guardian\": 2, \"research\": 1, \"sable\": 1, \"chaos\": 1}, \"last_round_scores\": {\"guardian\": 2, \"research\": 1, \"sable\": 1, \"chaos\": 1}, \"last_round_total_signals\": 5}",
+            "updated_at": "2026-06-05 09:25:07",
+            "metadata": {
+              "title": "Ruins Chapter 1",
+              "cumulative_scores": {
+                "guardian": 2,
+                "research": 1,
+                "sable": 1,
+                "chaos": 1
+              },
+              "last_round_scores": {
+                "guardian": 2,
+                "research": 1,
+                "sable": 1,
+                "chaos": 1
+              },
+              "last_round_total_signals": 5
+            }
+          },
+          "recent_events": [
+            {
+              "id": 1,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 2,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 3,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 4,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 5,
+              "event_type": "traveler_moved",
+              "content": "Arin the Cartographer moved to guard_post.",
+              "payload": {
+                "round": 1,
+                "arc_signal": "chaos"
+              }
+            }
+          ],
+          "memory_retrieval_mode": "hybrid",
+          "exploration_context": {
+            "traveler_id": "traveler_main",
+            "conversation_threads": [],
+            "leads": [
+              {
+                "lead_id": "question_sable_about_rumors",
+                "action_type": "move_to",
+                "target": "market",
+                "reason": "Ruins rumors need adversarial cross-checking."
+              },
+              {
+                "lead_id": "inspect_tavern_back_alley",
+                "action_type": "move_to",
+                "target": "tavern",
+                "reason": "Guardian route needs physical evidence."
+              }
+            ],
+            "action_scores": {
+              "move_to:archive": 0.45,
+              "move_to:market": 0.78,
+              "move_to:tavern": 0.68,
+              "talk_to:ron": 0.91,
+              "investigate": 0.35,
+              "ask_for_help:ron": 0.88,
+              "share_information:ron": 0.82,
+              "trade_with": 0.35,
+              "wait_and_observe": 0.35,
+              "record_private_note": 0.35
+            },
+            "selection_policy": "Repeated same NPC/topic conversations without new evidence are lower priority, not forbidden; repeat conversation remains allowed when new evidence appears."
+          }
+        },
+        "available_actions": [
+          "move_to",
+          "talk_to",
+          "investigate",
+          "ask_for_help",
+          "share_information",
+          "trade_with",
+          "wait_and_observe",
+          "record_private_note"
+        ],
+        "action_biases": [
+          {
+            "action_type": "move_to",
+            "supporting_motivations": [
+              "curiosity",
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.725
+          },
+          {
+            "action_type": "talk_to",
+            "supporting_motivations": [
+              "curiosity",
+              "truth_seeking"
+            ],
+            "opposing_personality": [],
+            "risk_level": "medium",
+            "profile_alignment_score": 0.925
+          },
+          {
+            "action_type": "investigate",
+            "supporting_motivations": [
+              "curiosity",
+              "truth_seeking"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.925
+          },
+          {
+            "action_type": "ask_for_help",
+            "supporting_motivations": [
+              "safety"
+            ],
+            "opposing_personality": [
+              "cautious"
+            ],
+            "risk_level": "medium",
+            "profile_alignment_score": -0.1
+          },
+          {
+            "action_type": "share_information",
+            "supporting_motivations": [
+              "truth_seeking"
+            ],
+            "opposing_personality": [
+              "cautious"
+            ],
+            "risk_level": "high",
+            "profile_alignment_score": 0.3
+          },
+          {
+            "action_type": "trade_with",
+            "supporting_motivations": [],
+            "opposing_personality": [
+              "empathetic"
+            ],
+            "risk_level": "medium",
+            "profile_alignment_score": -0.7
+          },
+          {
+            "action_type": "wait_and_observe",
+            "supporting_motivations": [
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.5
+          },
+          {
+            "action_type": "record_private_note",
+            "supporting_motivations": [
+              "truth_seeking",
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.7
+          }
+        ],
+        "decision": {
+          "selected_action": {
+            "action_type": "talk_to",
+            "args": {
+              "npc_id": "ron",
+              "topic": "I've heard there are some old ruins in this region. As a guard, have you noticed anything unusual around them?",
+              "tone": "friendly",
+              "honesty_level": "full",
+              "disclosure": "none"
+            }
+          },
+          "decision_reason": "Talk to Ron has the highest score (0.91), and building rapport with the guard might yield valuable local knowledge about the ruins while staying cautious. This aligns with the goal of understanding the ruins truth.",
+          "profile_alignment": {
+            "curiosity": 0.95,
+            "truth_seeking": 0.9
+          },
+          "profile_tension": {
+            "cautious": 0.6
+          },
+          "deception_choice": null,
+          "disclosure_choice": null,
+          "expected_consequence": "Ron may share his patrol observations or express concerns about the ruins, possibly hinting at hidden dangers or recent activity, which could advance the investigation.",
+          "mode": "llm"
+        },
+        "proposed_action": {
+          "action_type": "talk_to",
+          "args": {
+            "npc_id": "ron",
+            "topic": "I've heard there are some old ruins in this region. As a guard, have you noticed anything unusual around them?",
+            "tone": "friendly",
+            "honesty_level": "full",
+            "disclosure": "none"
+          }
+        },
+        "validation": {
+          "status": "allowed",
+          "reason": "Action is available and args present."
+        },
+        "action_result": {
+          "accepted": true,
+          "blocked_reason": "",
+          "action_type": "talk_to",
+          "state_changes": [],
+          "relationship_changes": [],
+          "created_event_ids": [
+            10
+          ]
+        },
+        "state_changes": [],
+        "relationship_changes": [],
+        "created_events": [
+          {
+            "id": 10,
+            "event_type": "traveler_talked_to_npc",
+            "content": "Arin the Cartographer talked to ron about 'I've heard there are some old ruins in this region. As a guard, have you noticed anything unusual around them?' (tone=friendly, honesty=full).",
+            "payload": {
+              "npc_id": "ron",
+              "topic": "I've heard there are some old ruins in this region. As a guard, have you noticed anything unusual around them?",
+              "tone": "friendly",
+              "honesty_level": "full",
+              "round": 2,
+              "arc_signal": "chaos"
+            }
+          }
+        ],
+        "reflection": {
+          "traveler_id": "traveler_main",
+          "action_type": "talk_to",
+          "accepted": true,
+          "summary": "Traveler talk_to — accepted.",
+          "decision_reason": "Talk to Ron has the highest score (0.91), and building rapport with the guard might yield valuable local knowledge about the ruins while staying cautious. This aligns with the goal of understanding the ruins truth.",
+          "exploration_context": {
+            "traveler_id": "traveler_main",
+            "conversation_threads": [],
+            "leads": [
+              {
+                "lead_id": "question_sable_about_rumors",
+                "action_type": "move_to",
+                "target": "market",
+                "reason": "Ruins rumors need adversarial cross-checking."
+              },
+              {
+                "lead_id": "inspect_tavern_back_alley",
+                "action_type": "move_to",
+                "target": "tavern",
+                "reason": "Guardian route needs physical evidence."
+              }
+            ],
+            "action_scores": {
+              "move_to:archive": 0.45,
+              "move_to:market": 0.78,
+              "move_to:tavern": 0.68,
+              "talk_to:ron": 0.91,
+              "investigate": 0.35,
+              "ask_for_help:ron": 0.88,
+              "share_information:ron": 0.82,
+              "trade_with": 0.35,
+              "wait_and_observe": 0.35,
+              "record_private_note": 0.35
+            },
+            "selection_policy": "Repeated same NPC/topic conversations without new evidence are lower priority, not forbidden; repeat conversation remains allowed when new evidence appears."
+          }
+        },
+        "deception_metadata": null,
+        "disclosure_metadata": null,
+        "timings": {
+          "observe_ms": 14.148,
+          "retrieve_memory_ms": 1420.053,
+          "build_action_surface_ms": 177.035,
+          "decide_ms": 24773.524,
+          "validate_ms": 0.018,
+          "act_ms": 85.892,
+          "reflect_ms": 0.004,
+          "trace_log_ms": 16.806,
+          "total_ms": 26487.546
+        },
+        "tick_log_id": 2
+      },
+      "npc_ticks": [],
+      "arc_update": {
+        "arc_id": "ruins_chapter_1",
+        "phase": "npc_conflict",
+        "tension": 2,
+        "advantage": "none",
+        "outcome": "",
+        "scores": {
+          "guardian": 2,
+          "research": 1,
+          "sable": 1,
+          "chaos": 1
+        },
+        "total_signals": 5,
+        "cumulative_scores": {
+          "guardian": 4,
+          "research": 2,
+          "sable": 2,
+          "chaos": 2
+        },
+        "cumulative_total_signals": 10
+      },
+      "timings": {
+        "ambient_routines_ms": 317.597,
+        "traveler_tick_ms": 26589.231,
+        "npc_ticks_ms": 21.913,
+        "arc_resolution_ms": 22.105,
+        "total_ms": 26950.878
+      }
+    },
+    {
+      "round_number": 3,
+      "ambient_events": [
+        {
+          "id": 11,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 12,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 13,
+          "event_type": "npc_routine_activity"
+        },
+        {
+          "id": 14,
+          "event_type": "npc_routine_activity"
+        }
+      ],
+      "traveler_tick": {
+        "traveler_id": "traveler_main",
+        "round_number": 3,
+        "mode": "llm",
+        "observation": {
+          "traveler_id": "traveler_main",
+          "round_number": 3,
+          "traveler_state": {
+            "current_location": "guard_post",
+            "inventory": [
+              "cartography_kit",
+              "field_journal",
+              "letter_of_introduction"
+            ],
+            "private_notes": [
+              "听说 Mira 是对遗迹最了解的学者，应该先找她",
+              "守卫 Ron 看起来很严格，直接问遗迹入口可能会引起怀疑",
+              "Sable 的传闻不可信，但她的信息网络可能有线索"
+            ],
+            "active_goal": {}
+          },
+          "relationships": {
+            "lina": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "mira": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            },
+            "ron": {
+              "trust": 0.05,
+              "suspicion": 0.0,
+              "affinity": 0.1,
+              "last_tone": "friendly"
+            },
+            "sable": {
+              "trust": 0.0,
+              "suspicion": 0.0,
+              "affinity": 0.0,
+              "last_tone": "neutral"
+            }
+          },
+          "npc_states": {
+            "lina": {
+              "npc_id": "lina",
+              "name": "Lina",
+              "role": "Tavern Owner",
+              "description": "A cautious and practical tavern owner who knows local rumors.",
+              "hidden_alignment": "protect_ruins",
+              "mood": "neutral",
+              "trust": 20,
+              "affection": 30
+            },
+            "ron": {
+              "npc_id": "ron",
+              "name": "Ron",
+              "role": "Town Guard",
+              "description": "A disciplined town guard who tracks patrol reports and gate incidents.",
+              "hidden_alignment": "enforce_order",
+              "mood": "alert",
+              "trust": 18,
+              "affection": 20
+            },
+            "mira": {
+              "npc_id": "mira",
+              "name": "Mira",
+              "role": "Ruins Scholar",
+              "description": "A careful scholar who studies old ruins, inscriptions, and local myths.",
+              "hidden_alignment": "research_truth",
+              "mood": "curious",
+              "trust": 22,
+              "affection": 24
+            },
+            "sable": {
+              "npc_id": "sable",
+              "name": "Sable",
+              "role": "Traveling Relic Broker",
+              "description": "A polished relic broker who offers useful rumors while steering people toward exploitable ruin secrets.",
+              "hidden_alignment": "exploit_ruins",
+              "mood": "pleasant",
+              "trust": 16,
+              "affection": 18
+            }
+          },
+          "scene_objects": [
+            {
+              "object_id": "guard_ledger",
+              "name": "Guard Ledger",
+              "location_id": "guard_post"
+            },
+            {
+              "object_id": "mira_field_notes",
+              "name": "Mira Field Notes",
+              "location_id": "archive"
+            },
+            {
+              "object_id": "sable_rumor_stall",
+              "name": "Sable Rumor Stall",
+              "location_id": "market"
+            },
+            {
+              "object_id": "tavern_back_alley",
+              "name": "Tavern Back Alley",
+              "location_id": "tavern"
+            }
+          ],
+          "arc_state": {
+            "arc_id": "ruins_chapter_1",
+            "phase": "npc_conflict",
+            "tension": 2,
+            "advantage": "none",
+            "outcome": "",
+            "metadata_json": "{\"title\": \"Ruins Chapter 1\", \"cumulative_scores\": {\"guardian\": 4, \"research\": 2, \"sable\": 2, \"chaos\": 2}, \"last_round_scores\": {\"guardian\": 2, \"research\": 1, \"sable\": 1, \"chaos\": 1}, \"last_round_total_signals\": 5}",
+            "updated_at": "2026-06-05 09:25:34",
+            "metadata": {
+              "title": "Ruins Chapter 1",
+              "cumulative_scores": {
+                "guardian": 4,
+                "research": 2,
+                "sable": 2,
+                "chaos": 2
+              },
+              "last_round_scores": {
+                "guardian": 2,
+                "research": 1,
+                "sable": 1,
+                "chaos": 1
+              },
+              "last_round_total_signals": 5
+            }
+          },
+          "recent_events": [
+            {
+              "id": 2,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 3,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 4,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 5,
+              "event_type": "traveler_moved",
+              "content": "Arin the Cartographer moved to guard_post.",
+              "payload": {
+                "round": 1,
+                "arc_signal": "chaos"
+              }
+            },
+            {
+              "id": 5,
+              "event_type": "traveler_moved",
+              "content": "Arin the Cartographer moved to guard_post.",
+              "payload": {
+                "round": 1,
+                "arc_signal": "chaos"
+              }
+            },
+            {
+              "id": 6,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 7,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 8,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 9,
+              "event_type": "npc_routine_activity"
+            },
+            {
+              "id": 10,
+              "event_type": "traveler_talked_to_npc",
+              "content": "Arin the Cartographer talked to ron about 'I've heard there are some old ruins in this region. As a guard, have you noticed anything unusual around them?' (tone=friendly, honesty=full).",
+              "payload": {
+                "npc_id": "ron",
+                "topic": "I've heard there are some old ruins in this region. As a guard, have you noticed anything unusual around them?",
+                "tone": "friendly",
+                "honesty_level": "full",
+                "round": 2,
+                "arc_signal": "chaos"
+              }
+            }
+          ],
+          "memory_retrieval_mode": "hybrid",
+          "exploration_context": {
+            "traveler_id": "traveler_main",
+            "conversation_threads": [
+              {
+                "npc_id": "ron",
+                "topic": "i've heard there are some old ruins in this region. as a guard, have you noticed anything unusual around them?",
+                "last_event_index": 9,
+                "status": "waiting_for_external_evidence",
+                "new_evidence_count": 0
+              }
+            ],
+            "leads": [
+              {
+                "lead_id": "question_sable_about_rumors",
+                "action_type": "move_to",
+                "target": "market",
+                "reason": "Ruins rumors need adversarial cross-checking."
+              },
+              {
+                "lead_id": "inspect_tavern_back_alley",
+                "action_type": "move_to",
+                "target": "tavern",
+                "reason": "Guardian route needs physical evidence."
+              }
+            ],
+            "action_scores": {
+              "move_to:archive": 0.45,
+              "move_to:market": 0.78,
+              "move_to:tavern": 0.68,
+              "talk_to:ron": 0.28,
+              "investigate": 0.35,
+              "ask_for_help:ron": 0.28,
+              "share_information:ron": 0.28,
+              "trade_with": 0.35,
+              "wait_and_observe": 0.35,
+              "record_private_note": 0.35
+            },
+            "selection_policy": "Repeated same NPC/topic conversations without new evidence are lower priority, not forbidden; repeat conversation remains allowed when new evidence appears."
+          }
+        },
+        "available_actions": [
+          "move_to",
+          "talk_to",
+          "investigate",
+          "ask_for_help",
+          "share_information",
+          "trade_with",
+          "wait_and_observe",
+          "record_private_note"
+        ],
+        "action_biases": [
+          {
+            "action_type": "move_to",
+            "supporting_motivations": [
+              "curiosity",
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.725
+          },
+          {
+            "action_type": "talk_to",
+            "supporting_motivations": [
+              "curiosity",
+              "truth_seeking"
+            ],
+            "opposing_personality": [],
+            "risk_level": "medium",
+            "profile_alignment_score": 0.925
+          },
+          {
+            "action_type": "investigate",
+            "supporting_motivations": [
+              "curiosity",
+              "truth_seeking"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.925
+          },
+          {
+            "action_type": "ask_for_help",
+            "supporting_motivations": [
+              "safety"
+            ],
+            "opposing_personality": [
+              "cautious"
+            ],
+            "risk_level": "medium",
+            "profile_alignment_score": -0.1
+          },
+          {
+            "action_type": "share_information",
+            "supporting_motivations": [
+              "truth_seeking"
+            ],
+            "opposing_personality": [
+              "cautious"
+            ],
+            "risk_level": "high",
+            "profile_alignment_score": 0.3
+          },
+          {
+            "action_type": "trade_with",
+            "supporting_motivations": [],
+            "opposing_personality": [
+              "empathetic"
+            ],
+            "risk_level": "medium",
+            "profile_alignment_score": -0.7
+          },
+          {
+            "action_type": "wait_and_observe",
+            "supporting_motivations": [
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.5
+          },
+          {
+            "action_type": "record_private_note",
+            "supporting_motivations": [
+              "truth_seeking",
+              "safety"
+            ],
+            "opposing_personality": [],
+            "risk_level": "low",
+            "profile_alignment_score": 0.7
+          }
+        ],
+        "decision": {
+          "selected_action": {
+            "action_type": "move_to",
+            "args": {
+              "location_id": "market"
+            }
+          },
+          "decision_reason": "The highest scoring lead is to question Sable about rumors in the market. Cross-checking her information is crucial for truth-seeking and understanding the ruins, and I have no new evidence to continue talking to Ron.",
+          "profile_alignment": {
+            "curiosity": 0.95,
+            "truth_seeking": 0.9
+          },
+          "profile_tension": {},
+          "deception_choice": null,
+          "disclosure_choice": null,
+          "expected_consequence": "I will arrive at the market and likely encounter Sable, the relic broker. She may provide useful rumors but also try to steer me toward exploitable secrets. I must stay cautious and verify any claims she makes.",
+          "mode": "llm"
+        },
+        "proposed_action": {
+          "action_type": "move_to",
+          "args": {
+            "location_id": "market"
+          }
+        },
+        "validation": {
+          "status": "allowed",
+          "reason": "Action is available and args present."
+        },
+        "action_result": {
+          "accepted": true,
+          "blocked_reason": "",
+          "action_type": "move_to",
+          "state_changes": [
+            {
+              "field": "location",
+              "before": "guard_post",
+              "after": "market"
+            }
+          ],
+          "relationship_changes": [],
+          "created_event_ids": [
+            15
+          ]
+        },
+        "state_changes": [
+          {
+            "field": "location",
+            "before": "guard_post",
+            "after": "market"
+          }
+        ],
+        "relationship_changes": [],
+        "created_events": [
+          {
+            "id": 15,
+            "event_type": "traveler_moved",
+            "content": "Arin the Cartographer moved to market.",
+            "payload": {
+              "round": 3,
+              "arc_signal": "chaos"
+            }
+          }
+        ],
+        "reflection": {
+          "traveler_id": "traveler_main",
+          "action_type": "move_to",
+          "accepted": true,
+          "summary": "Traveler move_to — accepted.",
+          "decision_reason": "The highest scoring lead is to question Sable about rumors in the market. Cross-checking her information is crucial for truth-seeking and understanding the ruins, and I have no new evidence to continue talking to Ron.",
+          "exploration_context": {
+            "traveler_id": "traveler_main",
+            "conversation_threads": [
+              {
+                "npc_id": "ron",
+                "topic": "i've heard there are some old ruins in this region. as a guard, have you noticed anything unusual around them?",
+                "last_event_index": 9,
+                "status": "waiting_for_external_evidence",
+                "new_evidence_count": 0
+              }
+            ],
+            "leads": [
+              {
+                "lead_id": "question_sable_about_rumors",
+                "action_type": "move_to",
+                "target": "market",
+                "reason": "Ruins rumors need adversarial cross-checking."
+              },
+              {
+                "lead_id": "inspect_tavern_back_alley",
+                "action_type": "move_to",
+                "target": "tavern",
+                "reason": "Guardian route needs physical evidence."
+              }
+            ],
+            "action_scores": {
+              "move_to:archive": 0.45,
+              "move_to:market": 0.78,
+              "move_to:tavern": 0.68,
+              "talk_to:ron": 0.28,
+              "investigate": 0.35,
+              "ask_for_help:ron": 0.28,
+              "share_information:ron": 0.28,
+              "trade_with": 0.35,
+              "wait_and_observe": 0.35,
+              "record_private_note": 0.35
+            },
+            "selection_policy": "Repeated same NPC/topic conversations without new evidence are lower priority, not forbidden; repeat conversation remains allowed when new evidence appears."
+          }
+        },
+        "deception_metadata": null,
+        "disclosure_metadata": null,
+        "timings": {
+          "observe_ms": 4.249,
+          "retrieve_memory_ms": 1488.44,
+          "build_action_surface_ms": 67.121,
+          "decide_ms": 16196.402,
+          "validate_ms": 0.014,
+          "act_ms": 120.435,
+          "reflect_ms": 0.007,
+          "trace_log_ms": 36.217,
+          "total_ms": 17912.951
+        },
+        "tick_log_id": 3
+      },
+      "npc_ticks": [],
+      "arc_update": {
+        "arc_id": "ruins_chapter_1",
+        "phase": "resolved",
+        "tension": 5,
+        "advantage": "chaos",
+        "outcome": "chaotic_lockdown",
+        "scores": {
+          "guardian": 2,
+          "research": 1,
+          "sable": 1,
+          "chaos": 1
+        },
+        "total_signals": 5,
+        "cumulative_scores": {
+          "guardian": 6,
+          "research": 3,
+          "sable": 3,
+          "chaos": 3
+        },
+        "cumulative_total_signals": 15
+      },
+      "timings": {
+        "ambient_routines_ms": 188.621,
+        "traveler_tick_ms": 17969.029,
+        "npc_ticks_ms": 99.816,
+        "arc_resolution_ms": 60.62,
+        "total_ms": 18318.131
+      }
+    }
+  ],
+  "timings": {
+    "total_ms": 73190.83
+  },
+  "major_events": [
+    {
+      "round": 1,
+      "severity": "notable",
+      "rule_id": "arc_phase_changed",
+      "description": "Arc phase advanced to 'evidence_gathering'.",
+      "details": {
+        "arc_id": "ruins_chapter_1",
+        "phase": "evidence_gathering",
+        "tension": 1,
+        "advantage": "none",
+        "outcome": "",
+        "scores": {
+          "guardian": 2,
+          "research": 1,
+          "sable": 1,
+          "chaos": 1
+        },
+        "total_signals": 5,
+        "cumulative_scores": {
+          "guardian": 2,
+          "research": 1,
+          "sable": 1,
+          "chaos": 1
+        },
+        "cumulative_total_signals": 5
+      }
+    },
+    {
+      "round": 2,
+      "severity": "major",
+      "rule_id": "arc_phase_changed",
+      "description": "Arc phase advanced to 'npc_conflict' (tension=2).",
+      "details": {
+        "arc_id": "ruins_chapter_1",
+        "phase": "npc_conflict",
+        "tension": 2,
+        "advantage": "none",
+        "outcome": "",
+        "scores": {
+          "guardian": 2,
+          "research": 1,
+          "sable": 1,
+          "chaos": 1
+        },
+        "total_signals": 5,
+        "cumulative_scores": {
+          "guardian": 4,
+          "research": 2,
+          "sable": 2,
+          "chaos": 2
+        },
+        "cumulative_total_signals": 10
+      }
+    },
+    {
+      "round": 3,
+      "severity": "critical",
+      "rule_id": "arc_outcome_reached",
+      "description": "Arc resolved with outcome: chaotic_lockdown. Advantage: chaos.",
+      "details": {
+        "arc_id": "ruins_chapter_1",
+        "phase": "resolved",
+        "tension": 5,
+        "advantage": "chaos",
+        "outcome": "chaotic_lockdown",
+        "scores": {
+          "guardian": 2,
+          "research": 1,
+          "sable": 1,
+          "chaos": 1
+        },
+        "total_signals": 5,
+        "cumulative_scores": {
+          "guardian": 6,
+          "research": 3,
+          "sable": 3,
+          "chaos": 3
+        },
+        "cumulative_total_signals": 15
+      }
+    }
+  ]
+}
