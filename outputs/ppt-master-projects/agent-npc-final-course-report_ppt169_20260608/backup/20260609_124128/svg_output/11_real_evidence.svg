@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <rect x="0" y="0" width="1280" height="720" fill="#FFFFFF"/>
+  <image href="../template_assets/pku_logo_cropped.png" x="1020" y="24" width="220" height="72" preserveAspectRatio="xMidYMid meet"/>
+  <rect x="0" y="68" width="82" height="68" fill="#A40012"/>
+  <text x="92" y="104" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="34" font-weight="bold" fill="#000000">真实证据：界面、课堂 trace 与多 NPC 覆盖</text>
+  <text x="92" y="136" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" fill="#333333">当前仓库中的真实截图和 trace 文件证明系统已经可运行</text>
+
+  <rect x="76" y="176" width="720" height="430" fill="#FFFFFF" stroke="#D9D9D9"/>
+  <image href="../images/player_ui_desktop.png" x="106" y="198" width="660" height="366" preserveAspectRatio="xMidYMid meet"/>
+  <text x="106" y="588" font-family='"DengXian", Arial, sans-serif' font-size="18" fill="#666666">React/Vite 玩家端界面截图：保留交互界面和开发者 trace 面板</text>
+
+  <rect x="842" y="176" width="344" height="430" fill="#F7F7F7" stroke="#D9D9D9"/>
+  <text x="878" y="230" font-family='"DengXian", Arial, sans-serif' font-size="28" font-weight="bold" fill="#A40012">Trace 证据字段</text>
+  <text x="878" y="292" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">Traveler 发言与行动理由</text>
+  <text x="878" y="332" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">NPC 回复与角色意图</text>
+  <text x="878" y="372" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">关系变化和状态更新</text>
+  <text x="878" y="412" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">探索线索与 arc evidence</text>
+  <text x="878" y="452" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">最终 outcome 与 timing</text>
+  <line x1="878" y1="502" x2="1150" y2="502" stroke="#D9D9D9"/>
+  <text x="878" y="540" font-family='"DengXian", Arial, sans-serif' font-size="18" fill="#666666">classroom_showcase_llm_run</text>
+  <text x="878" y="568" font-family='"DengXian", Arial, sans-serif' font-size="18" fill="#666666">sable_advantage_llm_run</text>
+
+  <text x="1180" y="692" text-anchor="end" font-family='"DengXian", Arial, sans-serif' font-size="14" fill="#666666">11</text>
+</svg>

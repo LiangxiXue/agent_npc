@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <rect x="0" y="0" width="1280" height="720" fill="#FFFFFF"/>
+  <image href="../template_assets/pku_logo_cropped.png" x="1020" y="24" width="220" height="72" preserveAspectRatio="xMidYMid meet"/>
+  <rect x="0" y="68" width="82" height="68" fill="#A40012"/>
+  <text x="92" y="104" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="34" font-weight="bold" fill="#000000">Autonomous NPC Runtime：NPC 响应世界事件</text>
+  <text x="92" y="136" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" fill="#333333">NPC 不只等待玩家输入，也能在事件触发后生成受约束主动行为</text>
+
+  <g id="runtime-flow">
+    <rect x="92" y="228" width="160" height="82" fill="#F7F7F7" stroke="#D9D9D9"/><text x="172" y="277" text-anchor="middle" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">world event</text>
+    <rect x="292" y="228" width="160" height="82" fill="#F7F7F7" stroke="#D9D9D9"/><text x="372" y="277" text-anchor="middle" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">NPC inbox</text>
+    <rect x="492" y="228" width="160" height="82" fill="#F7F7F7" stroke="#D9D9D9"/><text x="572" y="277" text-anchor="middle" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">ActionCatalog</text>
+    <rect x="692" y="228" width="160" height="82" fill="#FFF1E5" stroke="#D9D9D9"/><text x="772" y="277" text-anchor="middle" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#A40012">LLM tick</text>
+    <rect x="892" y="228" width="160" height="82" fill="#FFF1E5" stroke="#D9D9D9"/><text x="972" y="277" text-anchor="middle" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#A40012">validate</text>
+    <rect x="1092" y="228" width="110" height="82" fill="#F7F7F7" stroke="#D9D9D9"/><text x="1147" y="265" text-anchor="middle" font-family='"DengXian", Arial, sans-serif' font-size="20" fill="#000000">trace</text><text x="1147" y="292" text-anchor="middle" font-family='"DengXian", Arial, sans-serif' font-size="20" fill="#000000">mailbox</text>
+    <line x1="252" y1="269" x2="292" y2="269" stroke="#BFBFBF" stroke-width="2"/><polygon points="292,269 282,263 282,275" fill="#BFBFBF"/>
+    <line x1="452" y1="269" x2="492" y2="269" stroke="#BFBFBF" stroke-width="2"/><polygon points="492,269 482,263 482,275" fill="#BFBFBF"/>
+    <line x1="652" y1="269" x2="692" y2="269" stroke="#BFBFBF" stroke-width="2"/><polygon points="692,269 682,263 682,275" fill="#BFBFBF"/>
+    <line x1="852" y1="269" x2="892" y2="269" stroke="#BFBFBF" stroke-width="2"/><polygon points="892,269 882,263 882,275" fill="#BFBFBF"/>
+    <line x1="1052" y1="269" x2="1092" y2="269" stroke="#BFBFBF" stroke-width="2"/><polygon points="1092,269 1082,263 1082,275" fill="#BFBFBF"/>
+  </g>
+
+  <g id="control-points">
+    <rect x="126" y="404" width="300" height="104" fill="#F7F7F7" stroke="#D9D9D9"/>
+    <text x="156" y="442" font-family='"DengXian", Arial, sans-serif' font-size="24" font-weight="bold" fill="#A40012">控制点 1</text>
+    <text x="156" y="478" font-family='"DengXian", Arial, sans-serif' font-size="20" fill="#333333">可行动作来自 ActionCatalog</text>
+    <rect x="490" y="404" width="300" height="104" fill="#F7F7F7" stroke="#D9D9D9"/>
+    <text x="520" y="442" font-family='"DengXian", Arial, sans-serif' font-size="24" font-weight="bold" fill="#A40012">控制点 2</text>
+    <text x="520" y="478" font-family='"DengXian", Arial, sans-serif' font-size="20" fill="#333333">自主 tick 也经过 Validator</text>
+    <rect x="854" y="404" width="300" height="104" fill="#F7F7F7" stroke="#D9D9D9"/>
+    <text x="884" y="442" font-family='"DengXian", Arial, sans-serif' font-size="24" font-weight="bold" fill="#A40012">控制点 3</text>
+    <text x="884" y="478" font-family='"DengXian", Arial, sans-serif' font-size="20" fill="#333333">结果写入 mailbox 与 trace</text>
+  </g>
+
+  <line x1="92" y1="568" x2="1188" y2="568" stroke="#D9D9D9"/>
+  <text x="92" y="610" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#000000">运行时价值：</text>
+  <text x="244" y="610" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" fill="#333333">让世界事件以可约束、可复盘的方式影响角色行为。</text>
+  <text x="1180" y="692" text-anchor="end" font-family='"DengXian", Arial, sans-serif' font-size="14" fill="#666666">9</text>
+</svg>

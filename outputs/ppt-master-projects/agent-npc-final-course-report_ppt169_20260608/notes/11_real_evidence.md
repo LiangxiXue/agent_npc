@@ -1,0 +1,1 @@
+为了避免汇报停留在架构图上，这页放的是当前仓库里的真实界面和 trace 证据。左侧是 React/Vite 玩家端界面截图，右侧列出 timeline 中用于复盘的关键字段，包括 Traveler 发言、NPC 回复、关系变化、探索线索、arc evidence、最终 outcome 和 timing。项目还保留了课堂展示 trace 和 Sable 路线 trace，所以报告中的结果不是虚构描述，而是从当前项目运行输出中整理出来的。

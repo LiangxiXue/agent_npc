@@ -1,0 +1,3 @@
+No,Filename,Width,Height,AspectRatio,PixelAspectRatio,RatioSource,UsageCount,DisplayRatioVariants,AssetKind,SvgRenderable,PptxNativeSupported,SizeKB,Category,ImageArea_SxS,TextArea_SxS
+1,player_ui_desktop.png,1440,1100,1.31,1.31,pixel,1,,bitmap,True,True,122.8,Standard landscape,785x600,355x600
+2,player_ui_mobile.png,390,900,0.43,0.43,pixel,1,,bitmap,True,True,24.7,Portrait,260x600,880x600

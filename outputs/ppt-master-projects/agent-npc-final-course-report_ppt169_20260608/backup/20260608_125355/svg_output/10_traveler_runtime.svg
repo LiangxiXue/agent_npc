@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <g id="background">
+    <rect x="0" y="0" width="1280" height="720" fill="#F8FAFC"/>
+    <rect x="0" y="0" width="1280" height="14" fill="#1D4E89"/>
+  </g>
+
+  <g id="header">
+    <text x="56" y="72" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="34" font-weight="bold" fill="#17324D">Traveler Runtime：用 profile 驱动自动探索</text>
+    <text x="56" y="112" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#475569">Traveler 是 living-world simulation 中可配置的自动探索角色，而不是普通玩家输入。</text>
+    <text x="1204" y="72" text-anchor="end" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="12" fill="#64748B">10 / 14</text>
+  </g>
+
+  <g id="profile-card">
+    <rect x="72" y="164" width="348" height="366" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <rect x="72" y="164" width="348" height="54" rx="8" fill="#EEF4FA"/>
+    <use data-icon="tabler-outline/route" x="104" y="176" width="34" height="34" fill="#1D4E89" stroke-width="2"/>
+    <text x="154" y="198" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#17324D">YAML Profile</text>
+    <text x="104" y="256" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#1F2937">
+      <tspan x="104" dy="0">公开身份：角色如何自我介绍</tspan>
+      <tspan x="104" dy="34">私人目标：探索偏好与动机</tspan>
+      <tspan x="104" dy="34">隐藏信息：不能直接暴露的背景</tspan>
+      <tspan x="104" dy="34">行动边界：允许移动、询问、检查</tspan>
+      <tspan x="104" dy="34">探索风格：求真、谨慎或追求声望</tspan>
+    </text>
+    <rect x="104" y="444" width="284" height="54" rx="8" fill="#FFF3D6" stroke="#CBD5E1"/>
+    <text x="246" y="478" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#B7791F">profile 会改变路线选择</text>
+  </g>
+
+  <g id="loop-diagram">
+    <circle cx="770" cy="332" r="154" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="2"/>
+    <circle cx="770" cy="332" r="82" fill="#D8F3F7" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/robot" x="746" y="290" width="48" height="48" fill="#0E7490" stroke-width="2"/>
+    <text x="770" y="360" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#17324D">Traveler</text>
+    <text x="770" y="388" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">LLM-driven loop</text>
+
+    <rect x="694" y="142" width="152" height="58" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <text x="770" y="178" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">Observe</text>
+
+    <rect x="938" y="250" width="152" height="58" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <text x="1014" y="286" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">Retrieve</text>
+
+    <rect x="898" y="468" width="152" height="58" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <text x="974" y="504" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">Decide</text>
+
+    <rect x="490" y="468" width="152" height="58" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <text x="566" y="504" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">Act</text>
+
+    <rect x="450" y="250" width="152" height="58" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <text x="526" y="286" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">Reflect</text>
+
+    <path d="M830 192 L955 250" fill="none" stroke="#94A3B8" stroke-width="2"/>
+    <polygon points="955,250 943,249 949,238" fill="#94A3B8"/>
+    <path d="M1014 308 L974 468" fill="none" stroke="#94A3B8" stroke-width="2"/>
+    <polygon points="974,468 970,456 982,459" fill="#94A3B8"/>
+    <path d="M898 497 L642 497" fill="none" stroke="#94A3B8" stroke-width="2"/>
+    <polygon points="642,497 652,491 652,503" fill="#94A3B8"/>
+    <path d="M566 468 L526 308" fill="none" stroke="#94A3B8" stroke-width="2"/>
+    <polygon points="526,308 534,317 522,320" fill="#94A3B8"/>
+    <path d="M602 250 L710 192" fill="none" stroke="#94A3B8" stroke-width="2"/>
+    <polygon points="710,192 703,202 697,191" fill="#94A3B8"/>
+  </g>
+
+  <g id="export-fields">
+    <rect x="72" y="568" width="1136" height="58" rx="8" fill="#EEF4FA" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/timeline" x="100" y="581" width="32" height="32" fill="#1D4E89" stroke-width="2"/>
+    <text x="150" y="591" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">Timeline 导出字段</text>
+    <text x="150" y="606" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">round · 行动理由 · Traveler 发言 · NPC 回复 · 状态变化 · exploration leads</text>
+    <text x="150" y="624" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">timing breakdown · arc evidence · ambient arc signals · final outcome</text>
+  </g>
+
+  <g id="footer">
+    <text x="56" y="674" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="12" fill="#64748B">Source: course_report_zh.md · 2.4 / 3.7 Traveler runtime 与 timeline export</text>
+  </g>
+</svg>

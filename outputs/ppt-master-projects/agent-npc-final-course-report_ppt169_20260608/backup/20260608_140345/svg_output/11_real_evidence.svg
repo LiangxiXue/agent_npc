@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <g id="background">
+    <rect x="0" y="0" width="1280" height="720" fill="#F8FAFC"/>
+    <rect x="0" y="0" width="1280" height="14" fill="#1D4E89"/>
+  </g>
+
+  <g id="header">
+    <text x="56" y="72" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="34" font-weight="bold" fill="#17324D">真实证据：界面、课堂 trace 与多 NPC 覆盖</text>
+    <text x="56" y="112" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#475569">这页用当前仓库中的真实截图和 trace 文件证明系统不是只停留在设计文档。</text>
+    <text x="1204" y="72" text-anchor="end" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="12" fill="#64748B">11 / 14</text>
+  </g>
+
+  <g id="desktop-evidence">
+    <rect x="56" y="158" width="770" height="486" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <image href="../images/player_ui_desktop.png" x="86" y="184" width="710" height="394" preserveAspectRatio="xMidYMid meet"/>
+    <rect x="86" y="590" width="710" height="34" fill="#FFFFFF" fill-opacity="0.92"/>
+    <text x="106" y="613" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">React/Vite 玩家端界面截图：保留交互界面和开发者 trace 面板</text>
+  </g>
+
+  <g id="trace-evidence">
+    <rect x="858" y="158" width="366" height="290" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/timeline" x="890" y="188" width="36" height="36" fill="#B7791F" stroke-width="2"/>
+    <text x="940" y="210" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#17324D">Trace 证据</text>
+    <text x="890" y="266" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#1F2937">
+      <tspan x="890" dy="0">Traveler 发言与行动理由</tspan>
+      <tspan x="890" dy="32">NPC 回复与角色意图</tspan>
+      <tspan x="890" dy="32">关系变化和状态更新</tspan>
+      <tspan x="890" dy="32">探索线索与 arc evidence</tspan>
+      <tspan x="890" dy="32">最终 outcome 与 timing</tspan>
+    </text>
+  </g>
+
+  <g id="source-row">
+    <rect x="858" y="474" width="366" height="150" rx="8" fill="#EEF4FA" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/report-analytics" x="890" y="502" width="34" height="34" fill="#1D4E89" stroke-width="2"/>
+    <text x="940" y="524" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#1D4E89">复用的真实运行文件</text>
+    <text x="890" y="568" font-family="Consolas" font-size="14" fill="#475569">classroom_showcase_llm_run</text>
+    <text x="890" y="590" font-family="Consolas" font-size="14" fill="#475569">sable_advantage_llm_run</text>
+    <text x="890" y="614" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">Markdown timeline + JSON trace 对应验证</text>
+  </g>
+
+  <g id="footer">
+    <text x="56" y="668" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="12" fill="#64748B">Source: player_ui_desktop.png</text>
+    <text x="56" y="686" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="12" fill="#64748B">Trace: classroom_showcase_trace.md · sable_advantage_trace.md</text>
+  </g>
+</svg>

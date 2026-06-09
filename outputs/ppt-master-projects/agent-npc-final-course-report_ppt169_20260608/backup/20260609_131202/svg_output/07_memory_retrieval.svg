@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <rect x="0" y="0" width="1280" height="720" fill="#FFFFFF"/>
+  <image href="../template_assets/pku_logo_cropped.png" x="1020" y="24" width="220" height="72" preserveAspectRatio="xMidYMid meet"/>
+  <rect x="0" y="68" width="82" height="68" fill="#A40012"/>
+  <text x="92" y="104" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="34" font-weight="bold" fill="#000000">记忆与检索：让角色带着上下文行动</text>
+  <text x="92" y="136" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" fill="#333333">回复和 decision 不只依赖当前一句输入</text>
+
+  <g id="sources">
+    <rect x="98" y="190" width="300" height="62" fill="#F7F7F7" stroke="#D9D9D9"/><text x="128" y="230" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">近期上下文</text>
+    <rect x="98" y="278" width="300" height="62" fill="#F7F7F7" stroke="#D9D9D9"/><text x="128" y="318" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">稳定 lore</text>
+    <rect x="98" y="366" width="300" height="62" fill="#F7F7F7" stroke="#D9D9D9"/><text x="128" y="406" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">长期记忆</text>
+    <rect x="98" y="454" width="300" height="62" fill="#F7F7F7" stroke="#D9D9D9"/><text x="128" y="494" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">任务与状态</text>
+  </g>
+  <line x1="398" y1="221" x2="462" y2="221" stroke="#BFBFBF"/>
+  <line x1="398" y1="309" x2="462" y2="309" stroke="#BFBFBF"/>
+  <line x1="398" y1="397" x2="462" y2="397" stroke="#BFBFBF"/>
+  <line x1="398" y1="485" x2="462" y2="485" stroke="#BFBFBF"/>
+  <line x1="462" y1="221" x2="462" y2="485" stroke="#BFBFBF"/>
+  <line x1="462" y1="353" x2="540" y2="353" stroke="#BFBFBF" stroke-width="2"/>
+  <polygon points="540,353 530,347 530,359" fill="#BFBFBF"/>
+
+  <rect x="540" y="268" width="210" height="170" fill="#FFF1E5" stroke="#D9D9D9"/>
+  <text x="645" y="338" text-anchor="middle" font-family='"DengXian", Arial, sans-serif' font-size="28" font-weight="bold" fill="#A40012">Retrieval</text>
+  <text x="645" y="374" text-anchor="middle" font-family='"DengXian", Arial, sans-serif' font-size="20" fill="#333333">typed + semantic</text>
+  <text x="645" y="406" text-anchor="middle" font-family='"DengXian", Arial, sans-serif' font-size="18" fill="#666666">返回 memory snippets</text>
+
+  <line x1="750" y1="353" x2="826" y2="353" stroke="#BFBFBF" stroke-width="2"/>
+  <polygon points="826,353 816,347 816,359" fill="#BFBFBF"/>
+  <rect x="826" y="206" width="360" height="294" fill="#F7F7F7" stroke="#D9D9D9"/>
+  <text x="858" y="258" font-family='"DengXian", Arial, sans-serif' font-size="26" font-weight="bold" fill="#000000">合成后的 Agent 上下文</text>
+  <text x="858" y="318" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#333333">Observation：当前局面</text>
+  <text x="858" y="358" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#333333">Memory：历史互动与关系</text>
+  <text x="858" y="398" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#333333">Lore：稳定世界设定</text>
+  <text x="858" y="438" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#333333">Quest：任务条件</text>
+
+  <line x1="92" y1="568" x2="1188" y2="568" stroke="#D9D9D9"/>
+  <text x="92" y="610" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#000000">后台流程：</text>
+  <text x="220" y="610" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" fill="#333333">memory jobs 将运行中的交互和反思整理成后续可检索内容。</text>
+  <text x="1180" y="692" text-anchor="end" font-family='"DengXian", Arial, sans-serif' font-size="14" fill="#666666">7</text>
+</svg>

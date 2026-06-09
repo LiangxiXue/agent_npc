@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <g id="background">
+    <rect x="0" y="0" width="1280" height="720" fill="#F8FAFC"/>
+    <rect x="0" y="0" width="1280" height="14" fill="#1D4E89"/>
+  </g>
+
+  <g id="header">
+    <text x="56" y="72" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="34" font-weight="bold" fill="#17324D">记忆与检索：让角色带着上下文行动</text>
+    <text x="56" y="112" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#475569">角色回复和 decision 不只依赖当前一句输入，而是综合近期上下文、长期记忆、lore 和任务状态。</text>
+    <text x="1204" y="72" text-anchor="end" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="12" fill="#64748B">07 / 14</text>
+  </g>
+
+  <g id="source-stack">
+    <rect x="72" y="158" width="370" height="90" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/message-2-code" x="102" y="186" width="34" height="34" fill="#1D4E89" stroke-width="2"/>
+    <text x="154" y="198" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">近期上下文</text>
+    <text x="154" y="226" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">最近交互、当前输入、局部状态</text>
+
+    <rect x="72" y="270" width="370" height="90" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/book" x="102" y="298" width="34" height="34" fill="#1D4E89" stroke-width="2"/>
+    <text x="154" y="310" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">稳定 lore</text>
+    <text x="154" y="338" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">地点、NPC 设定、世界规则、秘密边界</text>
+
+    <rect x="72" y="382" width="370" height="90" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/database" x="102" y="410" width="34" height="34" fill="#1D4E89" stroke-width="2"/>
+    <text x="154" y="422" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">长期记忆</text>
+    <text x="154" y="450" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">历史互动、关系变化、重要事件摘要</text>
+
+    <rect x="72" y="494" width="370" height="90" rx="8" fill="#FFF3D6" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/checklist" x="102" y="522" width="34" height="34" fill="#B7791F" stroke-width="2"/>
+    <text x="154" y="534" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">任务与状态</text>
+    <text x="154" y="562" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">quest、inventory、location、trust</text>
+  </g>
+
+  <g id="retrieval-engine">
+    <rect x="512" y="236" width="232" height="220" rx="8" fill="#D8F3F7" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/user-search" x="604" y="268" width="44" height="44" fill="#0E7490" stroke-width="2"/>
+    <text x="628" y="340" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#17324D">Retrieval</text>
+    <text x="628" y="374" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" fill="#1F2937">typed + semantic</text>
+    <text x="628" y="406" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">返回 memory snippets</text>
+  </g>
+
+  <g id="context-output">
+    <rect x="820" y="184" width="360" height="324" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <text x="852" y="226" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#1D4E89">合成后的 Agent 上下文</text>
+    <text x="852" y="278" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#1F2937">
+      <tspan x="852" dy="0">Observation：当前局面</tspan>
+      <tspan x="852" dy="34">Memory：历史互动与关系</tspan>
+      <tspan x="852" dy="34">Lore：稳定世界设定</tspan>
+      <tspan x="852" dy="34">Quest：任务条件与可行动作</tspan>
+      <tspan x="852" dy="34">Trace hooks：后续复盘字段</tspan>
+    </text>
+    <rect x="852" y="440" width="296" height="42" rx="8" fill="#EEF4FA" stroke="#CBD5E1"/>
+    <text x="1000" y="466" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">进入 NPCMind / LLM decision</text>
+  </g>
+
+  <g id="flow-lines">
+    <line x1="442" y1="203" x2="512" y2="298" stroke="#94A3B8" stroke-width="2"/>
+    <polygon points="512,298 501,294 509,286" fill="#94A3B8"/>
+    <line x1="442" y1="315" x2="512" y2="332" stroke="#94A3B8" stroke-width="2"/>
+    <polygon points="512,332 501,326 504,338" fill="#94A3B8"/>
+    <line x1="442" y1="427" x2="512" y2="366" stroke="#94A3B8" stroke-width="2"/>
+    <polygon points="512,366 500,369 508,378" fill="#94A3B8"/>
+    <line x1="442" y1="539" x2="512" y2="400" stroke="#94A3B8" stroke-width="2"/>
+    <polygon points="512,400 501,406 512,412" fill="#94A3B8"/>
+    <line x1="744" y1="346" x2="820" y2="346" stroke="#94A3B8" stroke-width="2"/>
+    <polygon points="820,346 810,340 810,352" fill="#94A3B8"/>
+  </g>
+
+  <g id="background-jobs">
+    <rect x="512" y="536" width="668" height="70" rx="8" fill="#EEF4FA" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/server-cog" x="540" y="554" width="32" height="32" fill="#1D4E89" stroke-width="2"/>
+    <text x="588" y="564" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">后台 memory jobs</text>
+    <text x="588" y="592" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">把运行产生的交互、反思和候选记忆整理为后续可检索内容，降低单轮 prompt 负担。</text>
+  </g>
+
+  <g id="footer">
+    <text x="56" y="674" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="12" fill="#64748B">Source: course_report_zh.md · 3.2 记忆与检索系统 / 5.4 后台长期记忆流程</text>
+  </g>
+</svg>

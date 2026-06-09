@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <rect x="0" y="0" width="1280" height="720" fill="#FFFFFF"/>
+  <image href="../template_assets/pku_logo_cropped.png" x="1020" y="24" width="220" height="72" preserveAspectRatio="xMidYMid meet"/>
+  <rect x="0" y="68" width="82" height="68" fill="#A40012"/>
+  <text x="92" y="104" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="34" font-weight="bold" fill="#000000">总体架构：输入到 timeline 的受控链路</text>
+  <text x="92" y="136" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" fill="#333333">LLM 负责提出意图，事实改变交给校验、执行和状态写入</text>
+
+  <g id="flow">
+    <rect x="88" y="214" width="146" height="86" fill="#F7F7F7" stroke="#D9D9D9"/>
+    <text x="161" y="251" text-anchor="middle" font-family='"DengXian", Arial, sans-serif' font-size="22" font-weight="bold" fill="#000000">输入</text>
+    <text x="161" y="278" text-anchor="middle" font-family='"DengXian", Arial, sans-serif' font-size="16" fill="#666666">玩家 / Traveler</text>
+    <rect x="274" y="214" width="146" height="86" fill="#F7F7F7" stroke="#D9D9D9"/>
+    <text x="347" y="251" text-anchor="middle" font-family='"DengXian", Arial, sans-serif' font-size="22" font-weight="bold" fill="#000000">Observation</text>
+    <text x="347" y="278" text-anchor="middle" font-family='"DengXian", Arial, sans-serif' font-size="16" fill="#666666">状态切片</text>
+    <rect x="460" y="214" width="146" height="86" fill="#F7F7F7" stroke="#D9D9D9"/>
+    <text x="533" y="251" text-anchor="middle" font-family='"DengXian", Arial, sans-serif' font-size="22" font-weight="bold" fill="#000000">检索</text>
+    <text x="533" y="278" text-anchor="middle" font-family='"DengXian", Arial, sans-serif' font-size="16" fill="#666666">memory / lore</text>
+    <rect x="646" y="214" width="146" height="86" fill="#FFF1E5" stroke="#D9D9D9"/>
+    <text x="719" y="251" text-anchor="middle" font-family='"DengXian", Arial, sans-serif' font-size="22" font-weight="bold" fill="#A40012">NPCMind</text>
+    <text x="719" y="278" text-anchor="middle" font-family='"DengXian", Arial, sans-serif' font-size="16" fill="#666666">belief / plan</text>
+    <rect x="832" y="214" width="146" height="86" fill="#F7F7F7" stroke="#D9D9D9"/>
+    <text x="905" y="251" text-anchor="middle" font-family='"DengXian", Arial, sans-serif' font-size="22" font-weight="bold" fill="#000000">LLM</text>
+    <text x="905" y="278" text-anchor="middle" font-family='"DengXian", Arial, sans-serif' font-size="16" fill="#666666">decision</text>
+    <rect x="1018" y="214" width="146" height="86" fill="#FFF1E5" stroke="#D9D9D9"/>
+    <text x="1091" y="251" text-anchor="middle" font-family='"DengXian", Arial, sans-serif' font-size="22" font-weight="bold" fill="#A40012">校验</text>
+    <text x="1091" y="278" text-anchor="middle" font-family='"DengXian", Arial, sans-serif' font-size="16" fill="#666666">allowed / repair</text>
+    <line x1="234" y1="257" x2="274" y2="257" stroke="#BFBFBF" stroke-width="2"/>
+    <polygon points="274,257 264,251 264,263" fill="#BFBFBF"/>
+    <line x1="420" y1="257" x2="460" y2="257" stroke="#BFBFBF" stroke-width="2"/>
+    <polygon points="460,257 450,251 450,263" fill="#BFBFBF"/>
+    <line x1="606" y1="257" x2="646" y2="257" stroke="#BFBFBF" stroke-width="2"/>
+    <polygon points="646,257 636,251 636,263" fill="#BFBFBF"/>
+    <line x1="792" y1="257" x2="832" y2="257" stroke="#BFBFBF" stroke-width="2"/>
+    <polygon points="832,257 822,251 822,263" fill="#BFBFBF"/>
+    <line x1="978" y1="257" x2="1018" y2="257" stroke="#BFBFBF" stroke-width="2"/>
+    <polygon points="1018,257 1008,251 1008,263" fill="#BFBFBF"/>
+  </g>
+
+  <g id="execution">
+    <rect x="190" y="408" width="270" height="104" fill="#FFFFFF" stroke="#D9D9D9"/>
+    <text x="325" y="448" text-anchor="middle" font-family='"DengXian", Arial, sans-serif' font-size="22" font-weight="bold" fill="#000000">NarrativeEnvironment</text>
+    <text x="325" y="482" text-anchor="middle" font-family='"DengXian", Arial, sans-serif' font-size="18" fill="#333333">将 decision 转为 action</text>
+    <rect x="505" y="408" width="270" height="104" fill="#FFFFFF" stroke="#D9D9D9"/>
+    <text x="640" y="448" text-anchor="middle" font-family='"DengXian", Arial, sans-serif' font-size="22" font-weight="bold" fill="#000000">SQLite World State</text>
+    <text x="640" y="482" text-anchor="middle" font-family='"DengXian", Arial, sans-serif' font-size="18" fill="#333333">保存任务、物品、关系</text>
+    <rect x="820" y="408" width="270" height="104" fill="#FFFFFF" stroke="#D9D9D9"/>
+    <text x="955" y="448" text-anchor="middle" font-family='"DengXian", Arial, sans-serif' font-size="22" font-weight="bold" fill="#000000">Timeline Export</text>
+    <text x="955" y="482" text-anchor="middle" font-family='"DengXian", Arial, sans-serif' font-size="18" fill="#333333">输出课堂复盘证据</text>
+    <line x1="1091" y1="300" x2="1091" y2="356" stroke="#BFBFBF"/>
+    <line x1="1091" y1="356" x2="325" y2="356" stroke="#BFBFBF"/>
+    <line x1="325" y1="356" x2="325" y2="408" stroke="#BFBFBF"/>
+    <polygon points="325,408 319,398 331,398" fill="#BFBFBF"/>
+    <line x1="460" y1="460" x2="505" y2="460" stroke="#BFBFBF" stroke-width="2"/>
+    <polygon points="505,460 495,454 495,466" fill="#BFBFBF"/>
+    <line x1="775" y1="460" x2="820" y2="460" stroke="#BFBFBF" stroke-width="2"/>
+    <polygon points="820,460 810,454 810,466" fill="#BFBFBF"/>
+  </g>
+
+  <line x1="92" y1="580" x2="1188" y2="580" stroke="#D9D9D9"/>
+  <text x="92" y="622" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#000000">关键边界：</text>
+  <text x="220" y="622" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" fill="#333333">LLM 提出意图，系统决定事实是否发生。</text>
+  <text x="1180" y="692" text-anchor="end" font-family='"DengXian", Arial, sans-serif' font-size="14" fill="#666666">5</text>
+</svg>

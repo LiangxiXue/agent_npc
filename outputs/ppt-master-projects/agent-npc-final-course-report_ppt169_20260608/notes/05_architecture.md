@@ -1,0 +1,1 @@
+总体架构的关键，是把 LLM 放在“提出意图”的位置，而不是让它直接拥有执行权。玩家或 Traveler 的输入先变成 observation，再经过记忆与 lore 检索，进入 NPCMind 形成 belief、goal 和 plan；LLM 基于这些上下文输出结构化 decision。这个 decision 必须经过 ActionValidator 和 NarrativeEnvironment，才能写入 SQLite 世界状态。最后，系统会把过程导出为 trace 和 timeline，这也是后面报告和演示的主要证据来源。

@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <g id="background">
+    <rect x="0" y="0" width="1280" height="720" fill="#F8FAFC"/>
+    <rect x="0" y="0" width="1280" height="14" fill="#1D4E89"/>
+  </g>
+
+  <g id="header">
+    <text x="56" y="72" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="34" font-weight="bold" fill="#17324D">Git 演进：从单角色原型到可展示运行时</text>
+    <text x="56" y="112" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#475569">提交历史提供了项目从基础 Agent 到 Traveler 课堂 trace 的实现证据。</text>
+    <text x="1204" y="72" text-anchor="end" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="12" fill="#64748B">04 / 14</text>
+  </g>
+
+  <g id="timeline-axis">
+    <line x1="104" y1="306" x2="1038" y2="306" stroke="#94A3B8" stroke-width="3"/>
+    <circle cx="132" cy="306" r="9" fill="#1D4E89"/>
+    <circle cx="344" cy="306" r="9" fill="#1D4E89"/>
+    <circle cx="556" cy="306" r="9" fill="#0E7490"/>
+    <circle cx="768" cy="306" r="9" fill="#0E7490"/>
+    <circle cx="980" cy="306" r="9" fill="#B7791F"/>
+  </g>
+
+  <g id="phase-1">
+    <rect x="72" y="160" width="180" height="104" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/database" x="96" y="184" width="30" height="30" fill="#1D4E89" stroke-width="2"/>
+    <text x="138" y="198" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">单 NPC 原型</text>
+    <text x="96" y="232" font-family="Consolas" font-size="14" fill="#475569">d727b0f</text>
+    <text x="96" y="250" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#64748B">SQLite / workflow / trace</text>
+  </g>
+
+  <g id="phase-2">
+    <rect x="284" y="350" width="180" height="122" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/book" x="308" y="374" width="30" height="30" fill="#1D4E89" stroke-width="2"/>
+    <text x="350" y="388" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">记忆与 UI</text>
+    <text x="308" y="422" font-family="Consolas" font-size="14" fill="#475569">9ed495f</text>
+    <text x="308" y="446" font-family="Consolas" font-size="14" fill="#475569">261094c</text>
+    <text x="308" y="464" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#64748B">上下文 / lore / 玩家端</text>
+  </g>
+
+  <g id="phase-3">
+    <rect x="496" y="160" width="180" height="122" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/brain" x="520" y="184" width="30" height="30" fill="#0E7490" stroke-width="2"/>
+    <text x="562" y="198" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">心智与校验</text>
+    <text x="520" y="232" font-family="Consolas" font-size="14" fill="#475569">57c98e6</text>
+    <text x="520" y="256" font-family="Consolas" font-size="14" fill="#475569">856c804</text>
+    <text x="520" y="274" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#64748B">NPCMind / environment</text>
+  </g>
+
+  <g id="phase-4">
+    <rect x="708" y="350" width="180" height="122" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/users" x="732" y="374" width="30" height="30" fill="#0E7490" stroke-width="2"/>
+    <text x="774" y="388" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">自主运行时</text>
+    <text x="732" y="422" font-family="Consolas" font-size="14" fill="#475569">e895667</text>
+    <text x="732" y="446" font-family="Consolas" font-size="14" fill="#475569">bf5cd92</text>
+    <text x="732" y="464" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#64748B">event inbox / tick</text>
+  </g>
+
+  <g id="phase-5">
+    <rect x="920" y="160" width="180" height="122" rx="8" fill="#FFF3D6" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/route" x="944" y="184" width="30" height="30" fill="#B7791F" stroke-width="2"/>
+    <text x="986" y="198" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">Traveler 展示</text>
+    <text x="944" y="232" font-family="Consolas" font-size="14" fill="#475569">ad178e2</text>
+    <text x="944" y="256" font-family="Consolas" font-size="14" fill="#475569">d4142ee</text>
+    <text x="944" y="274" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#64748B">classroom / Sable route</text>
+  </g>
+
+  <g id="remote-status">
+    <rect x="72" y="536" width="1030" height="76" rx="8" fill="#EEF4FA" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/git-branch" x="104" y="558" width="32" height="32" fill="#1D4E89" stroke-width="2"/>
+    <text x="154" y="570" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">GitHub 远端分支证据</text>
+    <text x="154" y="598" font-family="Consolas" font-size="14" fill="#475569">main=e19512e · codex/living-world-demo=ad178e2 · codex/traveler-dialogue-trace=d4142ee</text>
+  </g>
+
+  <g id="footer">
+    <text x="56" y="674" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="12" fill="#64748B">Source: git_history_oneline.md · github_remote_heads.md</text>
+  </g>
+</svg>

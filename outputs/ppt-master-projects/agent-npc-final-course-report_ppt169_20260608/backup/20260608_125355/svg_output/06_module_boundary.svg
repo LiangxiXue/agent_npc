@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <g id="background">
+    <rect x="0" y="0" width="1280" height="720" fill="#F8FAFC"/>
+    <rect x="0" y="0" width="1280" height="14" fill="#1D4E89"/>
+  </g>
+
+  <g id="header">
+    <text x="56" y="72" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="34" font-weight="bold" fill="#17324D">模块职责：LLM 参与认知，系统掌握执行权</text>
+    <text x="56" y="112" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#475569">把角色智能拆成可理解、可测试、可追踪的责任边界。</text>
+    <text x="1204" y="72" text-anchor="end" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="12" fill="#64748B">06 / 14</text>
+  </g>
+
+  <g id="boundary-table">
+    <rect x="56" y="156" width="812" height="468" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <rect x="56" y="156" width="812" height="48" rx="8" fill="#1D4E89"/>
+    <text x="88" y="187" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#FFFFFF">模块</text>
+    <text x="286" y="187" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#FFFFFF">主要输入</text>
+    <text x="514" y="187" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#FFFFFF">责任边界</text>
+    <text x="748" y="187" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#FFFFFF">输出</text>
+
+    <line x1="254" y1="204" x2="254" y2="624" stroke="#CBD5E1"/>
+    <line x1="482" y1="204" x2="482" y2="624" stroke="#CBD5E1"/>
+    <line x1="716" y1="204" x2="716" y2="624" stroke="#CBD5E1"/>
+
+    <rect x="56" y="204" width="812" height="52" fill="#F8FAFC"/>
+    <text x="88" y="237" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">NarrativeEnv</text>
+    <text x="286" y="237" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">玩家 / Traveler 输入</text>
+    <text x="514" y="237" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#1F2937">构造 observation，执行 action</text>
+    <text x="748" y="237" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">ActionResult</text>
+
+    <line x1="56" y1="256" x2="868" y2="256" stroke="#CBD5E1"/>
+    <text x="88" y="291" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">Memory</text>
+    <text x="286" y="291" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">上下文 / lore / query</text>
+    <text x="514" y="291" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#1F2937">补足角色与世界背景</text>
+    <text x="748" y="291" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">snippets</text>
+
+    <line x1="56" y1="310" x2="868" y2="310" stroke="#CBD5E1"/>
+    <rect x="56" y="310" width="812" height="52" fill="#F8FAFC"/>
+    <text x="88" y="345" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">NPCMind</text>
+    <text x="286" y="345" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">observation + memory</text>
+    <text x="514" y="345" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#1F2937">形成 belief / goal / plan</text>
+    <text x="748" y="345" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">mind_state</text>
+
+    <line x1="56" y1="362" x2="868" y2="362" stroke="#CBD5E1"/>
+    <text x="88" y="397" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">LLM Decision</text>
+    <text x="286" y="397" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">mind + action surface</text>
+    <text x="514" y="397" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#1F2937">提出结构化意图和回复草稿</text>
+    <text x="748" y="397" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">decision</text>
+
+    <line x1="56" y1="416" x2="868" y2="416" stroke="#CBD5E1"/>
+    <rect x="56" y="416" width="812" height="52" fill="#F8FAFC"/>
+    <text x="88" y="451" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">ActionValidator</text>
+    <text x="286" y="451" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">decision + world state</text>
+    <text x="514" y="451" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#1F2937">允许、阻止或修复行动</text>
+    <text x="748" y="451" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">allowed / blocked</text>
+
+    <line x1="56" y1="468" x2="868" y2="468" stroke="#CBD5E1"/>
+    <text x="88" y="503" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">SQLite State</text>
+    <text x="286" y="503" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">validated result</text>
+    <text x="514" y="503" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#1F2937">维护任务、物品、地点、关系事实</text>
+    <text x="748" y="503" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">state_after</text>
+
+    <line x1="56" y1="522" x2="868" y2="522" stroke="#CBD5E1"/>
+    <rect x="56" y="522" width="812" height="52" fill="#F8FAFC"/>
+    <text x="88" y="557" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">Timeline Export</text>
+    <text x="286" y="557" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">round trace</text>
+    <text x="514" y="557" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#1F2937">整理可读 JSON / Markdown 输出</text>
+    <text x="748" y="557" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">timeline</text>
+
+    <line x1="56" y1="574" x2="868" y2="574" stroke="#CBD5E1"/>
+    <text x="88" y="609" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">Traveler Runtime</text>
+    <text x="286" y="609" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">YAML profile + world</text>
+    <text x="514" y="609" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#1F2937">自动观察、决策、行动和反思</text>
+    <text x="748" y="609" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">round result</text>
+  </g>
+
+  <g id="right-summary">
+    <rect x="912" y="156" width="312" height="214" rx="8" fill="#D8F3F7" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/shield-check" x="944" y="188" width="42" height="42" fill="#0E7490" stroke-width="2"/>
+    <text x="1000" y="210" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#17324D">执行权边界</text>
+    <text x="944" y="266" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#1F2937">
+      <tspan x="944" dy="0">LLM 只提出意图；</tspan>
+      <tspan x="944" dy="30">事实写入必须经过</tspan>
+      <tspan x="944" dy="30">Validator 与状态机。</tspan>
+    </text>
+  </g>
+
+  <g id="right-stack">
+    <rect x="912" y="400" width="312" height="224" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <text x="944" y="434" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#1D4E89">为什么这对课程汇报重要</text>
+    <text x="944" y="476" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#1F2937">
+      <tspan x="944" dy="0">1. 能解释项目不是聊天壳</tspan>
+      <tspan x="944" dy="32">2. 能定位每个行为原因</tspan>
+      <tspan x="944" dy="32">3. 能用 trace 证明结果</tspan>
+      <tspan x="944" dy="32">4. 能继续扩展评估脚本</tspan>
+    </text>
+  </g>
+
+  <g id="footer">
+    <text x="56" y="674" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="12" fill="#64748B">Source: course_report_zh.md · 3.8 模块职责表</text>
+  </g>
+</svg>

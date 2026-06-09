@@ -1,0 +1,8 @@
+﻿Task mode: create
+Primary profile: engineering-platform
+Secondary gates: classroom presentation, course project storytelling, image-led visual rhythm
+Deck size: 14 slides, 8-10 minute presentation
+Visual system: dark technical, formal, subtle pixel-RPG accents; AI-generated visual background per slide plus editable text/proof objects
+Required proof objects: architecture workflow, module boundary map, evolution evidence, trace example, UI screenshot, evaluation matrix, roadmap
+No invented metrics: use qualitative evidence from report, repo, screenshots and trace/timeline files only
+Final deliverable: PPTX only, in repo root/output path

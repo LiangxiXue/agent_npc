@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <g id="background">
+    <rect x="0" y="0" width="1280" height="720" fill="#F8FAFC"/>
+    <rect x="0" y="0" width="1280" height="14" fill="#1D4E89"/>
+  </g>
+
+  <g id="header">
+    <text x="56" y="72" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="34" font-weight="bold" fill="#17324D">Autonomous NPC Runtime：NPC 响应世界事件</text>
+    <text x="56" y="112" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#475569">NPC 不只等待玩家输入，也可以在世界事件触发后生成受约束的主动行为。</text>
+    <text x="1204" y="72" text-anchor="end" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="12" fill="#64748B">09 / 14</text>
+  </g>
+
+  <g id="event-flow">
+    <rect x="72" y="190" width="150" height="98" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/map-route" x="130" y="208" width="34" height="34" fill="#1D4E89" stroke-width="2"/>
+    <text x="147" y="262" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">world event</text>
+    <text x="147" y="282" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#64748B">事件写入</text>
+
+    <rect x="272" y="190" width="150" height="98" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/users" x="330" y="208" width="34" height="34" fill="#1D4E89" stroke-width="2"/>
+    <text x="347" y="262" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">NPC inbox</text>
+    <text x="347" y="282" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#64748B">事件投递</text>
+
+    <rect x="472" y="190" width="150" height="98" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/checklist" x="530" y="208" width="34" height="34" fill="#1D4E89" stroke-width="2"/>
+    <text x="547" y="262" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">ActionCatalog</text>
+    <text x="547" y="282" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#64748B">可行动作集合</text>
+
+    <rect x="672" y="190" width="150" height="98" rx="8" fill="#D8F3F7" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/robot" x="730" y="208" width="34" height="34" fill="#0E7490" stroke-width="2"/>
+    <text x="747" y="262" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">LLM tick</text>
+    <text x="747" y="282" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#64748B">constrained decision</text>
+
+    <rect x="872" y="190" width="150" height="98" rx="8" fill="#D8F3F7" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/shield-check" x="930" y="208" width="34" height="34" fill="#0E7490" stroke-width="2"/>
+    <text x="947" y="262" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">validate</text>
+    <text x="947" y="282" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#64748B">拦截 / 修复</text>
+
+    <rect x="1072" y="190" width="150" height="98" rx="8" fill="#FFF3D6" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/timeline" x="1130" y="208" width="34" height="34" fill="#B7791F" stroke-width="2"/>
+    <text x="1147" y="262" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">mailbox / trace</text>
+    <text x="1147" y="282" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#64748B">结果记录</text>
+
+    <line x1="222" y1="239" x2="272" y2="239" stroke="#94A3B8" stroke-width="2"/>
+    <polygon points="272,239 262,233 262,245" fill="#94A3B8"/>
+    <line x1="422" y1="239" x2="472" y2="239" stroke="#94A3B8" stroke-width="2"/>
+    <polygon points="472,239 462,233 462,245" fill="#94A3B8"/>
+    <line x1="622" y1="239" x2="672" y2="239" stroke="#94A3B8" stroke-width="2"/>
+    <polygon points="672,239 662,233 662,245" fill="#94A3B8"/>
+    <line x1="822" y1="239" x2="872" y2="239" stroke="#94A3B8" stroke-width="2"/>
+    <polygon points="872,239 862,233 862,245" fill="#94A3B8"/>
+    <line x1="1022" y1="239" x2="1072" y2="239" stroke="#94A3B8" stroke-width="2"/>
+    <polygon points="1072,239 1062,233 1062,245" fill="#94A3B8"/>
+  </g>
+
+  <g id="control-points">
+    <rect x="106" y="384" width="318" height="146" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <text x="136" y="424" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#1D4E89">控制点 1</text>
+    <text x="136" y="462" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" fill="#1F2937">可行动作来自 ActionCatalog</text>
+    <text x="136" y="492" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">LLM 不能凭空发明系统未支持的工具。</text>
+
+    <rect x="482" y="384" width="318" height="146" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <text x="512" y="424" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#0E7490">控制点 2</text>
+    <text x="512" y="462" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" fill="#1F2937">所有行动仍经过 Validator</text>
+    <text x="512" y="492" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">自主 tick 也不能绕过状态机。</text>
+
+    <rect x="858" y="384" width="318" height="146" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <text x="888" y="424" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#B7791F">控制点 3</text>
+    <text x="888" y="462" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" fill="#1F2937">结果写入 mailbox 与 trace</text>
+    <text x="888" y="492" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">便于区分直接对话和独立 NPC tick。</text>
+  </g>
+
+  <g id="takeaway">
+    <rect x="106" y="568" width="1070" height="44" rx="8" fill="#EEF4FA" stroke="#CBD5E1"/>
+    <text x="641" y="596" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" fill="#1F2937">自主运行时的价值不是“让 NPC 随机行动”，而是让世界事件通过可约束流程影响角色行为。</text>
+  </g>
+
+  <g id="footer">
+    <text x="56" y="674" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="12" fill="#64748B">Source: course_report_zh.md · 3.6 autonomous NPC runtime</text>
+  </g>
+</svg>

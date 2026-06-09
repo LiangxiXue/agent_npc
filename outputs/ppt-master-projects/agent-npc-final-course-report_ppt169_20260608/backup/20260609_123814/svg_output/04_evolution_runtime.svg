@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <rect x="0" y="0" width="1280" height="720" fill="#FFFFFF"/>
+  <image href="../template_assets/pku_logo_cropped.png" x="1020" y="24" width="220" height="72" preserveAspectRatio="xMidYMid meet"/>
+  <rect x="0" y="68" width="82" height="68" fill="#A40012"/>
+  <text x="92" y="104" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="34" font-weight="bold" fill="#000000">项目演进（二）：从执行边界到 Traveler 展示</text>
+  <text x="92" y="136" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" fill="#333333">后两次演进解决的是事实边界、主动行为和课堂复盘</text>
+
+  <rect x="92" y="192" width="500" height="336" fill="#F7F7F7" stroke="#D9D9D9"/>
+  <text x="126" y="244" font-family='"DengXian", Arial, sans-serif' font-size="28" font-weight="bold" fill="#A40012">3. NPCMind + Validator</text>
+  <text x="126" y="302" font-family='"DengXian", Arial, sans-serif' font-size="22" font-weight="bold" fill="#000000">为什么这样做</text>
+  <text x="126" y="340" font-family='"DengXian", Arial, sans-serif' font-size="20" fill="#333333">
+    <tspan x="126" dy="0">LLM 能生成合理语言，</tspan>
+    <tspan x="126" dy="28">但不能直接改写任务、</tspan>
+    <tspan x="126" dy="28">物品和关系事实。</tspan>
+  </text>
+  <text x="126" y="402" font-family='"DengXian", Arial, sans-serif' font-size="22" font-weight="bold" fill="#000000">带来的好处</text>
+  <text x="126" y="440" font-family='"DengXian", Arial, sans-serif' font-size="20" fill="#333333">
+    <tspan x="126" dy="0">角色心智、语言意图</tspan>
+    <tspan x="126" dy="28">和世界执行被分离；</tspan>
+    <tspan x="126" dy="28">越界行动可被拒绝、修复、记录。</tspan>
+  </text>
+
+  <rect x="676" y="192" width="500" height="336" fill="#FFF1E5" stroke="#D9D9D9"/>
+  <text x="710" y="244" font-family='"DengXian", Arial, sans-serif' font-size="28" font-weight="bold" fill="#A40012">4. Autonomous Runtime + Traveler</text>
+  <text x="710" y="302" font-family='"DengXian", Arial, sans-serif' font-size="22" font-weight="bold" fill="#000000">为什么这样做</text>
+  <text x="710" y="340" font-family='"DengXian", Arial, sans-serif' font-size="20" fill="#333333">
+    <tspan x="710" dy="0">课程展示需要看到多 NPC 覆盖、</tspan>
+    <tspan x="710" dy="28">主动探索路线和真实运行证据，</tspan>
+    <tspan x="710" dy="28">而不是手工单轮问答。</tspan>
+  </text>
+  <text x="710" y="402" font-family='"DengXian", Arial, sans-serif' font-size="22" font-weight="bold" fill="#000000">带来的好处</text>
+  <text x="710" y="440" font-family='"DengXian", Arial, sans-serif' font-size="20" fill="#333333">
+    <tspan x="710" dy="0">Traveler profile 驱动路线选择；</tspan>
+    <tspan x="710" dy="28">timeline 展示理由、回复、</tspan>
+    <tspan x="710" dy="28">状态变化和 outcome。</tspan>
+  </text>
+
+  <line x1="92" y1="568" x2="1188" y2="568" stroke="#D9D9D9"/>
+  <text x="92" y="610" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#000000">阶段结果：</text>
+  <text x="220" y="610" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" fill="#333333">系统从“对话程序”推进到“可控、主动、可复盘的 living world”。</text>
+  <text x="1180" y="692" text-anchor="end" font-family='"DengXian", Arial, sans-serif' font-size="14" fill="#666666">4</text>
+</svg>

@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <g id="background">
+    <rect x="0" y="0" width="1280" height="720" fill="#F8FAFC"/>
+    <rect x="0" y="0" width="1280" height="14" fill="#1D4E89"/>
+  </g>
+
+  <g id="header">
+    <text x="56" y="72" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="34" font-weight="bold" fill="#17324D">项目演进：从“会聊天”到可验证 living world</text>
+    <text x="56" y="112" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#475569">这页按能力阶段说明项目为什么不断增加模块，而不是罗列版本证据。</text>
+    <text x="1204" y="72" text-anchor="end" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="12" fill="#64748B">04 / 14</text>
+  </g>
+
+  <g id="evolution-logic">
+    <rect x="72" y="154" width="286" height="446" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/route" x="104" y="184" width="36" height="36" fill="#1D4E89" stroke-width="2"/>
+    <text x="156" y="208" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#17324D">演进主线</text>
+    <text x="104" y="268" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#1F2937">
+      <tspan x="104" dy="0">每一阶段都在补上</tspan>
+      <tspan x="104" dy="30">“可控角色 Agent”</tspan>
+      <tspan x="104" dy="30">缺失的一块：</tspan>
+    </text>
+    <text x="104" y="382" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#1F2937">
+      <tspan x="104" dy="0">上下文是否稳定</tspan>
+      <tspan x="104" dy="30">状态边界是否清楚</tspan>
+      <tspan x="104" dy="30">角色能否主动行动</tspan>
+      <tspan x="104" dy="30">结果能否复盘展示</tspan>
+    </text>
+    <rect x="104" y="528" width="222" height="42" rx="8" fill="#EEF4FA" stroke="#CBD5E1"/>
+    <text x="215" y="555" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">从 demo 到运行链路</text>
+  </g>
+
+  <g id="timeline-axis">
+    <line x1="398" y1="200" x2="398" y2="548" stroke="#94A3B8" stroke-width="3"/>
+  </g>
+
+  <g id="phase-1">
+    <rect x="430" y="154" width="760" height="92" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <circle cx="398" cy="200" r="9" fill="#1D4E89"/>
+    <use data-icon="tabler-outline/database" x="456" y="181" width="34" height="34" fill="#1D4E89" stroke-width="2"/>
+    <text x="510" y="190" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="20" font-weight="bold" fill="#17324D">1. 单 NPC 记忆对话原型</text>
+    <text x="510" y="219" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="16" fill="#1F2937">先验证最小闭环：读取状态、调用 LLM、回复玩家，并把过程保存为 trace。</text>
+    <text x="934" y="190" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" font-weight="bold" fill="#1D4E89">得到能力</text>
+    <text x="934" y="219" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">SQLite / workflow / reply trace</text>
+  </g>
+
+  <g id="phase-2">
+    <rect x="430" y="270" width="760" height="92" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <circle cx="398" cy="316" r="9" fill="#1D4E89"/>
+    <use data-icon="tabler-outline/book" x="456" y="297" width="34" height="34" fill="#1D4E89" stroke-width="2"/>
+    <text x="510" y="306" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="20" font-weight="bold" fill="#17324D">2. 分层上下文与玩家端</text>
+    <text x="510" y="335" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="16" fill="#1F2937">原型回复容易断裂，因此把 lore、近期上下文、长期记忆和交互入口拆开管理。</text>
+    <text x="934" y="306" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" font-weight="bold" fill="#1D4E89">得到能力</text>
+    <text x="934" y="335" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">retrieval / memory jobs / React UI</text>
+  </g>
+
+  <g id="phase-3">
+    <rect x="430" y="386" width="760" height="92" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <circle cx="398" cy="432" r="9" fill="#0E7490"/>
+    <use data-icon="tabler-outline/brain" x="456" y="413" width="34" height="34" fill="#0E7490" stroke-width="2"/>
+    <text x="510" y="422" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="20" font-weight="bold" fill="#17324D">3. 心智建模与规则边界</text>
+    <text x="510" y="451" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="16" fill="#1F2937">LLM 可以表达意图，但不能直接改世界事实，所以拆出主观判断和执行校验。</text>
+    <text x="934" y="422" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" font-weight="bold" fill="#0E7490">得到能力</text>
+    <text x="934" y="451" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">NPCMind / environment / validator</text>
+  </g>
+
+  <g id="phase-4">
+    <rect x="430" y="502" width="760" height="92" rx="8" fill="#FFF3D6" stroke="#CBD5E1"/>
+    <circle cx="398" cy="548" r="9" fill="#B7791F"/>
+    <use data-icon="tabler-outline/users" x="456" y="529" width="34" height="34" fill="#B7791F" stroke-width="2"/>
+    <text x="510" y="538" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="20" font-weight="bold" fill="#17324D">4. 多角色 living world 与 Traveler</text>
+    <text x="510" y="567" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="16" fill="#1F2937">课程展示需要自动探索、多 NPC 覆盖和可复盘证据，于是加入 runtime 与 timeline。</text>
+    <text x="934" y="538" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" font-weight="bold" fill="#B7791F">得到能力</text>
+    <text x="934" y="567" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">world events / Traveler / timeline export</text>
+  </g>
+
+  <g id="footer">
+    <text x="56" y="674" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="12" fill="#64748B">Source: git_history_oneline.md · course_report_zh.md · 项目主体文件</text>
+  </g>
+</svg>

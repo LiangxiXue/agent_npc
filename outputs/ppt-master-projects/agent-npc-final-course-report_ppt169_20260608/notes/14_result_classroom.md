@@ -1,0 +1,1 @@
+这页展示第一个真实运行结果：classroom showcase。这个 run 使用的是 truth-seeking 风格的 Arin the Cartographer，总共跑了 20 轮，最终 outcome 是 guardian_advantage，arc phase 为 resolved，tension 为 4。它覆盖了 Lina、Ron、Mira 和 Sable 四个 NPC，并在过程中记录了 Traveler 的行动理由、NPC 回复、关系变化、exploration leads 和 arc evidence。这个结果最适合课堂展示，因为它说明 Traveler 会按 profile 主动规划路线，并且每一步都有可复盘证据。

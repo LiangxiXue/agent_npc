@@ -1,0 +1,3 @@
+﻿ad178e24274f75245d3bc72479544e5c782dc1ab	refs/heads/codex/living-world-demo
+d4142eee34d0ca5a8a1ec17ef10bfc3fe0e291de	refs/heads/codex/traveler-dialogue-trace
+e19512e514946d6c22e2d247161a310fc04e1fcb	refs/heads/main

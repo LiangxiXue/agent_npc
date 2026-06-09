@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <g id="background">
+    <rect x="0" y="0" width="1280" height="720" fill="#F8FAFC"/>
+    <rect x="0" y="0" width="1280" height="14" fill="#1D4E89"/>
+  </g>
+
+  <g id="header">
+    <text x="56" y="72" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="34" font-weight="bold" fill="#17324D">评估：已有证据与下一步指标</text>
+    <text x="56" y="112" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#475569">当前评估以 demo trace、JSON / Markdown timeline 和人工复盘为主，不虚构大规模统计结论。</text>
+    <text x="1204" y="72" text-anchor="end" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="12" fill="#64748B">13 / 14</text>
+  </g>
+
+  <g id="evidence-matrix">
+    <rect x="56" y="154" width="802" height="430" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <rect x="56" y="154" width="802" height="46" rx="8" fill="#1D4E89"/>
+    <text x="86" y="184" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#FFFFFF">评估对象</text>
+    <text x="270" y="184" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#FFFFFF">当前证据来源</text>
+    <text x="506" y="184" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#FFFFFF">能说明什么</text>
+    <text x="700" y="184" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#FFFFFF">下一步</text>
+
+    <line x1="240" y1="200" x2="240" y2="584" stroke="#CBD5E1"/>
+    <line x1="480" y1="200" x2="480" y2="584" stroke="#CBD5E1"/>
+    <line x1="680" y1="200" x2="680" y2="584" stroke="#CBD5E1"/>
+
+    <rect x="56" y="200" width="802" height="64" fill="#F8FAFC"/>
+    <text x="86" y="238" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">角色一致性</text>
+    <text x="270" y="230" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">NPCMind trace / lore</text>
+    <text x="270" y="250" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">classroom trace</text>
+    <text x="506" y="238" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#1F2937">能复盘语气、知识边界</text>
+    <text x="700" y="238" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">固定对话集</text>
+
+    <line x1="56" y1="264" x2="858" y2="264" stroke="#CBD5E1"/>
+    <text x="86" y="302" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">状态一致性</text>
+    <text x="270" y="294" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">SQLite / Validator</text>
+    <text x="270" y="314" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">state changes</text>
+    <text x="506" y="302" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#1F2937">回复和状态写入分离</text>
+    <text x="700" y="302" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">自动一致性脚本</text>
+
+    <line x1="56" y1="328" x2="858" y2="328" stroke="#CBD5E1"/>
+    <rect x="56" y="328" width="802" height="64" fill="#F8FAFC"/>
+    <text x="86" y="366" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">越权行动</text>
+    <text x="270" y="358" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">allowed / blocked</text>
+    <text x="270" y="378" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">response constraints</text>
+    <text x="506" y="366" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#1F2937">能看到拦截路径存在</text>
+    <text x="700" y="366" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">分类统计频次</text>
+
+    <line x1="56" y1="392" x2="858" y2="392" stroke="#CBD5E1"/>
+    <text x="86" y="430" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">Traveler 差异</text>
+    <text x="270" y="422" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">showcase / Sable route</text>
+    <text x="270" y="442" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">profile YAML</text>
+    <text x="506" y="430" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#1F2937">不同 profile 影响路线</text>
+    <text x="700" y="430" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">同初始态重复运行</text>
+
+    <line x1="56" y1="456" x2="858" y2="456" stroke="#CBD5E1"/>
+    <rect x="56" y="456" width="802" height="64" fill="#F8FAFC"/>
+    <text x="86" y="494" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">Trace 可解释性</text>
+    <text x="270" y="486" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">JSON / Markdown</text>
+    <text x="270" y="506" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">timeline export</text>
+    <text x="506" y="494" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#1F2937">能定位行为原因</text>
+    <text x="700" y="494" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">图形化回放</text>
+
+    <line x1="56" y1="520" x2="858" y2="520" stroke="#CBD5E1"/>
+    <text x="86" y="558" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">运行开销</text>
+    <text x="270" y="550" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">timing breakdown</text>
+    <text x="270" y="570" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">Traveler tick 字段</text>
+    <text x="506" y="558" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#1F2937">能定位耗时阶段</text>
+    <text x="700" y="558" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">固定基准记录</text>
+  </g>
+
+  <g id="limits-path">
+    <rect x="900" y="154" width="324" height="430" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/report-analytics" x="932" y="184" width="38" height="38" fill="#1D4E89" stroke-width="2"/>
+    <text x="986" y="208" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#17324D">当前边界</text>
+
+    <rect x="932" y="258" width="260" height="54" rx="8" fill="#FFF3D6" stroke="#CBD5E1"/>
+    <text x="956" y="292" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" fill="#1F2937">多 Agent 调度仍需成熟</text>
+
+    <rect x="932" y="334" width="260" height="54" rx="8" fill="#FFF3D6" stroke="#CBD5E1"/>
+    <text x="956" y="368" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" fill="#1F2937">评估仍偏案例复盘</text>
+
+    <rect x="932" y="410" width="260" height="54" rx="8" fill="#FFF3D6" stroke="#CBD5E1"/>
+    <text x="956" y="444" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" fill="#1F2937">文本 timeline 阅读成本高</text>
+
+    <rect x="932" y="500" width="260" height="42" rx="8" fill="#D8F3F7" stroke="#CBD5E1"/>
+    <text x="1062" y="526" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#0E7490">下一步：自动分析 + 可视化回放</text>
+  </g>
+
+  <g id="footer">
+    <text x="56" y="674" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="12" fill="#64748B">Source: course_report_zh.md · 七、系统评估 / 八、问题与不足</text>
+  </g>
+</svg>

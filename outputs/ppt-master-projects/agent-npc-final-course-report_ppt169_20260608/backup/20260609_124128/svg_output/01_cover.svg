@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <rect x="0" y="0" width="1280" height="720" fill="#FFFFFF"/>
+  <rect x="0" y="68" width="82" height="68" fill="#A40012"/>
+  <image href="../template_assets/pku_logo_cropped.png" x="1020" y="24" width="220" height="72" preserveAspectRatio="xMidYMid meet"/>
+
+  <g id="title">
+    <text x="456" y="260" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="50" font-weight="bold" fill="#333333">记忆驱动的可验证</text>
+    <text x="456" y="326" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="50" font-weight="bold" fill="#333333">LLM 角色 Agent 系统</text>
+    <text x="904" y="374" text-anchor="middle" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="28" fill="#000000">从单 NPC 对话到 Traveler living-world runtime</text>
+    <line x1="88" y1="418" x2="1190" y2="418" stroke="#D9D9D9" stroke-width="1"/>
+    <line x1="776" y1="415" x2="1190" y2="415" stroke="#E87522" stroke-width="4"/>
+    <text x="904" y="482" text-anchor="middle" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="30" fill="#000000">课程项目最终汇报</text>
+    <text x="904" y="548" text-anchor="middle" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="26" fill="#000000">汇报人：薛良玺</text>
+    <text x="904" y="590" text-anchor="middle" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" fill="#333333">2026年6月9日</text>
+  </g>
+</svg>

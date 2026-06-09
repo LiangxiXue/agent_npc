@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <g id="background">
+    <rect x="0" y="0" width="1280" height="720" fill="#F8FAFC"/>
+    <rect x="0" y="0" width="1280" height="14" fill="#1D4E89"/>
+  </g>
+
+  <g id="header">
+    <text x="56" y="72" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="34" font-weight="bold" fill="#17324D">问题定义：角色聊天不等于世界状态</text>
+    <text x="56" y="112" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#475569">普通 LLM 对话容易把“说出来的内容”误当成“已经发生的事实”。</text>
+    <text x="1204" y="72" text-anchor="end" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="12" fill="#64748B">02 / 14</text>
+  </g>
+
+  <g id="risk-chat">
+    <rect x="72" y="168" width="344" height="270" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <rect x="72" y="168" width="344" height="8" fill="#B91C1C"/>
+    <use data-icon="tabler-outline/message-2-code" x="104" y="204" width="42" height="42" fill="#B91C1C" stroke-width="2"/>
+    <text x="164" y="224" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#17324D">语言幻觉</text>
+    <text x="104" y="280" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#1F2937">
+      <tspan x="104" dy="0">NPC 可能说“入口已解锁”、</tspan>
+      <tspan x="104" dy="28">“物品已交付”，但数据库和</tspan>
+      <tspan x="104" dy="28">任务状态并没有对应变化。</tspan>
+    </text>
+    <text x="104" y="392" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#64748B">风险：回复可信，状态不可信</text>
+  </g>
+
+  <g id="risk-memory">
+    <rect x="468" y="168" width="344" height="270" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <rect x="468" y="168" width="344" height="8" fill="#B7791F"/>
+    <use data-icon="tabler-outline/book" x="500" y="204" width="42" height="42" fill="#B7791F" stroke-width="2"/>
+    <text x="560" y="224" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#17324D">上下文断裂</text>
+    <text x="500" y="280" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#1F2937">
+      <tspan x="500" dy="0">只依赖当前输入时，角色会</tspan>
+      <tspan x="500" dy="28">忘记近期互动、长期记忆、</tspan>
+      <tspan x="500" dy="28">稳定世界设定和任务条件。</tspan>
+    </text>
+    <text x="500" y="392" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#64748B">风险：角色可聊，角色不稳定</text>
+  </g>
+
+  <g id="risk-trace">
+    <rect x="864" y="168" width="344" height="270" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <rect x="864" y="168" width="344" height="8" fill="#0E7490"/>
+    <use data-icon="tabler-outline/timeline" x="896" y="204" width="42" height="42" fill="#0E7490" stroke-width="2"/>
+    <text x="956" y="224" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#17324D">不可复盘</text>
+    <text x="896" y="280" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#1F2937">
+      <tspan x="896" dy="0">如果只保存最终回复，就无法</tspan>
+      <tspan x="896" dy="28">解释一次行为如何检索、决策、</tspan>
+      <tspan x="896" dy="28">校验并写入状态。</tspan>
+    </text>
+    <text x="896" y="392" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#64748B">风险：演示成功，证据不足</text>
+  </g>
+
+  <g id="answer-bar">
+    <rect x="72" y="498" width="1136" height="98" rx="8" fill="#EEF4FA" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/shield-check" x="104" y="526" width="42" height="42" fill="#1D4E89" stroke-width="2"/>
+    <text x="168" y="536" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#1D4E89">因此，项目要解决的不是“让角色更会说话”</text>
+    <text x="168" y="570" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#1F2937">而是把语言生成放入受规则约束的运行流程中，让世界事实由状态机、校验器和 trace 共同维护。</text>
+  </g>
+
+  <g id="footer">
+    <text x="56" y="674" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="12" fill="#64748B">Source: course_report_zh.md · 一、引言 / 五、项目特色</text>
+  </g>
+</svg>

@@ -1,0 +1,1 @@
+NPCMind 和 ActionValidator 是项目里最重要的一组边界。NPCMind 让角色在回复前先形成 belief、emotion、goal、plan 和 social strategy，所以角色不是只在模板里说话，而是有可记录的主观状态。ActionValidator 则从相反方向工作：它检查 LLM 提出的 action 是否符合当前世界状态，如果越界就阻止或修复。这样既保留了角色语言的灵活性，又避免一句自然语言直接改变数据库事实。

@@ -1,0 +1,1 @@
+这页展示第二个真实运行结果：Sable advantage。这个 run 使用的是 prestige / follow_rumors 风格的 Elyan Vale，总共跑了 15 轮，最终 outcome 是 sable_advantage，最终位置在 market。它和 classroom showcase 的差异很明显：Traveler 一开始就接触 Sable，后续路线也更偏向非正式信息渠道；Round 14 还记录了 secret hinted。这个结果说明不同 profile 会改变路线优先级和最终优势方向，但状态推进仍然由 Validator 和 arc rules 控制。

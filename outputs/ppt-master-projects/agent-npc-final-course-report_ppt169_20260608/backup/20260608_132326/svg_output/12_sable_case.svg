@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <g id="background">
+    <rect x="0" y="0" width="1280" height="720" fill="#F8FAFC"/>
+    <rect x="0" y="0" width="1280" height="14" fill="#1D4E89"/>
+  </g>
+
+  <g id="header">
+    <text x="56" y="72" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="34" font-weight="bold" fill="#17324D">Sable 路线：语言行为与状态变化分离</text>
+    <text x="56" y="112" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#475569">真实 trace 显示角色可以试探和引导，但不能直接越权解锁世界事实。</text>
+    <text x="1204" y="72" text-anchor="end" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="12" fill="#64748B">12 / 14</text>
+  </g>
+
+  <g id="trace-card">
+    <rect x="56" y="154" width="638" height="470" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <rect x="56" y="154" width="638" height="48" rx="8" fill="#EEF4FA"/>
+    <use data-icon="tabler-outline/code" x="84" y="164" width="30" height="30" fill="#1D4E89" stroke-width="2"/>
+    <text x="126" y="185" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">真实运行片段：sable_advantage · Round 5</text>
+
+    <rect x="88" y="228" width="574" height="58" rx="8" fill="#F1F5F9" stroke="#CBD5E1"/>
+    <text x="112" y="252" font-family="Consolas" font-size="14" fill="#475569">Traveler action: talk_to · target: sable</text>
+    <text x="112" y="274" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#1F2937">理由：Sable 是非正式信息渠道，Traveler 希望建立信任并获取遗迹传闻。</text>
+
+    <rect x="88" y="306" width="574" height="58" rx="8" fill="#F1F5F9" stroke="#CBD5E1"/>
+    <text x="112" y="330" font-family="Consolas" font-size="14" fill="#475569">NPC decision intent: redirect_ruins_inquiry</text>
+    <text x="112" y="352" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#1F2937">NPCMind belief：Traveler 可能知道有利可图的遗迹线索。</text>
+
+    <rect x="88" y="384" width="574" height="58" rx="8" fill="#F1F5F9" stroke="#CBD5E1"/>
+    <text x="112" y="408" font-family="Consolas" font-size="14" fill="#475569">Validator: traveler allowed · npc accepted=true</text>
+    <text x="112" y="430" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#1F2937">行动可以发生，但后续状态变化仍按规则记录。</text>
+
+    <rect x="88" y="462" width="574" height="58" rx="8" fill="#FFF3D6" stroke="#CBD5E1"/>
+    <text x="112" y="486" font-family="Consolas" font-size="14" fill="#475569">State change: trust 0.05 -> 0.10 · affinity 0.10 -> 0.20</text>
+    <text x="112" y="508" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#1F2937">允许的是关系推进，不是地点解锁或物品发放。</text>
+
+    <rect x="88" y="540" width="574" height="54" rx="8" fill="#D8F3F7" stroke="#CBD5E1"/>
+    <text x="112" y="563" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#1F2937">response constraints：不要声称地下遗迹入口已解锁；不要声称玩家获得物品奖励。</text>
+  </g>
+
+  <g id="boundary-comparison">
+    <rect x="736" y="154" width="488" height="220" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/message-2-code" x="768" y="188" width="38" height="38" fill="#1D4E89" stroke-width="2"/>
+    <text x="824" y="210" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#17324D">语言层允许</text>
+    <text x="768" y="264" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#1F2937">
+      <tspan x="768" dy="0">Sable 可以试探、转移话题、引导 Traveler，</tspan>
+      <tspan x="768" dy="30">并通过自然语言表现误导型角色的社交策略。</tspan>
+    </text>
+    <rect x="768" y="316" width="386" height="34" rx="8" fill="#EEF4FA" stroke="#CBD5E1"/>
+    <text x="786" y="338" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">这部分体现角色表达能力和 profile 差异。</text>
+
+    <rect x="736" y="404" width="488" height="220" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/shield-check" x="768" y="438" width="38" height="38" fill="#0E7490" stroke-width="2"/>
+    <text x="824" y="460" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#17324D">状态层受控</text>
+    <text x="768" y="514" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#1F2937">
+      <tspan x="768" dy="0">地点、物品、任务完成和关系变化必须通过</tspan>
+      <tspan x="768" dy="30">ActionValidator、任务状态机和 SQLite 写入。</tspan>
+    </text>
+    <rect x="768" y="566" width="386" height="34" rx="8" fill="#D8F3F7" stroke="#CBD5E1"/>
+    <text x="786" y="588" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">这部分体现系统事实边界和可复盘性。</text>
+  </g>
+
+  <g id="footer">
+    <text x="56" y="674" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="12" fill="#64748B">Source: course_report_zh.md · 6.1 典型 trace 示例 · sable_advantage_trace.md</text>
+  </g>
+</svg>

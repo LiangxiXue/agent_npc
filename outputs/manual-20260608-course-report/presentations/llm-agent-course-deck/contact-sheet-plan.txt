@@ -1,0 +1,14 @@
+﻿1. Cover - LLM NPC agent as controlled world runtime
+2. Problem - chat text is not world state
+3. Project goal - state + memory + validation + trace
+4. Evolution - four phases from single NPC to Traveler runtime
+5. System architecture - observation to timeline export
+6. Module boundary - who owns observation, memory, mind, decision, validation, state
+7. Memory/RAG - recent context, lore, long-term memory, background jobs
+8. NPCMind + ActionValidator - language flexibility under rule control
+9. Traveler runtime - automatic exploration in living-world simulation
+10. Evidence - real UI and classroom showcase traces
+11. Trace example - Sable route shows reply vs state boundary
+12. Evaluation - qualitative evidence and designed indicators
+13. Limits and future work - scheduler, memory quality, visualization, scale
+14. Closing - controllable LLM characters require traceable execution

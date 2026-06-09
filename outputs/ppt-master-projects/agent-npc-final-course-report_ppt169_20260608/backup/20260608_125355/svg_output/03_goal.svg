@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <g id="background">
+    <rect x="0" y="0" width="1280" height="720" fill="#F8FAFC"/>
+    <rect x="0" y="0" width="1280" height="14" fill="#1D4E89"/>
+  </g>
+
+  <g id="header">
+    <text x="56" y="72" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="34" font-weight="bold" fill="#17324D">项目目标：状态 + 记忆 + 校验 + Trace</text>
+    <text x="56" y="112" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#475569">让 LLM 角色 Agent 的每次行动都有上下文、有边界、有状态结果、有复盘证据。</text>
+    <text x="1204" y="72" text-anchor="end" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="12" fill="#64748B">03 / 14</text>
+  </g>
+
+  <g id="center-goal">
+    <rect x="340" y="220" width="600" height="150" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <text x="640" y="264" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#1D4E89">构建可运行、可观察、可验证的角色 Agent</text>
+    <text x="640" y="308" text-anchor="middle" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#1F2937">NPC 读取世界设定和记忆，形成主观计划，输出结构化 decision，</text>
+    <text x="640" y="336" text-anchor="middle" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#1F2937">再经过校验和任务状态机改变世界。</text>
+  </g>
+
+  <g id="pillar-state">
+    <rect x="76" y="168" width="236" height="160" rx="8" fill="#EEF4FA" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/database" x="104" y="196" width="36" height="36" fill="#1D4E89" stroke-width="2"/>
+    <text x="156" y="216" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#17324D">状态</text>
+    <text x="104" y="262" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#1F2937">
+      <tspan x="104" dy="0">SQLite 保存任务、地点、</tspan>
+      <tspan x="104" dy="26">物品、关系和事件。</tspan>
+    </text>
+  </g>
+
+  <g id="pillar-memory">
+    <rect x="968" y="168" width="236" height="160" rx="8" fill="#EEF4FA" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/book" x="996" y="196" width="36" height="36" fill="#1D4E89" stroke-width="2"/>
+    <text x="1048" y="216" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#17324D">记忆</text>
+    <text x="996" y="262" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#1F2937">
+      <tspan x="996" dy="0">近期上下文、长期记忆、</tspan>
+      <tspan x="996" dy="26">稳定 lore 共同进入决策。</tspan>
+    </text>
+  </g>
+
+  <g id="pillar-validation">
+    <rect x="76" y="424" width="236" height="160" rx="8" fill="#D8F3F7" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/shield-check" x="104" y="452" width="36" height="36" fill="#0E7490" stroke-width="2"/>
+    <text x="156" y="472" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#17324D">校验</text>
+    <text x="104" y="518" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#1F2937">
+      <tspan x="104" dy="0">ActionValidator 拦截</tspan>
+      <tspan x="104" dy="26">越界行动并安全降级。</tspan>
+    </text>
+  </g>
+
+  <g id="pillar-trace">
+    <rect x="968" y="424" width="236" height="160" rx="8" fill="#FFF3D6" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/timeline" x="996" y="452" width="36" height="36" fill="#B7791F" stroke-width="2"/>
+    <text x="1048" y="472" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#17324D">Trace</text>
+    <text x="996" y="518" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#1F2937">
+      <tspan x="996" dy="0">记录检索、decision、</tspan>
+      <tspan x="996" dy="26">状态变化和 timeline。</tspan>
+    </text>
+  </g>
+
+  <g id="connectors">
+    <line x1="312" y1="248" x2="340" y2="278" stroke="#94A3B8" stroke-width="2"/>
+    <line x1="968" y1="248" x2="940" y2="278" stroke="#94A3B8" stroke-width="2"/>
+    <line x1="312" y1="504" x2="340" y2="342" stroke="#94A3B8" stroke-width="2"/>
+    <line x1="968" y1="504" x2="940" y2="342" stroke="#94A3B8" stroke-width="2"/>
+  </g>
+
+  <g id="takeaway">
+    <rect x="340" y="444" width="600" height="96" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <text x="376" y="480" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#1D4E89">设计约束</text>
+    <text x="376" y="514" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#1F2937">自然语言可以影响关系和事件，但不能绕过规则直接改写事实。</text>
+  </g>
+
+  <g id="footer">
+    <text x="56" y="674" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="12" fill="#64748B">Source: course_report_zh.md · 1.3 项目目标</text>
+  </g>
+</svg>

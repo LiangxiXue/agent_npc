@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <g id="background">
+    <rect x="0" y="0" width="1280" height="720" fill="#F8FAFC"/>
+    <rect x="0" y="0" width="1280" height="16" fill="#1D4E89"/>
+    <rect x="72" y="610" width="1136" height="1" fill="#CBD5E1"/>
+  </g>
+
+  <g id="title-block">
+    <text x="84" y="168" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="52" font-weight="bold" fill="#17324D">记忆驱动的可验证</text>
+    <text x="84" y="232" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="52" font-weight="bold" fill="#17324D">LLM 角色 Agent 系统</text>
+    <rect x="84" y="262" width="520" height="4" fill="#0E7490"/>
+    <text x="84" y="320" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="24" fill="#475569">从单 NPC 对话到 Traveler living-world runtime 的课程项目汇报</text>
+  </g>
+
+  <g id="intro-block">
+    <rect x="84" y="382" width="620" height="122" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <text x="120" y="430" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#1D4E89">汇报简介</text>
+    <text x="120" y="456" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#1F2937">
+      <tspan x="120" dy="0">本项目把 LLM 角色对话放入状态、记忆、</tspan>
+      <tspan x="120" dy="26">校验和 trace 组成的运行链路，重点展示</tspan>
+      <tspan x="120" dy="26">角色行为如何被约束、记录并用于课程复盘。</tspan>
+    </text>
+  </g>
+
+  <g id="right-card">
+    <rect x="800" y="164" width="360" height="340" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/robot" x="950" y="212" width="64" height="64" fill="#0E7490" stroke-width="2"/>
+    <text x="980" y="318" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#17324D">课程最终汇报</text>
+    <text x="980" y="366" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" fill="#475569">LLM Agent / 记忆系统 / 可验证执行</text>
+    <rect x="858" y="414" width="244" height="42" rx="8" fill="#D8F3F7" stroke="#CBD5E1"/>
+    <text x="980" y="441" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#0E7490">真实项目代码与运行 trace 支撑</text>
+  </g>
+
+  <g id="speaker-info">
+    <text x="84" y="652" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">汇报人：薛良玺</text>
+    <text x="84" y="682" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" fill="#475569">时间：2026年6月9日</text>
+    <text x="1204" y="674" text-anchor="end" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="12" fill="#64748B">01 / 14</text>
+  </g>
+</svg>

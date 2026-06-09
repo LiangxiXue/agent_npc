@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <rect x="0" y="0" width="1280" height="720" fill="#FFFFFF"/>
+  <image href="../template_assets/pku_logo_cropped.png" x="1020" y="24" width="220" height="72" preserveAspectRatio="xMidYMid meet"/>
+  <rect x="0" y="68" width="82" height="68" fill="#A40012"/>
+  <text x="92" y="104" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="34" font-weight="bold" fill="#000000">评估：已有证据与下一步指标</text>
+  <text x="92" y="136" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" fill="#333333">当前不虚构大规模统计结论，而是用 trace 证明关键机制可复盘</text>
+
+  <rect x="92" y="206" width="330" height="272" fill="#F7F7F7" stroke="#D9D9D9"/>
+  <text x="126" y="258" font-family='"DengXian", Arial, sans-serif' font-size="28" font-weight="bold" fill="#A40012">已有证据</text>
+  <text x="126" y="318" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">demo trace</text>
+  <text x="126" y="356" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">JSON / Markdown timeline</text>
+  <text x="126" y="394" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">NPCMind 与 Validator 字段</text>
+  <text x="126" y="432" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">Traveler route 输出</text>
+
+  <rect x="474" y="206" width="330" height="272" fill="#FFF1E5" stroke="#D9D9D9"/>
+  <text x="508" y="258" font-family='"DengXian", Arial, sans-serif' font-size="28" font-weight="bold" fill="#A40012">能说明什么</text>
+  <text x="508" y="318" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">角色知识边界可复盘</text>
+  <text x="508" y="356" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">状态写入与回复分离</text>
+  <text x="508" y="394" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">越权行动有拦截路径</text>
+  <text x="508" y="432" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">profile 会影响路线</text>
+
+  <rect x="856" y="206" width="330" height="272" fill="#F7F7F7" stroke="#D9D9D9"/>
+  <text x="890" y="258" font-family='"DengXian", Arial, sans-serif' font-size="28" font-weight="bold" fill="#A40012">下一步指标</text>
+  <text x="890" y="318" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">固定对话集一致性</text>
+  <text x="890" y="356" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">越权拦截频次统计</text>
+  <text x="890" y="394" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">同初始态多次运行对比</text>
+  <text x="890" y="432" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">timeline 图形化回放</text>
+
+  <line x1="92" y1="568" x2="1188" y2="568" stroke="#D9D9D9"/>
+  <text x="92" y="610" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#000000">边界说明：</text>
+  <text x="220" y="610" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" fill="#333333">目前评估仍以案例 trace 和人工复盘为主，后续需要自动分析。</text>
+  <text x="1180" y="692" text-anchor="end" font-family='"DengXian", Arial, sans-serif' font-size="14" fill="#666666">15</text>
+</svg>

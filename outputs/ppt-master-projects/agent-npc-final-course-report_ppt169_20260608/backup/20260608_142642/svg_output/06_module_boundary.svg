@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <rect x="0" y="0" width="1280" height="720" fill="#FFFFFF"/>
+  <image href="../template_assets/image1.png" x="1030" y="20" width="205" height="72" preserveAspectRatio="xMidYMid meet"/>
+  <rect x="0" y="68" width="82" height="68" fill="#A40012"/>
+  <text x="92" y="104" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="34" font-weight="bold" fill="#000000">模块职责：LLM 参与认知，系统掌握执行权</text>
+  <text x="92" y="136" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" fill="#333333">三层责任边界：认知、校验、事实与证据</text>
+
+  <g id="layers">
+    <rect x="96" y="202" width="330" height="294" fill="#F7F7F7" stroke="#D9D9D9"/>
+    <rect x="96" y="202" width="330" height="56" fill="#F2F2F2"/>
+    <text x="126" y="240" font-family='"DengXian", Arial, sans-serif' font-size="26" font-weight="bold" fill="#A40012">认知与意图层</text>
+    <text x="126" y="304" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">Memory / Lore</text>
+    <text x="126" y="344" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">NPCMind</text>
+    <text x="126" y="384" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">LLM Decision</text>
+    <text x="126" y="438" font-family='"DengXian", Arial, sans-serif' font-size="18" fill="#333333">补充上下文，形成 belief / goal / plan，提出行动意图。</text>
+
+    <rect x="474" y="202" width="330" height="294" fill="#FFF1E5" stroke="#D9D9D9"/>
+    <rect x="474" y="202" width="330" height="56" fill="#FFF1E5"/>
+    <text x="504" y="240" font-family='"DengXian", Arial, sans-serif' font-size="26" font-weight="bold" fill="#A40012">校验与执行层</text>
+    <text x="504" y="304" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">ActionValidator</text>
+    <text x="504" y="344" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">NarrativeEnvironment</text>
+    <text x="504" y="384" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">Action Surface</text>
+    <text x="504" y="438" font-family='"DengXian", Arial, sans-serif' font-size="18" fill="#333333">检查行动是否允许，把 decision 转成系统 action。</text>
+
+    <rect x="852" y="202" width="330" height="294" fill="#F7F7F7" stroke="#D9D9D9"/>
+    <rect x="852" y="202" width="330" height="56" fill="#F2F2F2"/>
+    <text x="882" y="240" font-family='"DengXian", Arial, sans-serif' font-size="26" font-weight="bold" fill="#A40012">事实与证据层</text>
+    <text x="882" y="304" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">SQLite World State</text>
+    <text x="882" y="344" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">Trace / Timeline</text>
+    <text x="882" y="384" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">Traveler Runtime</text>
+    <text x="882" y="438" font-family='"DengXian", Arial, sans-serif' font-size="18" fill="#333333">保存事实状态，把运行过程导出为复盘证据。</text>
+  </g>
+  <line x1="426" y1="349" x2="474" y2="349" stroke="#BFBFBF" stroke-width="2"/>
+  <polygon points="474,349 464,343 464,355" fill="#BFBFBF"/>
+  <line x1="804" y1="349" x2="852" y2="349" stroke="#BFBFBF" stroke-width="2"/>
+  <polygon points="852,349 842,343 842,355" fill="#BFBFBF"/>
+
+  <line x1="92" y1="568" x2="1188" y2="568" stroke="#D9D9D9"/>
+  <text x="92" y="610" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#000000">汇报重点：</text>
+  <text x="220" y="610" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" fill="#333333">LLM 可以决定“想做什么”，但事实只由校验后的系统流程写入。</text>
+  <text x="1180" y="692" text-anchor="end" font-family='"DengXian", Arial, sans-serif' font-size="14" fill="#666666">6</text>
+</svg>

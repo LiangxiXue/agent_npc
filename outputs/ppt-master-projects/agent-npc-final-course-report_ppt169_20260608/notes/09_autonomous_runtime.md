@@ -1,0 +1,1 @@
+在 autonomous NPC runtime 中，NPC 可以响应世界事件，而不是永远等待玩家输入。流程从 world event 开始，事件进入 NPC inbox，系统根据 NPC 状态和 ActionCatalog 构造可行动作集合，然后让 LLM 在这个集合内做 constrained decision。即使是自主 tick，结果仍然必须经过 Validator，最后写入 mailbox、runtime state 和 trace。这个设计的重点不是让 NPC 随机行动，而是让世界事件以可约束、可复盘的方式影响角色。

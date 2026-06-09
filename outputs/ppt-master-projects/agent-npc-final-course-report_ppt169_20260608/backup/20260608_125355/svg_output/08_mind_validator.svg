@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <g id="background">
+    <rect x="0" y="0" width="1280" height="720" fill="#F8FAFC"/>
+    <rect x="0" y="0" width="1280" height="14" fill="#1D4E89"/>
+  </g>
+
+  <g id="header">
+    <text x="56" y="72" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="34" font-weight="bold" fill="#17324D">NPCMind + ActionValidator：自由表达，受控执行</text>
+    <text x="56" y="112" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#475569">角色可以有主观判断和语言策略，但事实变化必须经过规则边界。</text>
+    <text x="1204" y="72" text-anchor="end" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="12" fill="#64748B">08 / 14</text>
+  </g>
+
+  <g id="mind-panel">
+    <rect x="72" y="166" width="440" height="280" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <rect x="72" y="166" width="440" height="52" rx="8" fill="#D8F3F7"/>
+    <use data-icon="tabler-outline/brain" x="104" y="178" width="32" height="32" fill="#0E7490" stroke-width="2"/>
+    <text x="150" y="199" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#17324D">NPCMind：形成主观状态</text>
+    <text x="112" y="260" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#1F2937">
+      <tspan x="112" dy="0">belief：我相信当前局面是什么</tspan>
+      <tspan x="112" dy="34">emotion：我对玩家或事件的态度</tspan>
+      <tspan x="112" dy="34">active goal：当前要推进的目标</tspan>
+      <tspan x="112" dy="34">active plan：下一步行动计划</tspan>
+      <tspan x="112" dy="34">social strategy：透露、要求凭证或转移话题</tspan>
+    </text>
+  </g>
+
+  <g id="decision-bridge">
+    <rect x="550" y="260" width="180" height="96" rx="8" fill="#EEF4FA" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/robot" x="624" y="276" width="32" height="32" fill="#1D4E89" stroke-width="2"/>
+    <text x="640" y="326" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">LLM decision</text>
+    <text x="640" y="348" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">意图 + 回复草稿</text>
+    <line x1="512" y1="308" x2="550" y2="308" stroke="#94A3B8" stroke-width="2"/>
+    <polygon points="550,308 540,302 540,314" fill="#94A3B8"/>
+    <line x1="730" y1="308" x2="768" y2="308" stroke="#94A3B8" stroke-width="2"/>
+    <polygon points="768,308 758,302 758,314" fill="#94A3B8"/>
+  </g>
+
+  <g id="validator-panel">
+    <rect x="768" y="166" width="440" height="280" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <rect x="768" y="166" width="440" height="52" rx="8" fill="#D8F3F7"/>
+    <use data-icon="tabler-outline/shield-check" x="800" y="178" width="32" height="32" fill="#0E7490" stroke-width="2"/>
+    <text x="846" y="199" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#17324D">ActionValidator：守住事实边界</text>
+    <text x="808" y="260" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#1F2937">
+      <tspan x="808" dy="0">检查行动是否在当前状态下允许</tspan>
+      <tspan x="808" dy="34">阻止“语言上直接解锁地点”</tspan>
+      <tspan x="808" dy="34">阻止“缺少条件就发放物品”</tspan>
+      <tspan x="808" dy="34">将非法或不完整行动降级为安全结果</tspan>
+      <tspan x="808" dy="34">把校验原因写入 trace</tspan>
+    </text>
+  </g>
+
+  <g id="outcomes">
+    <rect x="162" y="512" width="250" height="92" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <text x="194" y="548" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#15803D">allowed</text>
+    <text x="194" y="580" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">满足当前任务和世界条件</text>
+
+    <rect x="515" y="512" width="250" height="92" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <text x="547" y="548" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#B91C1C">blocked</text>
+    <text x="547" y="580" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">越界行动不会写入状态</text>
+
+    <rect x="868" y="512" width="250" height="92" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <text x="900" y="548" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#B7791F">repaired</text>
+    <text x="900" y="580" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">保留有效意图，移除不合规部分</text>
+  </g>
+
+  <g id="takeaway">
+    <rect x="162" y="462" width="956" height="34" rx="8" fill="#EEF4FA" stroke="#CBD5E1"/>
+    <text x="640" y="485" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#1F2937">语言层可以灵活扮演角色；状态层必须可验证、可追踪、可测试。</text>
+  </g>
+
+  <g id="footer">
+    <text x="56" y="674" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="12" fill="#64748B">Source: course_report_zh.md · 2.3 / 3.3 / 3.4</text>
+  </g>
+</svg>

@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <g id="background">
+    <rect x="0" y="0" width="1280" height="720" fill="#F8FAFC"/>
+    <rect x="0" y="0" width="1280" height="14" fill="#1D4E89"/>
+  </g>
+
+  <g id="header">
+    <text x="56" y="72" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="34" font-weight="bold" fill="#17324D">模块职责：LLM 参与认知，系统掌握执行权</text>
+    <text x="56" y="112" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#475569">把原来的职责表压缩成三层边界：认知、校验、事实与证据。</text>
+    <text x="1204" y="72" text-anchor="end" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="12" fill="#64748B">06 / 14</text>
+  </g>
+
+  <g id="cognition-layer">
+    <rect x="74" y="164" width="340" height="340" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <rect x="74" y="164" width="340" height="58" rx="8" fill="#EEF4FA"/>
+    <use data-icon="tabler-outline/brain" x="104" y="178" width="34" height="34" fill="#1D4E89" stroke-width="2"/>
+    <text x="154" y="200" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#17324D">认知与意图层</text>
+    <text x="104" y="266" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#1F2937">
+      <tspan x="104" dy="0">Memory / Lore</tspan>
+      <tspan x="104" dy="34">NPCMind</tspan>
+      <tspan x="104" dy="34">LLM Decision</tspan>
+    </text>
+    <rect x="104" y="392" width="280" height="72" rx="8" fill="#F8FAFC" stroke="#CBD5E1"/>
+    <text x="126" y="417" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">
+      <tspan x="126" dy="0">职责：补充上下文，形成 belief / goal / plan，</tspan>
+      <tspan x="126" dy="22">并提出结构化行动意图。</tspan>
+    </text>
+    <text x="126" y="459" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#64748B">输出：decision + response draft</text>
+  </g>
+
+  <g id="validation-layer">
+    <rect x="470" y="164" width="340" height="340" rx="8" fill="#D8F3F7" stroke="#CBD5E1"/>
+    <rect x="470" y="164" width="340" height="58" rx="8" fill="#D8F3F7"/>
+    <use data-icon="tabler-outline/shield-check" x="500" y="178" width="34" height="34" fill="#0E7490" stroke-width="2"/>
+    <text x="550" y="200" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#17324D">校验与执行层</text>
+    <text x="500" y="266" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#1F2937">
+      <tspan x="500" dy="0">ActionValidator</tspan>
+      <tspan x="500" dy="34">NarrativeEnvironment</tspan>
+      <tspan x="500" dy="34">Action Surface</tspan>
+    </text>
+    <rect x="500" y="392" width="280" height="72" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <text x="522" y="417" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">
+      <tspan x="522" dy="0">职责：检查行动是否允许，修复越界结果，</tspan>
+      <tspan x="522" dy="22">把 decision 转成系统 action。</tspan>
+    </text>
+    <text x="522" y="459" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#64748B">输出：allowed / blocked / repaired</text>
+  </g>
+
+  <g id="state-layer">
+    <rect x="866" y="164" width="340" height="340" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <rect x="866" y="164" width="340" height="58" rx="8" fill="#FFF3D6"/>
+    <use data-icon="tabler-outline/database" x="896" y="178" width="34" height="34" fill="#B7791F" stroke-width="2"/>
+    <text x="946" y="200" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#17324D">事实与证据层</text>
+    <text x="896" y="266" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#1F2937">
+      <tspan x="896" dy="0">SQLite World State</tspan>
+      <tspan x="896" dy="34">Trace / Timeline</tspan>
+      <tspan x="896" dy="34">Traveler Runtime</tspan>
+    </text>
+    <rect x="896" y="392" width="280" height="72" rx="8" fill="#F8FAFC" stroke="#CBD5E1"/>
+    <text x="918" y="417" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">
+      <tspan x="918" dy="0">职责：保存任务、物品、地点和关系，</tspan>
+      <tspan x="918" dy="22">把运行过程导出为复盘证据。</tspan>
+    </text>
+    <text x="918" y="459" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#64748B">输出：state_after + timeline</text>
+  </g>
+
+  <g id="flow">
+    <line x1="414" y1="334" x2="470" y2="334" stroke="#94A3B8" stroke-width="2"/>
+    <polygon points="470,334 460,328 460,340" fill="#94A3B8"/>
+    <line x1="810" y1="334" x2="866" y2="334" stroke="#94A3B8" stroke-width="2"/>
+    <polygon points="866,334 856,328 856,340" fill="#94A3B8"/>
+  </g>
+
+  <g id="takeaway">
+    <rect x="154" y="560" width="972" height="56" rx="8" fill="#EEF4FA" stroke="#CBD5E1"/>
+    <text x="188" y="595" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#1D4E89">汇报重点：</text>
+    <text x="290" y="595" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" fill="#1F2937">LLM 可以决定“想做什么”，但世界事实只由校验后的系统流程写入。</text>
+  </g>
+
+  <g id="footer">
+    <text x="56" y="674" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="12" fill="#64748B">Source: course_report_zh.md · 3.8 模块职责表</text>
+  </g>
+</svg>

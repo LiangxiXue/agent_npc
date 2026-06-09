@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <rect x="0" y="0" width="1280" height="720" fill="#FFFFFF"/>
+  <image href="../template_assets/pku_logo_cropped.png" x="1020" y="24" width="220" height="72" preserveAspectRatio="xMidYMid meet"/>
+  <rect x="0" y="68" width="82" height="68" fill="#A40012"/>
+  <text x="92" y="104" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="34" font-weight="bold" fill="#000000">项目演进（一）：从“能对话”到“带上下文对话”</text>
+  <text x="92" y="136" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" fill="#333333">前两次演进解决的是最小闭环和角色稳定性</text>
+
+  <rect x="92" y="192" width="500" height="336" fill="#F7F7F7" stroke="#D9D9D9"/>
+  <text x="126" y="244" font-family='"DengXian", Arial, sans-serif' font-size="28" font-weight="bold" fill="#A40012">1. 单 NPC 记忆对话原型</text>
+  <text x="126" y="302" font-family='"DengXian", Arial, sans-serif' font-size="22" font-weight="bold" fill="#000000">为什么这样做</text>
+  <text x="126" y="340" font-family='"DengXian", Arial, sans-serif' font-size="20" fill="#333333">
+    <tspan x="126" dy="0">先验证最小可运行闭环：</tspan>
+    <tspan x="126" dy="28">读取状态、调用 LLM、回复玩家，</tspan>
+    <tspan x="126" dy="28">并把过程保存下来。</tspan>
+  </text>
+  <text x="126" y="402" font-family='"DengXian", Arial, sans-serif' font-size="22" font-weight="bold" fill="#000000">带来的好处</text>
+  <text x="126" y="440" font-family='"DengXian", Arial, sans-serif' font-size="20" fill="#333333">
+    <tspan x="126" dy="0">项目不再停留在 prompt demo；</tspan>
+    <tspan x="126" dy="28">SQLite、workflow 和 trace</tspan>
+    <tspan x="126" dy="28">成为后续扩展基座。</tspan>
+  </text>
+
+  <rect x="676" y="192" width="500" height="336" fill="#FFFFFF" stroke="#D9D9D9"/>
+  <text x="710" y="244" font-family='"DengXian", Arial, sans-serif' font-size="28" font-weight="bold" fill="#A40012">2. 分层上下文与玩家端</text>
+  <text x="710" y="302" font-family='"DengXian", Arial, sans-serif' font-size="22" font-weight="bold" fill="#000000">为什么这样做</text>
+  <text x="710" y="340" font-family='"DengXian", Arial, sans-serif' font-size="20" fill="#333333">
+    <tspan x="710" dy="0">早期原型只看当前输入，</tspan>
+    <tspan x="710" dy="28">角色知识边界、地点和关系</tspan>
+    <tspan x="710" dy="28">容易断裂，需要把上下文拆层。</tspan>
+  </text>
+  <text x="710" y="402" font-family='"DengXian", Arial, sans-serif' font-size="22" font-weight="bold" fill="#000000">带来的好处</text>
+  <text x="710" y="440" font-family='"DengXian", Arial, sans-serif' font-size="20" fill="#333333">
+    <tspan x="710" dy="0">lore、长期记忆、近期上下文</tspan>
+    <tspan x="710" dy="28">和 UI 入口分开后，</tspan>
+    <tspan x="710" dy="28">回复更稳定，也便于调试展示。</tspan>
+  </text>
+
+  <line x1="92" y1="568" x2="1188" y2="568" stroke="#D9D9D9"/>
+  <text x="92" y="610" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#000000">阶段结果：</text>
+  <text x="220" y="610" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" fill="#333333">系统从“能说话”推进到“带着世界设定和历史上下文说话”。</text>
+  <text x="1180" y="692" text-anchor="end" font-family='"DengXian", Arial, sans-serif' font-size="14" fill="#666666">3</text>
+</svg>

@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <rect x="0" y="0" width="1280" height="720" fill="#FFFFFF"/>
+  <image href="../template_assets/pku_logo_cropped.png" x="1020" y="24" width="220" height="72" preserveAspectRatio="xMidYMid meet"/>
+  <rect x="0" y="68" width="82" height="68" fill="#A40012"/>
+  <text x="92" y="104" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="34" font-weight="bold" fill="#000000">问题定义：角色聊天不等于世界状态</text>
+  <text x="92" y="136" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" fill="#333333">为什么普通 LLM 角色对话不足以支撑可复盘系统</text>
+
+  <g id="risks">
+    <rect x="92" y="198" width="330" height="286" fill="#F7F7F7" stroke="#D9D9D9"/>
+    <text x="122" y="250" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="28" font-weight="bold" fill="#A40012">01 语言幻觉</text>
+    <text x="122" y="304" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="22" fill="#000000">
+      <tspan x="122" dy="0">角色可以说“入口已解锁”，</tspan>
+      <tspan x="122" dy="36">但数据库和任务状态并未</tspan>
+      <tspan x="122" dy="36">真的发生对应变化。</tspan>
+    </text>
+    <rect x="474" y="198" width="330" height="286" fill="#F7F7F7" stroke="#D9D9D9"/>
+    <text x="504" y="250" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="28" font-weight="bold" fill="#A40012">02 上下文断裂</text>
+    <text x="504" y="304" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="22" fill="#000000">
+      <tspan x="504" dy="0">只看当前输入时，角色很难</tspan>
+      <tspan x="504" dy="36">稳定保持地点、关系、知识</tspan>
+      <tspan x="504" dy="36">边界和长期目标。</tspan>
+    </text>
+    <rect x="856" y="198" width="330" height="286" fill="#F7F7F7" stroke="#D9D9D9"/>
+    <text x="886" y="250" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="28" font-weight="bold" fill="#A40012">03 无法复盘</text>
+    <text x="886" y="304" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="22" fill="#000000">
+      <tspan x="886" dy="0">如果只保存最终回复，就很难</tspan>
+      <tspan x="886" dy="36">解释一次行为为什么发生、</tspan>
+      <tspan x="886" dy="36">又如何改变状态。</tspan>
+    </text>
+  </g>
+
+  <line x1="92" y1="560" x2="1188" y2="560" stroke="#D9D9D9" stroke-width="1"/>
+  <text x="92" y="604" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#000000">核心问题：</text>
+  <text x="220" y="604" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" fill="#333333">如何保留 LLM 的表达能力，同时让世界事实由程序规则维护？</text>
+  <text x="1180" y="692" text-anchor="end" font-family='"DengXian", Arial, sans-serif' font-size="14" fill="#666666">2</text>
+</svg>

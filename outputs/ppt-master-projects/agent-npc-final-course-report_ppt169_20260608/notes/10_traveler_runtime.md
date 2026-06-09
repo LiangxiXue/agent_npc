@@ -1,0 +1,1 @@
+Traveler runtime 是项目后期最适合课堂展示的部分。Traveler 不是手工输入的玩家，而是由 YAML profile 配置的角色 Agent，它有公开身份、私人目标、隐藏信息、行动边界和探索风格。每一轮它会观察世界、检索线索、决定移动或询问，再执行行动并反思。timeline 导出会记录行动理由、Traveler 发言、NPC 回复、状态变化、timing breakdown 和 arc evidence，因此不同 profile 的路线差异也可以被实际复盘。

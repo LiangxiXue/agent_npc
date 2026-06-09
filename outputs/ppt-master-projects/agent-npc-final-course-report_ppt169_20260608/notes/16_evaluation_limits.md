@@ -1,0 +1,1 @@
+当前评估主要依赖 demo trace、JSON 和 Markdown timeline，以及人工复盘。它已经能说明一些关键问题，例如角色知识边界能不能复盘，状态变化是否经过 Validator，Traveler profile 是否会影响路线，以及 timing breakdown 能不能帮助定位开销。局限也很明确：目前还不是大规模自动统计，文本 timeline 阅读成本也偏高。后续更合理的方向，是在已有 trace 基础上构建自动分析脚本和图形化回放界面。

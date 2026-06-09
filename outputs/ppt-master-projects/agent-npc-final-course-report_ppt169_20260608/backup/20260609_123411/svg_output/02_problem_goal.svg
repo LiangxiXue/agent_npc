@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <rect x="0" y="0" width="1280" height="720" fill="#FFFFFF"/>
+  <image href="../template_assets/pku_logo_cropped.png" x="1020" y="24" width="220" height="72" preserveAspectRatio="xMidYMid meet"/>
+  <rect x="0" y="68" width="82" height="68" fill="#A40012"/>
+  <text x="92" y="104" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="34" font-weight="bold" fill="#000000">问题与目标：角色对话如何变成可验证系统</text>
+  <text x="92" y="136" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" fill="#333333">合并原问题定义和项目目标，保留最关键的逻辑链</text>
+
+  <rect x="92" y="198" width="500" height="330" fill="#F7F7F7" stroke="#D9D9D9"/>
+  <text x="126" y="250" font-family='"DengXian", Arial, sans-serif' font-size="28" font-weight="bold" fill="#A40012">普通 LLM 角色对话的三类风险</text>
+  <text x="126" y="310" font-family='"DengXian", Arial, sans-serif' font-size="23" fill="#000000">1. 语言幻觉：说“入口解锁”不等于状态已改变</text>
+  <text x="126" y="360" font-family='"DengXian", Arial, sans-serif' font-size="23" fill="#000000">2. 上下文断裂：角色难以稳定保持记忆和边界</text>
+  <text x="126" y="410" font-family='"DengXian", Arial, sans-serif' font-size="23" fill="#000000">3. 无法复盘：只保存回复就难以解释行为原因</text>
+  <line x1="126" y1="458" x2="548" y2="458" stroke="#D9D9D9"/>
+  <text x="126" y="494" font-family='"DengXian", Arial, sans-serif' font-size="20" fill="#333333">核心问题：如何保留表达能力，同时让世界事实由规则维护？</text>
+
+  <rect x="676" y="198" width="500" height="330" fill="#FFFFFF" stroke="#D9D9D9"/>
+  <text x="710" y="250" font-family='"DengXian", Arial, sans-serif' font-size="28" font-weight="bold" fill="#A40012">项目要补上的四个支柱</text>
+  <text x="710" y="310" font-family='"DengXian", Arial, sans-serif' font-size="23" fill="#000000">状态：SQLite 保存任务、地点、物品、关系和事件</text>
+  <text x="710" y="360" font-family='"DengXian", Arial, sans-serif' font-size="23" fill="#000000">记忆：近期上下文、长期记忆、稳定 lore 进入决策</text>
+  <text x="710" y="410" font-family='"DengXian", Arial, sans-serif' font-size="23" fill="#000000">校验：Validator 拦截越界行动并安全降级</text>
+  <text x="710" y="460" font-family='"DengXian", Arial, sans-serif' font-size="23" fill="#000000">Trace：记录决策、状态变化和 timeline 证据</text>
+
+  <line x1="92" y1="568" x2="1188" y2="568" stroke="#D9D9D9"/>
+  <text x="92" y="610" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#000000">目标：</text>
+  <text x="160" y="610" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" fill="#333333">构建可运行、可观察、可验证的 LLM 角色 Agent，而不是只做聊天界面。</text>
+  <text x="1180" y="692" text-anchor="end" font-family='"DengXian", Arial, sans-serif' font-size="14" fill="#666666">2</text>
+</svg>

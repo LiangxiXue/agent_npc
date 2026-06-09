@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <rect x="0" y="0" width="1280" height="720" fill="#FFFFFF"/>
+  <image href="../template_assets/pku_logo_cropped.png" x="1020" y="24" width="220" height="72" preserveAspectRatio="xMidYMid meet"/>
+  <rect x="0" y="68" width="82" height="68" fill="#A40012"/>
+  <text x="92" y="104" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="34" font-weight="bold" fill="#000000">Sable 路线：语言行为与状态变化分离</text>
+  <text x="92" y="136" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" fill="#333333">真实 trace 显示：角色关系可以推进，但任务事实仍由规则控制</text>
+
+  <g id="trace">
+    <rect x="92" y="194" width="1096" height="86" fill="#F7F7F7" stroke="#D9D9D9"/>
+    <text x="126" y="230" font-family='"DengXian", Arial, sans-serif' font-size="22" font-weight="bold" fill="#A40012">Traveler reason</text>
+    <text x="338" y="230" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">通过非正式信息渠道建立信任，并获取遗迹相关传闻。</text>
+    <text x="126" y="262" font-family='"DengXian", Arial, sans-serif' font-size="18" fill="#666666">allowed action: speak_to_npc / ask_about_ruins</text>
+
+    <rect x="92" y="306" width="1096" height="86" fill="#FFFFFF" stroke="#D9D9D9"/>
+    <text x="126" y="342" font-family='"DengXian", Arial, sans-serif' font-size="22" font-weight="bold" fill="#A40012">Sable response</text>
+    <text x="338" y="342" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">可以试探、转移话题、引导 Traveler 继续对话。</text>
+    <text x="126" y="374" font-family='"DengXian", Arial, sans-serif' font-size="18" fill="#666666">relationship delta recorded / dialogue strategy changed</text>
+
+    <rect x="92" y="418" width="1096" height="86" fill="#FFF1E5" stroke="#D9D9D9"/>
+    <text x="126" y="454" font-family='"DengXian", Arial, sans-serif' font-size="22" font-weight="bold" fill="#A40012">Response constraints</text>
+    <text x="390" y="454" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">不能声称遗迹入口已经解锁，也不能声称玩家获得物品奖励。</text>
+    <text x="126" y="486" font-family='"DengXian", Arial, sans-serif' font-size="18" fill="#666666">state transition remains controlled by validator and quest rules</text>
+  </g>
+
+  <line x1="92" y1="568" x2="1188" y2="568" stroke="#D9D9D9"/>
+  <text x="92" y="610" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#000000">案例结论：</text>
+  <text x="220" y="610" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" fill="#333333">允许角色关系和对话策略推进，不允许绕过规则完成任务。</text>
+  <text x="1180" y="692" text-anchor="end" font-family='"DengXian", Arial, sans-serif' font-size="14" fill="#666666">12</text>
+</svg>

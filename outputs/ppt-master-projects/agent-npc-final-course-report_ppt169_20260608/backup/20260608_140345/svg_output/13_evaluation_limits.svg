@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <g id="background">
+    <rect x="0" y="0" width="1280" height="720" fill="#F8FAFC"/>
+    <rect x="0" y="0" width="1280" height="14" fill="#1D4E89"/>
+  </g>
+
+  <g id="header">
+    <text x="56" y="72" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="34" font-weight="bold" fill="#17324D">评估：已有证据与下一步指标</text>
+    <text x="56" y="112" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#475569">当前不虚构大规模统计结论，而是用 trace 证明关键机制已经可复盘。</text>
+    <text x="1204" y="72" text-anchor="end" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="12" fill="#64748B">13 / 14</text>
+  </g>
+
+  <g id="evidence-now">
+    <rect x="70" y="166" width="350" height="352" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/timeline" x="104" y="200" width="38" height="38" fill="#1D4E89" stroke-width="2"/>
+    <text x="158" y="224" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#17324D">已有证据</text>
+    <text x="104" y="284" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#1F2937">
+      <tspan x="104" dy="0">demo trace</tspan>
+      <tspan x="104" dy="34">JSON / Markdown timeline</tspan>
+      <tspan x="104" dy="34">NPCMind 与 Validator 字段</tspan>
+      <tspan x="104" dy="34">Traveler route 输出</tspan>
+      <tspan x="104" dy="34">timing breakdown</tspan>
+    </text>
+    <rect x="104" y="442" width="282" height="42" rx="8" fill="#EEF4FA" stroke="#CBD5E1"/>
+    <text x="245" y="469" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">适合做课程级机制证明</text>
+  </g>
+
+  <g id="what-it-shows">
+    <rect x="466" y="166" width="350" height="352" rx="8" fill="#D8F3F7" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/report-analytics" x="500" y="200" width="38" height="38" fill="#0E7490" stroke-width="2"/>
+    <text x="554" y="224" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#17324D">能说明什么</text>
+    <text x="500" y="284" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#1F2937">
+      <tspan x="500" dy="0">角色知识边界可复盘</tspan>
+      <tspan x="500" dy="34">状态写入与回复分离</tspan>
+      <tspan x="500" dy="34">越权行动有拦截路径</tspan>
+      <tspan x="500" dy="34">profile 会影响探索路线</tspan>
+      <tspan x="500" dy="34">耗时阶段可以定位</tspan>
+    </text>
+    <rect x="500" y="442" width="282" height="42" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <text x="641" y="469" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">证明系统链路真实存在</text>
+  </g>
+
+  <g id="next-metrics">
+    <rect x="862" y="166" width="350" height="352" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/chart-bar" x="896" y="200" width="38" height="38" fill="#B7791F" stroke-width="2"/>
+    <text x="950" y="224" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#17324D">下一步指标</text>
+    <text x="896" y="284" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#1F2937">
+      <tspan x="896" dy="0">固定对话集一致性</tspan>
+      <tspan x="896" dy="34">越权拦截频次统计</tspan>
+      <tspan x="896" dy="34">同初始态多次运行对比</tspan>
+      <tspan x="896" dy="34">timeline 图形化回放</tspan>
+      <tspan x="896" dy="34">自动 trace 分析脚本</tspan>
+    </text>
+    <rect x="896" y="442" width="282" height="42" rx="8" fill="#FFF3D6" stroke="#CBD5E1"/>
+    <text x="1037" y="469" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#B7791F">从案例复盘走向量化评估</text>
+  </g>
+
+  <g id="limits">
+    <rect x="154" y="560" width="972" height="56" rx="8" fill="#EEF4FA" stroke="#CBD5E1"/>
+    <text x="188" y="595" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#1D4E89">边界说明：</text>
+    <text x="290" y="595" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" fill="#1F2937">目前评估仍以案例 trace 和人工复盘为主，后续需要自动分析和可视化回放。</text>
+  </g>
+
+  <g id="footer">
+    <text x="56" y="674" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="12" fill="#64748B">Source: course_report_zh.md · 七、系统评估 / 八、问题与不足</text>
+  </g>
+</svg>

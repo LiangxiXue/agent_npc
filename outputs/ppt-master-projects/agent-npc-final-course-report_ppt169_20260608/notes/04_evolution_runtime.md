@@ -1,0 +1,1 @@
+这页展开项目演进的后半部分。第三阶段拆出 NPCMind、NarrativeEnvironment 和 ActionValidator，是因为 LLM 可以生成合理语言，但不能直接拥有改写任务、物品和关系事实的执行权。这样角色心智、语言意图和世界执行被分离，越界行动可以被拒绝、修复并记录。第四阶段加入 autonomous runtime 和 Traveler，是因为课程展示需要多 NPC 覆盖、自动探索路线和真实运行证据，而不是手工单轮问答。Traveler profile 可以驱动路线选择，timeline 可以展示每轮理由、回复、状态变化和 outcome。

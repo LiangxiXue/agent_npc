@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <rect x="0" y="0" width="1280" height="720" fill="#FFFFFF"/>
+  <image href="../template_assets/pku_logo_cropped.png" x="1020" y="24" width="220" height="72" preserveAspectRatio="xMidYMid meet"/>
+  <rect x="0" y="68" width="82" height="68" fill="#A40012"/>
+  <g id="main">
+    <text x="196" y="220" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="46" font-weight="bold" fill="#A40012">结论：可控 LLM 角色需要可追踪执行</text>
+    <line x1="196" y1="270" x2="1088" y2="270" stroke="#D9D9D9"/>
+    <text x="196" y="340" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="28" fill="#000000">本项目把 LLM 放入受规则约束的运行链路中：</text>
+    <text x="196" y="392" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="26" fill="#333333">语言生成提供表达和推理能力；系统流程维护事实、校验行动并记录结果。</text>
+    <rect x="196" y="460" width="892" height="76" fill="#F7F7F7" stroke="#D9D9D9"/>
+    <text x="232" y="508" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" fill="#000000">后续工作：多 Agent 调度、长期记忆质量、自动评估和 timeline 可视化。</text>
+    <text x="640" y="622" text-anchor="middle" font-family='"DengXian", Arial, sans-serif' font-size="36" font-weight="bold" fill="#333333">Thanks for your listening!</text>
+  </g>
+  <text x="1180" y="692" text-anchor="end" font-family='"DengXian", Arial, sans-serif' font-size="14" fill="#666666">16</text>
+</svg>

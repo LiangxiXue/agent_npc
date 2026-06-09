@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <rect x="0" y="0" width="1280" height="720" fill="#FFFFFF"/>
+  <image href="../template_assets/pku_logo_cropped.png" x="1020" y="24" width="220" height="72" preserveAspectRatio="xMidYMid meet"/>
+  <rect x="0" y="68" width="82" height="68" fill="#A40012"/>
+  <text x="92" y="104" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="34" font-weight="bold" fill="#000000">Traveler Runtime：用 profile 驱动自动探索</text>
+  <text x="92" y="136" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" fill="#333333">Traveler 是 living-world simulation 中可配置的自动探索角色</text>
+
+  <rect x="104" y="194" width="360" height="330" fill="#F7F7F7" stroke="#D9D9D9"/>
+  <text x="138" y="244" font-family='"DengXian", Arial, sans-serif' font-size="28" font-weight="bold" fill="#A40012">YAML Profile</text>
+  <text x="138" y="304" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">公开身份：角色如何自我介绍</text>
+  <text x="138" y="344" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">私人目标：探索偏好与动机</text>
+  <text x="138" y="384" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">隐藏信息：不能直接暴露</text>
+  <text x="138" y="424" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">行动边界：移动、询问、检查</text>
+  <text x="138" y="464" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">探索风格：谨慎或追求声望</text>
+
+  <g id="loop">
+    <rect x="548" y="208" width="140" height="62" fill="#F7F7F7" stroke="#D9D9D9"/><text x="618" y="248" text-anchor="middle" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">Observe</text>
+    <rect x="740" y="208" width="140" height="62" fill="#F7F7F7" stroke="#D9D9D9"/><text x="810" y="248" text-anchor="middle" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">Retrieve</text>
+    <rect x="932" y="208" width="140" height="62" fill="#FFF1E5" stroke="#D9D9D9"/><text x="1002" y="248" text-anchor="middle" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#A40012">Decide</text>
+    <rect x="932" y="432" width="140" height="62" fill="#F7F7F7" stroke="#D9D9D9"/><text x="1002" y="472" text-anchor="middle" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">Act</text>
+    <rect x="740" y="432" width="140" height="62" fill="#F7F7F7" stroke="#D9D9D9"/><text x="810" y="472" text-anchor="middle" font-family='"DengXian", Arial, sans-serif' font-size="22" fill="#000000">Reflect</text>
+    <line x1="688" y1="239" x2="740" y2="239" stroke="#BFBFBF" stroke-width="2"/><polygon points="740,239 730,233 730,245" fill="#BFBFBF"/>
+    <line x1="880" y1="239" x2="932" y2="239" stroke="#BFBFBF" stroke-width="2"/><polygon points="932,239 922,233 922,245" fill="#BFBFBF"/>
+    <line x1="1002" y1="270" x2="1002" y2="432" stroke="#BFBFBF" stroke-width="2"/><polygon points="1002,432 996,422 1008,422" fill="#BFBFBF"/>
+    <line x1="932" y1="463" x2="880" y2="463" stroke="#BFBFBF" stroke-width="2"/><polygon points="880,463 890,457 890,469" fill="#BFBFBF"/>
+    <line x1="740" y1="463" x2="618" y2="463" stroke="#BFBFBF" stroke-width="2"/><line x1="618" y1="463" x2="618" y2="270" stroke="#BFBFBF" stroke-width="2"/><polygon points="618,270 612,280 624,280" fill="#BFBFBF"/>
+  </g>
+
+  <line x1="92" y1="568" x2="1188" y2="568" stroke="#D9D9D9"/>
+  <text x="92" y="610" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#000000">Timeline 字段：</text>
+  <text x="254" y="610" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" fill="#333333">行动理由、Traveler 发言、NPC 回复、状态变化、arc evidence。</text>
+  <text x="1180" y="692" text-anchor="end" font-family='"DengXian", Arial, sans-serif' font-size="14" fill="#666666">10</text>
+</svg>

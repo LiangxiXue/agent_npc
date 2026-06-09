@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <rect x="0" y="0" width="1280" height="720" fill="#FFFFFF"/>
+  <image href="../template_assets/pku_logo_cropped.png" x="1020" y="24" width="220" height="72" preserveAspectRatio="xMidYMid meet"/>
+  <rect x="0" y="68" width="82" height="68" fill="#A40012"/>
+  <text x="92" y="104" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="34" font-weight="bold" fill="#000000">项目目标：状态 + 记忆 + 校验 + Trace</text>
+  <text x="92" y="136" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" fill="#333333">让 LLM 角色 Agent 的每次行动都有上下文、有边界、有结果、有证据</text>
+
+  <rect x="326" y="188" width="628" height="108" fill="#F2F2F2" stroke="#D9D9D9"/>
+  <text x="640" y="254" text-anchor="middle" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="30" font-weight="bold" fill="#A40012">构建可运行、可观察、可验证的角色 Agent</text>
+
+  <g id="pillars">
+    <rect x="92" y="356" width="250" height="142" fill="#FFFFFF" stroke="#D9D9D9"/>
+    <text x="122" y="406" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="28" font-weight="bold" fill="#A40012">状态</text>
+    <text x="122" y="448" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="20" fill="#333333">SQLite 保存任务、地点、物品、关系和事件。</text>
+
+    <rect x="386" y="356" width="250" height="142" fill="#FFFFFF" stroke="#D9D9D9"/>
+    <text x="416" y="406" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="28" font-weight="bold" fill="#A40012">记忆</text>
+    <text x="416" y="448" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="20" fill="#333333">近期上下文、长期记忆、稳定 lore 进入决策。</text>
+
+    <rect x="680" y="356" width="250" height="142" fill="#FFFFFF" stroke="#D9D9D9"/>
+    <text x="710" y="406" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="28" font-weight="bold" fill="#A40012">校验</text>
+    <text x="710" y="448" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="20" fill="#333333">Validator 拦截越界行动并安全降级。</text>
+
+    <rect x="974" y="356" width="214" height="142" fill="#FFFFFF" stroke="#D9D9D9"/>
+    <text x="1004" y="406" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="28" font-weight="bold" fill="#A40012">Trace</text>
+    <text x="1004" y="448" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="20" fill="#333333">记录决策、状态变化和 timeline。</text>
+  </g>
+
+  <line x1="92" y1="560" x2="1188" y2="560" stroke="#D9D9D9" stroke-width="1"/>
+  <text x="92" y="604" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#000000">设计约束：</text>
+  <text x="220" y="604" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" fill="#333333">自然语言可以影响关系和事件，但不能绕过规则直接改写事实。</text>
+  <text x="1180" y="692" text-anchor="end" font-family='"DengXian", Arial, sans-serif' font-size="14" fill="#666666">3</text>
+</svg>

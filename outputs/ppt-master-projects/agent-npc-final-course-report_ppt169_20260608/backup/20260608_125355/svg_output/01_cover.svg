@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <g id="background">
+    <rect x="0" y="0" width="1280" height="720" fill="#F8FAFC"/>
+    <rect x="0" y="0" width="1280" height="16" fill="#1D4E89"/>
+    <rect x="56" y="640" width="1168" height="1" fill="#CBD5E1"/>
+  </g>
+
+  <g id="title-block">
+    <text x="72" y="146" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="52" font-weight="bold" fill="#17324D">记忆驱动的可验证 LLM 角色 Agent 系统</text>
+    <text x="76" y="198" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="24" fill="#475569">从单 NPC 对话到 Traveler living-world runtime 的课程项目汇报</text>
+    <rect x="76" y="230" width="720" height="4" fill="#0E7490"/>
+  </g>
+
+  <g id="thesis-block">
+    <rect x="76" y="286" width="640" height="168" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <text x="112" y="334" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#1D4E89">核心论点</text>
+    <text x="112" y="374" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#1F2937">
+      <tspan x="112" dy="0">LLM 负责理解、意图和表达；系统负责状态、校验和 trace。</tspan>
+      <tspan x="112" dy="30">真正要展示的不是一次好看的回复，而是一条可复盘的执行链路。</tspan>
+    </text>
+  </g>
+
+  <g id="controlled-loop">
+    <rect x="784" y="286" width="116" height="76" rx="8" fill="#EEF4FA" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/brain" x="822" y="302" width="34" height="34" fill="#1D4E89" stroke-width="2"/>
+    <text x="842" y="350" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#1F2937">理解</text>
+
+    <rect x="940" y="286" width="116" height="76" rx="8" fill="#EEF4FA" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/message-2-code" x="978" y="302" width="34" height="34" fill="#1D4E89" stroke-width="2"/>
+    <text x="998" y="350" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#1F2937">Decision</text>
+
+    <rect x="1096" y="286" width="116" height="76" rx="8" fill="#D8F3F7" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/shield-check" x="1134" y="302" width="34" height="34" fill="#0E7490" stroke-width="2"/>
+    <text x="1154" y="350" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#1F2937">校验</text>
+
+    <line x1="900" y1="324" x2="940" y2="324" stroke="#94A3B8" stroke-width="2"/>
+    <polygon points="940,324 930,318 930,330" fill="#94A3B8"/>
+    <line x1="1056" y1="324" x2="1096" y2="324" stroke="#94A3B8" stroke-width="2"/>
+    <polygon points="1096,324 1086,318 1086,330" fill="#94A3B8"/>
+
+    <rect x="860" y="424" width="300" height="72" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/timeline" x="890" y="443" width="30" height="30" fill="#B7791F" stroke-width="2"/>
+    <text x="934" y="454" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">状态写入与 timeline</text>
+    <text x="934" y="482" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">SQLite / trace / 课程报告证据</text>
+  </g>
+
+  <g id="evidence-tags">
+    <rect x="76" y="540" width="224" height="46" rx="8" fill="#FFF3D6" stroke="#CBD5E1"/>
+    <text x="100" y="569" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#1F2937">课程报告 + README</text>
+    <rect x="324" y="540" width="250" height="46" rx="8" fill="#D8F3F7" stroke="#CBD5E1"/>
+    <text x="348" y="569" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#1F2937">真实 UI 截图与 trace</text>
+    <rect x="598" y="540" width="252" height="46" rx="8" fill="#EEF4FA" stroke="#CBD5E1"/>
+    <text x="622" y="569" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#1F2937">GitHub 提交演进证据</text>
+  </g>
+
+  <g id="footer">
+    <text x="76" y="674" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="12" fill="#64748B">Final course presentation · agent_npc · 2026-06-08</text>
+    <text x="1204" y="674" text-anchor="end" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="12" fill="#64748B">01 / 14</text>
+  </g>
+</svg>

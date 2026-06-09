@@ -1,0 +1,1 @@
+这页进一步拆开模块职责。NarrativeEnvironment 负责组织 observation 和执行 action，Memory 系统负责补充上下文，NPCMind 负责形成角色内部判断，LLM Decision 负责提出结构化意图。真正守住事实边界的是 ActionValidator 和 SQLite World State，前者决定行动是否允许，后者保存任务、地点、物品和关系的真实变化。这样的分工让项目更容易解释，也让后续测试和定位问题更清楚。

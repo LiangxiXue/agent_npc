@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <rect x="0" y="0" width="1280" height="720" fill="#FFFFFF"/>
+  <image href="../template_assets/pku_logo_cropped.png" x="1020" y="24" width="220" height="72" preserveAspectRatio="xMidYMid meet"/>
+  <rect x="0" y="68" width="82" height="68" fill="#A40012"/>
+  <text x="92" y="104" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="34" font-weight="bold" fill="#000000">项目演进：从“会聊天”到可验证 living world</text>
+  <text x="92" y="136" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" fill="#333333">按能力阶段解释项目为什么不断增加模块</text>
+
+  <line x1="176" y1="230" x2="1104" y2="230" stroke="#D9D9D9" stroke-width="2"/>
+  <g id="timeline">
+    <circle cx="220" cy="230" r="12" fill="#A40012"/>
+    <rect x="120" y="276" width="250" height="210" fill="#F7F7F7" stroke="#D9D9D9"/>
+    <text x="148" y="324" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="26" font-weight="bold" fill="#A40012">1. 单 NPC 原型</text>
+    <text x="148" y="368" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="20" fill="#000000">
+      <tspan x="148" dy="0">验证最小闭环：</tspan>
+      <tspan x="148" dy="32">读取状态、调用 LLM、</tspan>
+      <tspan x="148" dy="32">回复并留下 trace。</tspan>
+    </text>
+
+    <circle cx="460" cy="230" r="12" fill="#A40012"/>
+    <rect x="400" y="276" width="250" height="210" fill="#F7F7F7" stroke="#D9D9D9"/>
+    <text x="428" y="324" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="26" font-weight="bold" fill="#A40012">2. 上下文与 UI</text>
+    <text x="428" y="368" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="20" fill="#000000">
+      <tspan x="428" dy="0">加入 lore、近期上下文、</tspan>
+      <tspan x="428" dy="32">长期记忆和玩家端界面，</tspan>
+      <tspan x="428" dy="32">减少角色断裂。</tspan>
+    </text>
+
+    <circle cx="700" cy="230" r="12" fill="#A40012"/>
+    <rect x="680" y="276" width="250" height="210" fill="#F7F7F7" stroke="#D9D9D9"/>
+    <text x="708" y="324" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="26" font-weight="bold" fill="#A40012">3. 心智与校验</text>
+    <text x="708" y="368" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="20" fill="#000000">
+      <tspan x="708" dy="0">拆出 NPCMind、</tspan>
+      <tspan x="708" dy="32">Environment、Validator，</tspan>
+      <tspan x="708" dy="32">分离语言与事实。</tspan>
+    </text>
+
+    <circle cx="940" cy="230" r="12" fill="#A40012"/>
+    <rect x="960" y="276" width="220" height="210" fill="#FFF1E5" stroke="#D9D9D9"/>
+    <text x="988" y="324" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="26" font-weight="bold" fill="#A40012">4. Traveler</text>
+    <text x="988" y="368" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="20" fill="#000000">
+      <tspan x="988" dy="0">加入自主运行、</tspan>
+      <tspan x="988" dy="32">多 NPC 覆盖和 timeline，</tspan>
+      <tspan x="988" dy="32">用于课堂复盘展示。</tspan>
+    </text>
+  </g>
+
+  <line x1="92" y1="560" x2="1188" y2="560" stroke="#D9D9D9"/>
+  <text x="92" y="604" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" font-weight="bold" fill="#000000">演进逻辑：</text>
+  <text x="220" y="604" font-family='"DengXian", "Microsoft YaHei", Arial, sans-serif' font-size="24" fill="#333333">每一阶段都在补上“可控角色 Agent”的一个缺口。</text>
+  <text x="1180" y="692" text-anchor="end" font-family='"DengXian", Arial, sans-serif' font-size="14" fill="#666666">4</text>
+</svg>

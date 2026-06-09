@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720">
+  <g id="background">
+    <rect x="0" y="0" width="1280" height="720" fill="#F8FAFC"/>
+    <rect x="0" y="0" width="1280" height="14" fill="#1D4E89"/>
+  </g>
+
+  <g id="header">
+    <text x="56" y="72" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="34" font-weight="bold" fill="#17324D">总体架构：输入到 timeline 的受控链路</text>
+    <text x="56" y="112" font-family='"Microsoft YaHei", "PingFang SC", Arial, sans-serif' font-size="18" fill="#475569">系统把 LLM 放在“提出意图”的位置，把事实改变交给校验、执行和状态写入。</text>
+    <text x="1204" y="72" text-anchor="end" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="12" fill="#64748B">05 / 14</text>
+  </g>
+
+  <g id="main-flow">
+    <rect x="58" y="188" width="142" height="100" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/users" x="106" y="208" width="34" height="34" fill="#1D4E89" stroke-width="2"/>
+    <text x="129" y="262" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">输入</text>
+    <text x="129" y="282" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#64748B">玩家 / Traveler</text>
+
+    <rect x="238" y="188" width="142" height="100" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/user-search" x="286" y="208" width="34" height="34" fill="#1D4E89" stroke-width="2"/>
+    <text x="309" y="262" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">Observation</text>
+    <text x="309" y="282" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#64748B">状态切片</text>
+
+    <rect x="418" y="188" width="142" height="100" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/book" x="466" y="208" width="34" height="34" fill="#1D4E89" stroke-width="2"/>
+    <text x="489" y="262" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">检索</text>
+    <text x="489" y="282" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#64748B">memory / lore</text>
+
+    <rect x="598" y="188" width="142" height="100" rx="8" fill="#D8F3F7" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/brain" x="646" y="208" width="34" height="34" fill="#0E7490" stroke-width="2"/>
+    <text x="669" y="262" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">NPCMind</text>
+    <text x="669" y="282" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#64748B">belief / plan</text>
+
+    <rect x="778" y="188" width="142" height="100" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/robot" x="826" y="208" width="34" height="34" fill="#1D4E89" stroke-width="2"/>
+    <text x="849" y="262" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">LLM decision</text>
+    <text x="849" y="282" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#64748B">结构化意图</text>
+
+    <rect x="958" y="188" width="142" height="100" rx="8" fill="#D8F3F7" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/shield-check" x="1006" y="208" width="34" height="34" fill="#0E7490" stroke-width="2"/>
+    <text x="1029" y="262" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">校验</text>
+    <text x="1029" y="282" text-anchor="middle" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#64748B">allowed / repaired</text>
+
+    <line x1="200" y1="238" x2="238" y2="238" stroke="#94A3B8" stroke-width="2"/>
+    <polygon points="238,238 228,232 228,244" fill="#94A3B8"/>
+    <line x1="380" y1="238" x2="418" y2="238" stroke="#94A3B8" stroke-width="2"/>
+    <polygon points="418,238 408,232 408,244" fill="#94A3B8"/>
+    <line x1="560" y1="238" x2="598" y2="238" stroke="#94A3B8" stroke-width="2"/>
+    <polygon points="598,238 588,232 588,244" fill="#94A3B8"/>
+    <line x1="740" y1="238" x2="778" y2="238" stroke="#94A3B8" stroke-width="2"/>
+    <polygon points="778,238 768,232 768,244" fill="#94A3B8"/>
+    <line x1="920" y1="238" x2="958" y2="238" stroke="#94A3B8" stroke-width="2"/>
+    <polygon points="958,238 948,232 948,244" fill="#94A3B8"/>
+  </g>
+
+  <g id="execution-layer">
+    <rect x="156" y="392" width="278" height="118" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/server-cog" x="188" y="422" width="34" height="34" fill="#1D4E89" stroke-width="2"/>
+    <text x="238" y="432" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">NarrativeEnvironment</text>
+    <text x="238" y="462" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">把 decision 转为可执行 action</text>
+    <text x="238" y="486" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#64748B">构造 observation / 写 trace</text>
+
+    <rect x="502" y="392" width="278" height="118" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/database" x="534" y="422" width="34" height="34" fill="#1D4E89" stroke-width="2"/>
+    <text x="584" y="432" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">SQLite World State</text>
+    <text x="584" y="462" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">任务、关系、物品、地点、事件</text>
+    <text x="584" y="486" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#64748B">只有校验后的结果能写入</text>
+
+    <rect x="848" y="392" width="278" height="118" rx="8" fill="#FFF3D6" stroke="#CBD5E1"/>
+    <use data-icon="tabler-outline/timeline" x="880" y="422" width="34" height="34" fill="#B7791F" stroke-width="2"/>
+    <text x="930" y="432" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#17324D">Timeline Export</text>
+    <text x="930" y="462" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#475569">round / reason / state changes</text>
+    <text x="930" y="486" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="14" fill="#64748B">课堂展示与报告证据</text>
+
+    <line x1="1029" y1="288" x2="1029" y2="350" stroke="#94A3B8" stroke-width="2"/>
+    <line x1="1029" y1="350" x2="295" y2="350" stroke="#94A3B8" stroke-width="2"/>
+    <line x1="295" y1="350" x2="295" y2="392" stroke="#94A3B8" stroke-width="2"/>
+    <polygon points="295,392 289,382 301,382" fill="#94A3B8"/>
+    <line x1="434" y1="451" x2="502" y2="451" stroke="#94A3B8" stroke-width="2"/>
+    <polygon points="502,451 492,445 492,457" fill="#94A3B8"/>
+    <line x1="780" y1="451" x2="848" y2="451" stroke="#94A3B8" stroke-width="2"/>
+    <polygon points="848,451 838,445 838,457" fill="#94A3B8"/>
+  </g>
+
+  <g id="takeaway">
+    <rect x="156" y="566" width="970" height="50" rx="8" fill="#EEF4FA" stroke="#CBD5E1"/>
+    <text x="186" y="598" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" font-weight="bold" fill="#1D4E89">关键边界：</text>
+    <text x="282" y="598" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="18" fill="#1F2937">LLM 提出意图，系统决定事实是否发生，并把每一步留下可复盘证据。</text>
+  </g>
+
+  <g id="footer">
+    <text x="56" y="674" font-family='"Microsoft YaHei", Arial, sans-serif' font-size="12" fill="#64748B">Source: course_report_zh.md · 四、系统架构图</text>
+  </g>
+</svg>
